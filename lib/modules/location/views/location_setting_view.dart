@@ -19,18 +19,19 @@ class LocationSettingView extends StatelessWidget {
 
     // 다이얼로그를 화면이 렌더링된 후에 표시하기 위해 addPostFrameCallback 사용
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      showInitialDialog(context);
+      showBottomSheet(context);
+      // showInitialDialog(context);
     });
 
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         actions: [
-          InfoBtn(),
-          SizedBox(width: 20),
+          const InfoBtn(),
+          const SizedBox(width: 20),
         ],
-        leading: AppbarBackBtn(),
-        title: Text(
+        leading: const AppbarBackBtn(),
+        title: const Text(
           "내 지역 설정",
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
@@ -40,10 +41,10 @@ class LocationSettingView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            LocationBar(),
+            const LocationBar(),
             Expanded(
               child: Container(
-                child: Center(child: Text("지도")),
+                child: const Center(child: Text("지도")),
               ),
             ),
           ],
@@ -60,7 +61,7 @@ class LocationSettingView extends StatelessWidget {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.white,
-          title: Stack(
+          title: const Stack(
             alignment: Alignment.center,
             children: [
               Text.rich(
@@ -94,7 +95,7 @@ class LocationSettingView extends StatelessWidget {
                   width: 320,
                   height: 296,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
                     border: Border.all(
                       color: const Color.fromARGB(255, 196, 185, 185),
                     ),
@@ -104,15 +105,15 @@ class LocationSettingView extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         Image.asset('assets/images/map.png'),
-                        SizedBox(height: 40),
-                        LocationBar(),
+                        const SizedBox(height: 40),
+                        const LocationBar(),
                       ],
                     ),
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 YellowElevationBtn(
                   onPressed: () {
                     Navigator.of(context).pop(); // 현재 다이얼로그 닫기
@@ -121,7 +122,7 @@ class LocationSettingView extends StatelessWidget {
                   title: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
+                      const Text(
                         "다음",
                         style: TextStyle(
                           color: Colors.black,
@@ -149,7 +150,7 @@ class LocationSettingView extends StatelessWidget {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.white,
-          title: Stack(
+          title: const Stack(
             alignment: Alignment.center,
             children: [
               Text.rich(
@@ -183,7 +184,7 @@ class LocationSettingView extends StatelessWidget {
                   width: 320,
                   height: 296,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
                     border: Border.all(
                       color: const Color.fromARGB(255, 196, 185, 185),
                     ),
@@ -193,18 +194,18 @@ class LocationSettingView extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         Image.asset('assets/images/map.png'),
-                        SizedBox(height: 40),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                        const SizedBox(height: 40),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 24.0),
                           child: LocationSlider(currentValue: 10.0),
                         ),
                       ],
                     ),
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Row(
                   children: [
                     Expanded(
@@ -218,7 +219,7 @@ class LocationSettingView extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Image.asset('assets/images/left-arrow.png'),
-                            Text(
+                            const Text(
                               "이전",
                               style: TextStyle(
                                 color: Colors.black,
@@ -226,12 +227,12 @@ class LocationSettingView extends StatelessWidget {
                                 fontSize: 16,
                               ),
                             ),
-                            SizedBox(width: 24),
+                            const SizedBox(width: 24),
                           ],
                         ),
                       ),
                     ),
-                    SizedBox(width: 20),
+                    const SizedBox(width: 20),
                     Expanded(
                       child: YellowElevationBtn(
                         onPressed: () {
@@ -240,8 +241,8 @@ class LocationSettingView extends StatelessWidget {
                         title: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            SizedBox(width: 24),
-                            Text(
+                            const SizedBox(width: 24),
+                            const Text(
                               "다음",
                               style: TextStyle(
                                 color: Colors.black,
@@ -258,6 +259,98 @@ class LocationSettingView extends StatelessWidget {
                 )
               ],
             ),
+          ),
+        );
+      },
+    );
+  }
+
+  // 바텀 시트
+  void showBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(
+                height: 52,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Text(
+                            "파트너",
+                            style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                                color: CatchmongColors.sub_gray),
+                          ),
+                          SizedBox(
+                            height: 8,
+                          ),
+                          Text(
+                            "10개",
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: CatchmongColors.black),
+                          ),
+                        ],
+                      ),
+                    ),
+                    VerticalDivider(
+                      thickness: 1,
+                      color: CatchmongColors.gray,
+                    ),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Text(
+                            "스토어",
+                            style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                                color: CatchmongColors.sub_gray),
+                          ),
+                          SizedBox(
+                            height: 8,
+                          ),
+                          Text(
+                            "10개",
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: CatchmongColors.black),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              const LocationSlider(currentValue: 10.0), // 슬라이더 추가
+              const SizedBox(height: 24),
+              YellowElevationBtn(
+                  onPressed: () {
+                    Get.back();
+                  },
+                  title: Text(
+                    "저장하기",
+                    style: TextStyle(
+                        color: CatchmongColors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700),
+                  ))
+            ],
           ),
         );
       },
