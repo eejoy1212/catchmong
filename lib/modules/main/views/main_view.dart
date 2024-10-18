@@ -173,7 +173,18 @@ class MainView extends StatelessWidget {
             ),
             SizedBox(
               height: 16,
-            )
+            ),
+            SizedBox(
+              height: 120, // 카드의 높이와 동일하게 설정
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal, // 가로로 스크롤되도록 설정
+                itemCount: 2, // 카드의 개수
+                itemBuilder: (context, index) {
+                  return Image.asset(
+                      "assets/images/banner${index + 1}.png"); // ReviewCard를 리스트에 삽입
+                },
+              ),
+            ),
           ],
         ),
       ),
