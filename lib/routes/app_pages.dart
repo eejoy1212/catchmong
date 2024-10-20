@@ -5,6 +5,8 @@ import 'package:catchmong/modules/login/bindings/login_binding.dart';
 import 'package:catchmong/modules/login/views/login_view.dart';
 import 'package:catchmong/modules/main/bindings/main_bindings.dart';
 import 'package:catchmong/modules/main/views/main_view.dart';
+import 'package:catchmong/modules/search/bindings/search_binding.dart';
+import 'package:catchmong/modules/search/views/search_view.dart';
 import 'package:get/get.dart';
 
 class AppPages {
@@ -30,6 +32,11 @@ class AppPages {
       name: '/main',
       page: () => MainView(),
       binding: MainBinding(),
+    ),
+    GetPage(
+      name: '/search',
+      page: () => SearchView(),
+      binding: SearchBinding(),
     ),
   ];
 }

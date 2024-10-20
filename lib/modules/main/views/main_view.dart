@@ -1,4 +1,7 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/widget/button/AlarmBtn.dart';
+import 'package:catchmong/widget/button/SearchBtn.dart';
+import 'package:catchmong/widget/button/ShoppingBtn.dart';
 import 'package:catchmong/widget/card/MainCard.dart';
 import 'package:catchmong/widget/card/ReviewCard.dart';
 import 'package:catchmong/widget/card/StoreGiftCard.dart';
@@ -14,15 +17,33 @@ class MainView extends StatelessWidget {
         title: Padding(
           padding: const EdgeInsets.only(left: 20.0, top: 16, bottom: 16),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                '모든지역',
-                style: TextStyle(
-                    color: CatchmongColors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600),
+              Row(
+                children: [
+                  Text(
+                    '모든지역',
+                    style: TextStyle(
+                        color: CatchmongColors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600),
+                  ),
+                  Image.asset('assets/images/right-arrow.png'),
+                ],
               ),
-              Image.asset('assets/images/right-arrow.png')
+              Row(
+                children: [
+                  SearchBtn(),
+                  SizedBox(
+                    width: 16,
+                  ),
+                  AlarmBtn(),
+                  SizedBox(
+                    width: 16,
+                  ),
+                  ShoppingBtn()
+                ],
+              )
             ],
           ),
         ),
