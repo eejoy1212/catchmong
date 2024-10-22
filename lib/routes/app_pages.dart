@@ -1,3 +1,6 @@
+import 'package:catchmong/modules/location/alarm/bindings/alarm_binding.dart';
+import 'package:catchmong/modules/location/alarm/views/alarm_setting_view.dart';
+import 'package:catchmong/modules/location/alarm/views/alarm_view.dart';
 import 'package:catchmong/modules/location/bindings/location_binding.dart';
 import 'package:catchmong/modules/location/views/location_setting_view.dart';
 import 'package:catchmong/modules/location/views/location_view.dart';
@@ -37,6 +40,16 @@ class AppPages {
       name: '/search',
       page: () => SearchView(),
       binding: SearchBinding(),
+    ),
+    GetPage(
+      name: '/alarm',
+      page: () => AlarmView(),
+      binding: AlarmBinding(),
+    ),
+    GetPage(
+      name: '/alarm-setting',
+      page: () => AlarmSettingView(),
+      binding: AlarmBinding(),
     ),
   ];
 }

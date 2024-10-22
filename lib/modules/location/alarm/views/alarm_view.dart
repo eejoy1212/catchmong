@@ -1,22 +1,34 @@
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/widget/button/AppbarBackBtn.dart';
-import 'package:catchmong/widget/content/partner_content.dart';
-import 'package:catchmong/widget/content/store_content.dart';
+import 'package:catchmong/widget/content/activity_content.dart';
+import 'package:catchmong/widget/content/alarm_content.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-class SearchView extends StatelessWidget {
-  const SearchView({super.key});
+class AlarmView extends StatelessWidget {
+  const AlarmView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2, // 파트너와 스토어 두 개의 탭
+      length: 2, // 탭의 개수 설정
       child: Scaffold(
+        backgroundColor: CatchmongColors.gray50,
         appBar: AppBar(
+          actions: [
+            Container(
+              margin: const EdgeInsets.only(right: 20),
+              child: InkWell(
+                  onTap: () {
+                    Get.toNamed('/alarm-setting');
+                  },
+                  child: Image.asset('assets/images/setting-icon.png')),
+            )
+          ],
           leading: const AppbarBackBtn(),
           centerTitle: true,
           title: const Text(
-            "검색",
+            "알림",
             style: TextStyle(
                 color: CatchmongColors.black,
                 fontSize: 18,
@@ -24,8 +36,8 @@ class SearchView extends StatelessWidget {
           ),
           bottom: const TabBar(
             tabs: [
-              Tab(text: "파트너"),
-              Tab(text: "스토어"),
+              Tab(text: "공지"),
+              Tab(text: "활동"),
             ],
             indicator: BoxDecoration(
               border: Border(
@@ -42,18 +54,18 @@ class SearchView extends StatelessWidget {
               fontSize: 16, // 선택된 탭 글자 크기 설정 (16px)
               fontWeight: FontWeight.w400, // 선택된 탭 글자를 볼드 처리
             ),
-            unselectedLabelStyle: const TextStyle(
-                fontSize: 16, // 선택되지 않은 탭 글자 크기 설정 (16px)
-                fontWeight: FontWeight.w400, // 선택된 탭 글자를 볼드 처리
-                color: CatchmongColors.gray400),
+            unselectedLabelStyle: TextStyle(
+              fontSize: 16, // 선택되지 않은 탭 글자 크기 설정 (16px)
+              fontWeight: FontWeight.w400, // 선택되지 않은 탭 글자 스타일
+            ),
           ),
         ),
         body: TabBarView(
           children: [
-            // 파트너 탭
-            PartnerContent(),
-            // 스토어 탭
-            StoreContent()
+            // 알람 탭 내용
+            AlarmContent(),
+            // 스토어 탭 내용
+            AcitivityContent()
           ],
         ),
       ),

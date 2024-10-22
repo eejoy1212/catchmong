@@ -8,7 +8,7 @@ class AlarmBtn extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
         onTap: () {
-          Get.toNamed('/search');
+          Get.toNamed('/alarm');
         },
         child: Image.asset('assets/images/alarm-icon.png'));
   }

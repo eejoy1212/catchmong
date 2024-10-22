@@ -19,8 +19,8 @@ class LocationSettingView extends StatelessWidget {
 
     // 다이얼로그를 화면이 렌더링된 후에 표시하기 위해 addPostFrameCallback 사용
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      showBottomSheet(context);
-      showInitialDialog(context);
+      // showBottomSheet(context);
+      // showInitialDialog(context);
     });
 
     return Scaffold(
