@@ -8,7 +8,7 @@ class ShoppingBtn extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
         onTap: () {
-          Get.toNamed('/search');
+          Get.toNamed('/scrap');
         },
         child: Image.asset('assets/images/shopping-icon.png'));
   }

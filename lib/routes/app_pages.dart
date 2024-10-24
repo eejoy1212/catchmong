@@ -2,6 +2,8 @@ import 'package:catchmong/modules/location/alarm/bindings/alarm_binding.dart';
 import 'package:catchmong/modules/location/alarm/views/alarm_setting_view.dart';
 import 'package:catchmong/modules/location/alarm/views/alarm_view.dart';
 import 'package:catchmong/modules/location/bindings/location_binding.dart';
+import 'package:catchmong/modules/location/scrap/bindings/scrap_binding.dart';
+import 'package:catchmong/modules/location/scrap/views/scrap_view.dart';
 import 'package:catchmong/modules/location/views/location_setting_view.dart';
 import 'package:catchmong/modules/location/views/location_view.dart';
 import 'package:catchmong/modules/login/bindings/login_binding.dart';
@@ -23,7 +25,7 @@ class AppPages {
     ),
     GetPage(
       name: '/location',
-      page: () => LocationView(),
+      page: () => const LocationView(),
       binding: LocationBinding(),
     ),
     GetPage(
@@ -38,18 +40,23 @@ class AppPages {
     ),
     GetPage(
       name: '/search',
-      page: () => SearchView(),
+      page: () => const SearchView(),
       binding: SearchBinding(),
     ),
     GetPage(
       name: '/alarm',
-      page: () => AlarmView(),
+      page: () => const AlarmView(),
       binding: AlarmBinding(),
     ),
     GetPage(
       name: '/alarm-setting',
-      page: () => AlarmSettingView(),
+      page: () => const AlarmSettingView(),
       binding: AlarmBinding(),
+    ),
+    GetPage(
+      name: '/scrap',
+      page: () => const ScrapView(),
+      binding: ScrapBinding(),
     ),
   ];
 }
