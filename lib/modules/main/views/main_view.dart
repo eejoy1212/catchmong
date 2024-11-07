@@ -1,54 +1,76 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/modules/bottom_nav/bottom_nav_controller.dart';
+import 'package:catchmong/modules/mypage/views/mypage_view.dart';
+import 'package:catchmong/widget/bar/mypage_appbar.dart';
+import 'package:catchmong/widget/bar/search_appbar.dart';
 import 'package:catchmong/widget/button/AlarmBtn.dart';
 import 'package:catchmong/widget/button/SearchBtn.dart';
 import 'package:catchmong/widget/button/ShoppingBtn.dart';
 import 'package:catchmong/widget/card/MainCard.dart';
 import 'package:catchmong/widget/card/ReviewCard.dart';
 import 'package:catchmong/widget/card/StoreGiftCard.dart';
+import 'package:catchmong/widget/content/partner_content.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+class MainScreen extends StatelessWidget {
+  final BottomNavController _controller = Get.put(BottomNavController());
+
+  final List<Widget> _pages = [
+    MainView(),
+    PartnerContent(),
+    Text('지도'), // 예시용 추가 페이지
+    Text('페이백'), // 예시용 추가 페이지
+    MyPageView()
+  ];
+  final List<PreferredSizeWidget> _appbars = [
+    AppBar(),
+    SearchAppbar(),
+    AppBar(),
+    AppBar(),
+    MypageAppbar()
+  ];
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() => Scaffold(
+          body: _pages[_controller.selectedIndex.value],
+          appBar: _appbars[_controller.selectedIndex.value],
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed, // 라벨이 항상 보이도록 설정
+            currentIndex: _controller.selectedIndex.value,
+            onTap: _controller.onItemTapped,
+            items: [
+              BottomNavigationBarItem(
+                icon: Image.asset('assets/images/bottom-home.png'),
+                label: '홈',
+              ),
+              BottomNavigationBarItem(
+                icon: Image.asset('assets/images/bottom-search.png'),
+                label: '검색',
+              ),
+              BottomNavigationBarItem(
+                icon: Image.asset('assets/images/bottom-pin.png'),
+                label: '지도',
+              ),
+              BottomNavigationBarItem(
+                icon: Image.asset('assets/images/bottom-payback.png'),
+                label: '페이백',
+              ),
+              BottomNavigationBarItem(
+                icon: Image.asset('assets/images/bottom-my.png'),
+                label: '마이페이지',
+              ),
+            ],
+          ),
+        ));
+  }
+}
 
 class MainView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Padding(
-          padding: const EdgeInsets.only(left: 20.0, top: 16, bottom: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    '모든지역',
-                    style: TextStyle(
-                        color: CatchmongColors.black,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600),
-                  ),
-                  Image.asset('assets/images/right-arrow.png'),
-                ],
-              ),
-              Row(
-                children: [
-                  SearchBtn(),
-                  SizedBox(
-                    width: 16,
-                  ),
-                  AlarmBtn(),
-                  SizedBox(
-                    width: 16,
-                  ),
-                  ShoppingBtn()
-                ],
-              )
-            ],
-          ),
-        ),
-      ),
-      body: SingleChildScrollView(
+    return SafeArea(
+      child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [

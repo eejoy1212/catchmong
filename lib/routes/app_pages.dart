@@ -37,7 +37,7 @@ class AppPages {
     ),
     GetPage(
       name: '/main',
-      page: () => MainView(),
+      page: () => MainScreen(),
       binding: MainBinding(),
     ),
     GetPage(
