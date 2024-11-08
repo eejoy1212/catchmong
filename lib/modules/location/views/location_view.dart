@@ -14,34 +14,43 @@ class LocationView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Image.asset(
-              'assets/images/location-txt.png',
-              width: 360,
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 40),
+              child: Image.asset(
+                'assets/images/location-txt.png',
+              ),
             ),
-            Image.asset(
-              'assets/images/map.png',
-              width: 360,
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 40),
+              child: Image.asset(
+                'assets/images/map.png',
+              ),
             ),
             Column(
               children: [
-                YellowElevationBtn(
-                  title: Text(
-                    "지도에서 설정하기",
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
-                    ), // 텍스트 색상 설정
+                Container(
+                  margin: EdgeInsets.symmetric(horizontal: 40),
+                  child: YellowElevationBtn(
+                    title: Text(
+                      "지도에서 설정하기",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                      ), // 텍스트 색상 설정
+                    ),
+                    onPressed: () async {
+                      // 라우팅 수행
+                      await Get.toNamed('/location-setting');
+                    },
                   ),
-                  onPressed: () async {
-                    // 라우팅 수행
-                    await Get.toNamed('/location-setting');
-                  },
                 ),
                 SizedBox(
                   height: 16,
                 ),
-                TxtBtn()
+                Container(
+                    margin: EdgeInsets.symmetric(horizontal: 40),
+                    child: TxtBtn())
               ],
             )
           ],
