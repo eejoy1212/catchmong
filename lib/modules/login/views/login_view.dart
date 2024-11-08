@@ -18,12 +18,17 @@ class LoginView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Image.asset(
-              'assets/images/login-img.png',
-              width: 360,
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 40),
+              child: Image.asset(
+                'assets/images/login-logo.png',
+                // width: 360,
+              ),
             ),
-            SizedBox(
-              width: 360,
+            Container(
+              margin: EdgeInsets.symmetric(
+                horizontal: 40,
+              ),
               child: Column(
                 children: [
                   Image.asset(
