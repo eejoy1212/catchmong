@@ -15,12 +15,11 @@ class LocationSettingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double _currentValue = 10.0; // 슬라이더 값
+    double _currentValue = 10.0;
 
-    // 다이얼로그를 화면이 렌더링된 후에 표시하기 위해 addPostFrameCallback 사용
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // showBottomSheet(context);
-      // showInitialDialog(context);
+      showBottomSheet(context);
+      showInitialDialog(context);
     });
 
     return Scaffold(
@@ -53,7 +52,6 @@ class LocationSettingView extends StatelessWidget {
     );
   }
 
-  // 초기 다이얼로그
   void showInitialDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -116,8 +114,8 @@ class LocationSettingView extends StatelessWidget {
                 const SizedBox(height: 20),
                 YellowElevationBtn(
                   onPressed: () {
-                    Navigator.of(context).pop(); // 현재 다이얼로그 닫기
-                    showRadiusDialog(context); // 반경 설정 다이얼로그 열기
+                    Navigator.of(context).pop();
+                    showRadiusDialog(context);
                   },
                   title: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -125,12 +123,12 @@ class LocationSettingView extends StatelessWidget {
                       const Text(
                         "다음",
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Colors.white,
                           fontWeight: FontWeight.w700,
                           fontSize: 16,
                         ),
                       ),
-                      Image.asset('assets/images/right-arrow.png')
+                      Image.asset('assets/images/right-arrow-white.png')
                     ],
                   ),
                 ),
@@ -142,7 +140,6 @@ class LocationSettingView extends StatelessWidget {
     );
   }
 
-  // 반경 설정 다이얼로그
   void showRadiusDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -198,7 +195,7 @@ class LocationSettingView extends StatelessWidget {
                         Image.asset('assets/images/map.png'),
                         const SizedBox(height: 40),
                         const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 24.0),
+                          padding: EdgeInsets.symmetric(horizontal: 12),
                           child: LocationSlider(currentValue: 10.0),
                         ),
                       ],
@@ -211,23 +208,21 @@ class LocationSettingView extends StatelessWidget {
                     Expanded(
                       child: GrayElevationBtn(
                         onPressed: () {
-                          Navigator.of(context).pop(); // 반경 설정 다이얼로그 닫기
-                          showInitialDialog(context); // 내 지역 설정 다이얼로그 다시 열기
+                          Navigator.of(context).pop();
+                          showInitialDialog(context);
                         },
                         title: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Image.asset('assets/images/left-arrow.png'),
+                            Image.asset('assets/images/left-arrow-white.png'),
                             const Text(
                               "이전",
                               style: TextStyle(
-                                color: Colors.black,
+                                color: Colors.white,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 16,
                               ),
                             ),
-                            const SizedBox(width: 24),
                           ],
                         ),
                       ),
@@ -236,21 +231,20 @@ class LocationSettingView extends StatelessWidget {
                     Expanded(
                       child: YellowElevationBtn(
                         onPressed: () {
-                          Navigator.of(context).pop(); // 반경 설정 다이얼로그 닫기
+                          Navigator.of(context).pop();
                         },
                         title: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const SizedBox(width: 24),
                             const Text(
                               "다음",
                               style: TextStyle(
-                                color: Colors.black,
+                                color: Colors.white,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 16,
                               ),
                             ),
-                            Image.asset('assets/images/right-arrow.png')
+                            Image.asset('assets/images/right-arrow-white.png')
                           ],
                         ),
                       ),
@@ -265,7 +259,6 @@ class LocationSettingView extends StatelessWidget {
     );
   }
 
-  // 바텀 시트
   void showBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -293,9 +286,7 @@ class LocationSettingView extends StatelessWidget {
                                 fontWeight: FontWeight.w400,
                                 color: CatchmongColors.sub_gray),
                           ),
-                          SizedBox(
-                            height: 8,
-                          ),
+                          SizedBox(height: 8),
                           Text(
                             "10개",
                             style: TextStyle(
@@ -320,9 +311,7 @@ class LocationSettingView extends StatelessWidget {
                                 fontWeight: FontWeight.w400,
                                 color: CatchmongColors.sub_gray),
                           ),
-                          SizedBox(
-                            height: 8,
-                          ),
+                          SizedBox(height: 8),
                           Text(
                             "10개",
                             style: TextStyle(
@@ -337,19 +326,21 @@ class LocationSettingView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              const LocationSlider(currentValue: 10.0), // 슬라이더 추가
+              const LocationSlider(currentValue: 10.0),
               const SizedBox(height: 24),
               YellowElevationBtn(
-                  onPressed: () {
-                    Get.back();
-                  },
-                  title: Text(
-                    "저장하기",
-                    style: TextStyle(
-                        color: CatchmongColors.black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700),
-                  ))
+                onPressed: () {
+                  Get.back();
+                },
+                title: const Text(
+                  "저장하기",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
             ],
           ),
         );
