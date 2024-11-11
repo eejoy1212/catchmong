@@ -2,6 +2,11 @@ import 'package:get/get.dart';
 // import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class LocationController extends GetxController {
+  @override
+  void onInit() {
+    // TODO: implement onInit
+    super.onInit();
+  }
   // final Rx<LatLng> initialPosition =
   //     LatLng(37.5665, 126.9780).obs; // 서울 초기 위치 설정
   // final Rx<LatLng?> selectedLocation = Rx<LatLng?>(null); // 선택된 위치

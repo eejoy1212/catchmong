@@ -20,7 +20,8 @@ class GrayElevationBtn extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed, // 전달받은 onPressed 콜백을 사용
         style: ElevatedButton.styleFrom(
-          primary: CatchmongColors.gray, // 버튼 배경색 노랑으로 설정
+          backgroundColor: CatchmongColors.gray,
+          // primary: CatchmongColors.gray, // 버튼 배경색 노랑으로 설정
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8), // 보더 반경 설정
           ),

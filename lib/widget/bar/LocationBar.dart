@@ -26,7 +26,7 @@ class LocationBar extends StatelessWidget {
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 4),
-              primary: Colors.white,
+              backgroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(28),
               ),

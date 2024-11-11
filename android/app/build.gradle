@@ -33,7 +33,7 @@ android {
     defaultConfig {
         applicationId "com.example.catchmong"
         // Google Maps 플러그인에서 요구하는 최소 SDK 버전을 21로 설정
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdkVersion 34
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName

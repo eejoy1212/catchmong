@@ -1,9 +1,11 @@
 import 'package:catchmong/routes/app_pages.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:get/get.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await NaverMapSdk.instance.initialize(clientId: "9ue8t44jzd");
   runApp(MyApp());
 }
 
