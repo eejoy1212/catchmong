@@ -1,16 +1,16 @@
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/modules/bottom_nav/bottom_nav_controller.dart';
 import 'package:catchmong/modules/mypage/views/mypage_view.dart';
+import 'package:catchmong/widget/bar/mainview_appbar.dart';
 import 'package:catchmong/widget/bar/mypage_appbar.dart';
 import 'package:catchmong/widget/bar/search_appbar.dart';
-import 'package:catchmong/widget/button/AlarmBtn.dart';
-import 'package:catchmong/widget/button/SearchBtn.dart';
-import 'package:catchmong/widget/button/ShoppingBtn.dart';
 import 'package:catchmong/widget/card/MainCard.dart';
 import 'package:catchmong/widget/card/ReviewCard.dart';
 import 'package:catchmong/widget/card/StoreGiftCard.dart';
 import 'package:catchmong/widget/card/hot-type-card.dart';
 import 'package:catchmong/widget/card/restaurant-type-card.dart';
+import 'package:catchmong/widget/chip/page-indicator.dart';
+import 'package:catchmong/widget/content/map_content.dart';
 import 'package:catchmong/widget/content/partner_content.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -21,12 +21,12 @@ class MainScreen extends StatelessWidget {
   final List<Widget> _pages = [
     MainView(),
     PartnerContent(),
-    Text('지도'), // 예시용 추가 페이지
+    MapContent(),
     Text('페이백'), // 예시용 추가 페이지
     MyPageView()
   ];
   final List<PreferredSizeWidget> _appbars = [
-    AppBar(),
+    MainViewAppbar(),
     SearchAppbar(),
     AppBar(),
     AppBar(),
@@ -76,10 +76,38 @@ class MainView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Container(
-              height: 260,
-              color: CatchmongColors.gray,
-            ),
+            Stack(children: [
+              Container(
+                width: MediaQuery.of(context).size.width,
+                height: 260, // 카드의 높이와 동일하게 설정
+                color: CatchmongColors.gray50,
+                child: Center(
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal, // 가로로 스크롤되도록 설정
+                    itemCount: 5, // 카드의 개수
+                    itemBuilder: (context, index) {
+                      return Image.asset(
+                        "assets/images/main-banner${index + 1}.png",
+                        width: MediaQuery.of(context).size.width,
+                      ); // ReviewCard를 리스트에 삽입
+                    },
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 16,
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                        5,
+                        (index) => PageIndicator(
+                            isCurrent: index == 1 ? true : false)),
+                  ),
+                ),
+              )
+            ]),
             Container(
               margin: EdgeInsets.only(left: 20, right: 20),
               child: Column(

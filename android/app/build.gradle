@@ -67,5 +67,6 @@ flutter {
 }
 
 dependencies {
+    implementation 'com.naver.maps:map-sdk:3.17.0'
     // 필요 시 추가 종속성을 여기에 추가
 }
