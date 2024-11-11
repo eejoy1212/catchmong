@@ -9,6 +9,8 @@ import 'package:catchmong/widget/button/ShoppingBtn.dart';
 import 'package:catchmong/widget/card/MainCard.dart';
 import 'package:catchmong/widget/card/ReviewCard.dart';
 import 'package:catchmong/widget/card/StoreGiftCard.dart';
+import 'package:catchmong/widget/card/hot-type-card.dart';
+import 'package:catchmong/widget/card/restaurant-type-card.dart';
 import 'package:catchmong/widget/content/partner_content.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -88,15 +90,76 @@ class MainView extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Expanded(
-                            child: Image.asset('assets/images/partner.png')),
-                        Expanded(child: Image.asset('assets/images/store.png')),
+                            child: Column(
+                          children: [
+                            Image.asset('assets/images/partner.png'),
+                            SizedBox(
+                              height: 7,
+                            ),
+                            Text(
+                              "파트너",
+                              style: TextStyle(
+                                  color: CatchmongColors.black,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600),
+                            )
+                          ],
+                        )),
+                        // Expanded(child: Column(
+                        //   children: [
+                        //     Image.asset('assets/images/store.png'),
+                        //      SizedBox(
+                        //       height: 7,
+                        //     ),
+                        //     Text("스토어")
+                        //   ],
+                        // )),
                         Expanded(
-                            child: Image.asset('assets/images/payback.png')),
+                            child: Column(
+                          children: [
+                            Image.asset('assets/images/payback.png'),
+                            SizedBox(
+                              height: 7,
+                            ),
+                            Text(
+                              "페이백",
+                              style: TextStyle(
+                                  color: CatchmongColors.black,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600),
+                            )
+                          ],
+                        )),
+                        Expanded(
+                            child: Column(
+                          children: [
+                            Image.asset('assets/images/register-store.png'),
+                            SizedBox(
+                              height: 7,
+                            ),
+                            Text(
+                              "입점신청",
+                              style: TextStyle(
+                                  color: CatchmongColors.black,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600),
+                            )
+                          ],
+                        )),
                       ],
                     ),
                   ),
                 ],
               ),
+            ),
+            //어떤식당을 찾으시나요 카드
+            RestaurantTypeCard(),
+            SizedBox(
+              height: 12,
+            ),
+            HotTypeCard(),
+            SizedBox(
+              height: 12,
             ),
             // 리뷰몽
             MainCard(
@@ -194,21 +257,48 @@ class MainView extends StatelessWidget {
                     SizedBox(
                       height: 16,
                     ),
-                    SizedBox(
-                      height: 550,
-                      child: GridView.builder(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2, // 한 줄에 두 개의 아이템을 배치
-                          mainAxisSpacing: 20, // 세로 간격
-                          crossAxisSpacing: 16, // 가로 간격
-                          childAspectRatio:
-                              0.6, // 카드의 가로세로 비율 조정 (카드의 높이를 늘리기 위해 비율 설정)
+                    // SizedBox(
+                    //   height: 550,
+                    //   child: GridView.builder(
+                    //     physics: NeverScrollableScrollPhysics(),
+                    //     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    //       crossAxisCount: 2, // 한 줄에 두 개의 아이템을 배치
+                    //       mainAxisSpacing: 20, // 세로 간격
+                    //       crossAxisSpacing: 16, // 가로 간격
+                    //       childAspectRatio:
+                    //           0.6, // 카드의 가로세로 비율 조정 (카드의 높이를 늘리기 위해 비율 설정)
+                    //     ),
+                    //     itemCount: 4, // 카드의 개수
+                    //     itemBuilder: (context, index) {
+                    //       return IntrinsicHeight(
+                    //           child: StoreGiftCard()); // 각 그리드 셀에 들어갈 카드 컴포넌트
+                    //     },
+                    //   ),
+                    // )
+                    Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(child: StoreGiftCard()),
+                            SizedBox(
+                              width: 8,
+                            ),
+                            Expanded(child: StoreGiftCard()),
+                          ],
                         ),
-                        itemCount: 4, // 카드의 개수
-                        itemBuilder: (context, index) {
-                          return StoreGiftCard(); // 각 그리드 셀에 들어갈 카드 컴포넌트
-                        },
-                      ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Row(
+                          children: [
+                            Expanded(child: StoreGiftCard()),
+                            SizedBox(
+                              width: 8,
+                            ),
+                            Expanded(child: StoreGiftCard()),
+                          ],
+                        ),
+                      ],
                     )
                   ],
                 ),
@@ -218,13 +308,16 @@ class MainView extends StatelessWidget {
               height: 16,
             ),
             SizedBox(
+              width: MediaQuery.of(context).size.width,
               height: 120, // 카드의 높이와 동일하게 설정
               child: ListView.builder(
                 scrollDirection: Axis.horizontal, // 가로로 스크롤되도록 설정
                 itemCount: 2, // 카드의 개수
                 itemBuilder: (context, index) {
                   return Image.asset(
-                      "assets/images/banner${index + 1}.png"); // ReviewCard를 리스트에 삽입
+                    "assets/images/banner${index + 1}.png",
+                    width: MediaQuery.of(context).size.width,
+                  ); // ReviewCard를 리스트에 삽입
                 },
               ),
             ),
