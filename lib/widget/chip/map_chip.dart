@@ -47,6 +47,7 @@ class MapChip extends StatelessWidget {
               title,
               style: TextStyle(
                 color: isActive ? Colors.white : CatchmongColors.sub_gray,
+                fontSize: 14,
               ),
             ),
           ],

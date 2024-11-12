@@ -1,5 +1,9 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/widget/button/TxtBtn.dart';
+import 'package:catchmong/widget/dialog/UseDialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 
 class MyPageView extends StatelessWidget {
   const MyPageView({super.key});
@@ -66,7 +70,9 @@ class MyPageView extends StatelessWidget {
                 ),
                 //친추 페이백 버튼
                 InkWell(
-                  onTap: () {},
+                  onTap: () {
+                    showShareDialog(context);
+                  },
                   child: Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: 16,
@@ -131,7 +137,9 @@ class MyPageView extends StatelessWidget {
                     ),
                     Expanded(
                       child: InkWell(
-                        onTap: () {},
+                        onTap: () {
+                          showRecommenderDialog(context);
+                        },
                         child: Container(
                           padding: EdgeInsets.symmetric(vertical: 12),
                           decoration: BoxDecoration(
@@ -160,7 +168,9 @@ class MyPageView extends StatelessWidget {
           //타일 1-스크랩
           ,
           InkWell(
-            onTap: () {},
+            onTap: () {
+              Get.toNamed('/scrap');
+            },
             child: Container(
               padding: EdgeInsets.symmetric(
                 vertical: 21,
@@ -189,7 +199,9 @@ class MyPageView extends StatelessWidget {
           //타일 2-내가 쓴 글
           ,
           InkWell(
-            onTap: () {},
+            onTap: () {
+              Get.toNamed('/my-write');
+            },
             child: Container(
               padding: EdgeInsets.symmetric(
                 vertical: 21,
@@ -218,7 +230,13 @@ class MyPageView extends StatelessWidget {
           //타일 3-서비스 이용약관
           ,
           InkWell(
-            onTap: () {},
+            onTap: () {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return UseDialog();
+                  });
+            },
             child: Container(
               padding: EdgeInsets.symmetric(
                 vertical: 21,
@@ -304,4 +322,241 @@ class MyPageView extends StatelessWidget {
       ),
     ));
   }
+}
+
+//추천인 창
+void showRecommenderDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: Colors.white,
+        title: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Opacity(
+                opacity: 0, child: Image.asset('assets/images/close-icon.png')),
+            Text(
+              "추천인 목록",
+              style: TextStyle(
+                color: CatchmongColors.black,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            InkWell(
+                onTap: () {
+                  Navigator.of(context).pop();
+                },
+                child: Image.asset('assets/images/close-icon.png'))
+          ],
+        ),
+        content: SizedBox(
+          height: 350,
+          child: ListView.builder(
+            itemCount: 10, // 원하는 데이터 개수로 설정
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                padding: EdgeInsets.symmetric(
+                  vertical: 16,
+                ),
+                decoration: BoxDecoration(
+                    border: Border(
+                        bottom: BorderSide(
+                  color: CatchmongColors.gray50,
+                ))),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ClipOval(
+                      child: Container(
+                        width: 36, // 아바타 너비 36px
+                        height: 36, // 아바타 높이 36px
+                        child: Image.asset(
+                          index % 2 == 0
+                              ? 'assets/images/profile3.png'
+                              : 'assets/images/profile1.jpg',
+                          fit: BoxFit.cover, // 이미지가 원형 안에 잘 맞도록 설정
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 8,
+                    ),
+                    Column(
+                      children: [
+                        Text(
+                          "이원희님",
+                          style: TextStyle(
+                              color: CatchmongColors.black,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500),
+                        ),
+                        Text(
+                          "계정아이디",
+                          style: TextStyle(
+                              color: CatchmongColors.gray_300,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400),
+                        )
+                      ],
+                    )
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    },
+  );
+}
+
+//공유하기 창
+void showShareDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: Colors.white,
+        title: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Opacity(
+                opacity: 0, child: Image.asset('assets/images/close-icon.png')),
+            Text(
+              "공유하기",
+              style: TextStyle(
+                color: CatchmongColors.black,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            InkWell(
+                onTap: () {
+                  Navigator.of(context).pop();
+                },
+                child: Image.asset('assets/images/close-icon.png'))
+          ],
+        ),
+        content: SizedBox(
+          height: 100,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Image.asset('assets/images/kakao-share.png'),
+                  SizedBox(
+                    height: 8,
+                  ),
+                  Text(
+                    "카카오로\n공유하기",
+                    style: TextStyle(
+                      color: CatchmongColors.gray_800,
+                      fontSize: 12,
+                    ),
+                    textAlign: TextAlign.center,
+                  )
+                ],
+              ),
+              SizedBox(
+                width: 32,
+              ),
+              InkWell(
+                onTap: () {
+                  // 클립보드에 "공유링크" 텍스트 복사
+                  Clipboard.setData(ClipboardData(text: "공유링크"));
+                  Get.back();
+                  showShareConfirmDialog(context);
+                },
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Image.asset('assets/images/link-share.png'),
+                    SizedBox(
+                      height: 8,
+                    ),
+                    Text(
+                      "링크로\n공유하기",
+                      style: TextStyle(
+                        color: CatchmongColors.gray_800,
+                        fontSize: 12,
+                      ),
+                      textAlign: TextAlign.center,
+                    )
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+void showShareConfirmDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: Colors.white,
+        titlePadding: EdgeInsets.all(0),
+        contentPadding: EdgeInsets.all(0),
+        content: SizedBox(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                  padding: EdgeInsets.symmetric(
+                    vertical: 20,
+                    horizontal: 16,
+                  ),
+                  child: Text(
+                    "초대 링크가 복사되었습니다.지금 공유해보세요!",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  )),
+              InkWell(
+                onTap: () {
+                  // 확인 버튼의 동작 추가
+                  Get.back();
+                },
+                child: Container(
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                      border: Border(
+                          top: BorderSide(
+                    color: CatchmongColors.gray_300,
+                  ))),
+                  height: 60,
+                  child: Text(
+                    "확인",
+                    style: TextStyle(
+                      color: CatchmongColors.blue1,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }

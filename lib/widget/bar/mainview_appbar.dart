@@ -28,17 +28,17 @@ class MainViewAppbar extends StatelessWidget implements PreferredSizeWidget {
       ),
       actions: [
         SearchBtn(),
-        SizedBox(
-          width: 16,
-        ),
+        // SizedBox(
+        //   width: 16,
+        // ),
         AlarmBtn(),
-        SizedBox(
-          width: 16,
-        ),
+        // SizedBox(
+        //   width: 16,
+        // ),
         ShoppingBtn(),
-        SizedBox(
-          width: 20,
-        )
+        // SizedBox(
+        //   width: 20,
+        // )
       ],
     );
   }

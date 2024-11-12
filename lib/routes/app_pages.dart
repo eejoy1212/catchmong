@@ -10,6 +10,7 @@ import 'package:catchmong/modules/login/bindings/login_binding.dart';
 import 'package:catchmong/modules/login/views/login_view.dart';
 import 'package:catchmong/modules/main/bindings/main_bindings.dart';
 import 'package:catchmong/modules/main/views/main_view.dart';
+import 'package:catchmong/modules/mypage/views/my_write_view.dart';
 import 'package:catchmong/modules/partner/bindings/partner-binding.dart';
 import 'package:catchmong/modules/partner/views/partner-show-view.dart';
 import 'package:catchmong/modules/search/bindings/search_binding.dart';
@@ -58,6 +59,11 @@ class AppPages {
     GetPage(
       name: '/scrap',
       page: () => const ScrapView(),
+      binding: ScrapBinding(),
+    ),
+    GetPage(
+      name: '/my-write',
+      page: () => const MyWriteView(),
       binding: ScrapBinding(),
     ),
     GetPage(

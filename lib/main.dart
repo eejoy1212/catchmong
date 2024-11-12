@@ -17,6 +17,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
           useMaterial3: false,
           appBarTheme: AppBarTheme(color: Colors.white, elevation: 0),
+          dialogTheme: DialogTheme(
+            shape: RoundedRectangleBorder(
+              borderRadius:
+                  BorderRadius.circular(24), // 전역적으로 다이얼로그에 radius 24 적용
+            ),
+          ),
           colorScheme: ColorScheme.fromSeed(
             seedColor: CatchmongColors.yellow_main,
             primary: CatchmongColors.yellow_main,

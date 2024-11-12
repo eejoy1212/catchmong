@@ -40,10 +40,13 @@ class MainScreen extends StatelessWidget {
           appBar: _appbars[_controller.selectedIndex.value],
           bottomNavigationBar: BottomNavigationBar(
             type: BottomNavigationBarType.fixed, // 라벨이 항상 보이도록 설정
+            selectedItemColor: CatchmongColors.gray400,
             currentIndex: _controller.selectedIndex.value,
             onTap: _controller.onItemTapped,
             items: [
               BottomNavigationBarItem(
+                activeIcon:
+                    Image.asset('assets/images/bottom-home-selected.png'),
                 icon: Image.asset('assets/images/bottom-home.png'),
                 label: '홈',
               ),
@@ -52,6 +55,8 @@ class MainScreen extends StatelessWidget {
                 label: '검색',
               ),
               BottomNavigationBarItem(
+                activeIcon:
+                    Image.asset('assets/images/bottom-pin-selected.png'),
                 icon: Image.asset('assets/images/bottom-pin.png'),
                 label: '지도',
               ),
