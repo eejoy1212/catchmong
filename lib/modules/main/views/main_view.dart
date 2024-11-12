@@ -2,6 +2,7 @@ import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/modules/bottom_nav/bottom_nav_controller.dart';
 import 'package:catchmong/modules/mypage/views/mypage_view.dart';
 import 'package:catchmong/widget/bar/mainview_appbar.dart';
+import 'package:catchmong/widget/bar/map_appbar.dart';
 import 'package:catchmong/widget/bar/mypage_appbar.dart';
 import 'package:catchmong/widget/bar/search_appbar.dart';
 import 'package:catchmong/widget/card/MainCard.dart';
@@ -28,7 +29,7 @@ class MainScreen extends StatelessWidget {
   final List<PreferredSizeWidget> _appbars = [
     MainViewAppbar(),
     SearchAppbar(),
-    AppBar(),
+    MapAppbar(),
     AppBar(),
     MypageAppbar()
   ];

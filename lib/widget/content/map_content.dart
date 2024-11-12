@@ -1,34 +1,7 @@
-// import 'package:catchmong/modules/location/controllers/location_controller.dart';
-// import 'package:flutter/material.dart';
-// import 'package:flutter_naver_map/flutter_naver_map.dart';
-
-// class MapContent extends StatelessWidget {
-//   MapContent({super.key});
-//   final LocationController controller = LocationController();
-//   // 마커 위치 설정 (예: 서울 시청 위치)
-//   final NLatLng markerPosition = NLatLng(37.5665, 126.9780); // 고정된 마커 위치
-//   @override
-//   Widget build(BuildContext context) {
-//     return SafeArea(
-//       child: Container(
-//         // child: Text("data")
-//         child: NaverMap(
-// options: const NaverMapViewOptions(
-//   initialCameraPosition: NCameraPosition(
-//     target: NLatLng(37.5665, 126.9780), // 초기 카메라 위치도 동일하게 설정
-//     zoom: 15,
-//   ),
-// ),
-//           onMapReady: (controller) {
-//             print("네이버 맵 로딩됨!");
-//           },
-//         ),
-//       ),
-//     );
-//   }
-// }
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/modules/location/controllers/location_controller.dart';
+import 'package:catchmong/widget/bar/map_searchbar.dart';
+import 'package:catchmong/widget/chip/map_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:geolocator/geolocator.dart';
@@ -41,7 +14,6 @@ class MapContent extends StatelessWidget {
 
   // 현재 위치를 가져오는 메서드
   Future<NLatLng> _getCurrentPosition() async {
-    // 위치 권한 요청
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       return Future.error('Location services are disabled.');
@@ -60,60 +32,190 @@ class MapContent extends StatelessWidget {
           'Location permissions are permanently denied, we cannot request permissions.');
     }
 
-    // 현재 위치 가져오기
     Position position = await Geolocator.getCurrentPosition();
     return NLatLng(position.latitude, position.longitude);
   }
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showBottomSheet(context);
+    });
     return SafeArea(
-      child: Container(
-        child: FutureBuilder<NLatLng>(
-          future: _getCurrentPosition(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            } else {
-              final currentPosition = snapshot.data!;
-              final marker = NCircleOverlay(
-                id: "marker",
-                center: currentPosition,
-                radius: 16,
-                color: CatchmongColors.green_line,
-              );
-              //  NMarker(
-              //   id: 'currentLocationMarker',
-              //   position: currentPosition,
+      child: FutureBuilder<NLatLng>(
+        future: _getCurrentPosition(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else {
+            final currentPosition = snapshot.data!;
+            final marker = NCircleOverlay(
+              id: "marker",
+              center: currentPosition,
+              radius: 16,
+              color: CatchmongColors.green_line,
+            );
 
-              // );
-
-              return NaverMap(
-                options: NaverMapViewOptions(
-                  initialCameraPosition: NCameraPosition(
-                    target: currentPosition, // 초기 카메라 위치도 동일하게 설정
-                    zoom: 15,
+            // `Column` 안에 `NaverMap`과 `Text`를 함께 넣기 위해 이 위치에서 `NaverMap`을 초기화함
+            return Column(
+              children: [
+                Container(
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 16,
+                      ),
+                      Container(
+                          margin: EdgeInsets.symmetric(
+                            horizontal: 20,
+                          ),
+                          child: MapSearchbar()),
+                      SizedBox(
+                        height: 16,
+                      ),
+                      // Container(
+                      //   margin: EdgeInsets.symmetric(
+                      //     horizontal: 20,
+                      //   ),
+                      //   child: Row(
+                      //     children: [
+                      //       MapChip(
+                      //         title: '전체',
+                      //         isActive: true,
+                      //       ),
+                      //       MapChip(
+                      //         title: '전체',
+                      //         isActive: true,
+                      //       )
+                      //     ],
+                      //   ),
+                      // ),
+                      // SizedBox(
+                      //   height: 16,
+                      // ),
+                    ],
                   ),
                 ),
-                onMapReady: (controller) {
-                  controller.addOverlay(marker);
-
-                  // 지도 로딩이 완료되면 마커 추가
-                  // controller.addMarker(
-                  //   Marker(
-                  //     markerId: 'currentLocationMarker',
-                  //     position: currentPosition,
-                  //     captionText: '내 위치',
-                  //   ),
-                  // );
-                },
-              );
-            }
-          },
-        ),
+                Expanded(
+                  child: NaverMap(
+                    options: NaverMapViewOptions(
+                      initialCameraPosition: NCameraPosition(
+                        target: currentPosition,
+                        zoom: 15,
+                      ),
+                    ),
+                    onMapReady: (controller) {
+                      controller.addOverlay(marker);
+                    },
+                  ),
+                ),
+              ],
+            );
+          }
+        },
       ),
     );
   }
+}
+
+void showBottomSheet(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    isDismissible: false, // 바텀시트를 밖으로 내려서 닫지 못하게 설정
+    enableDrag: true, // 드래그로 높이를 조절할 수 있게 설정
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (BuildContext context) {
+      return DraggableScrollableSheet(
+        snap: false,
+        expand: false, // 드래그로 스크롤이 확장되지 않도록 설정
+        initialChildSize: 120 / 606, // 초기 높이 비율 설정
+        minChildSize: 120 / 606, // 최소 높이 비율 설정
+        maxChildSize: 1.0, // 최대 높이를 전체 화면으로 설정
+        builder: (BuildContext context, ScrollController scrollController) {
+          return Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                // 인디케이터 추가
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                // 바텀시트의 콘텐츠
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      MapChip(
+                        useLeadingIcon: true,
+                        title: "필터",
+                        isActive: false,
+                        marginRight: 8,
+                        leadingIcon:
+                            Image.asset('assets/images/filter-icon.png'),
+                      ),
+                      SizedBox(width: 8),
+                      MapChip(
+                        useLeadingIcon: true,
+                        title: "영업중",
+                        isActive: false,
+                        marginRight: 8,
+                        leadingIcon:
+                            Image.asset('assets/images/filter-icon.png'),
+                      ),
+                      SizedBox(width: 8),
+                      MapChip(
+                        useLeadingIcon: true,
+                        title: "예약",
+                        isActive: false,
+                        marginRight: 8,
+                        leadingIcon:
+                            Image.asset('assets/images/filter-icon.png'),
+                      ),
+                      SizedBox(width: 8),
+                      MapChip(
+                        useLeadingIcon: true,
+                        title: "픽업",
+                        isActive: false,
+                        marginRight: 8,
+                        leadingIcon:
+                            Image.asset('assets/images/filter-icon.png'),
+                      ),
+                      SizedBox(width: 8),
+                      MapChip(
+                        useLeadingIcon: true,
+                        title: "주차",
+                        isActive: false,
+                        marginRight: 8,
+                        leadingIcon:
+                            Image.asset('assets/images/parking-icon.png'),
+                      ),
+                      SizedBox(width: 8),
+                      MapChip(
+                        useLeadingIcon: true,
+                        title: "쿠폰",
+                        isActive: false,
+                        marginRight: 8,
+                        leadingIcon:
+                            Image.asset('assets/images/coupon-icon.png'),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
 }
