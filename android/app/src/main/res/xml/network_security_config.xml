@@ -1,0 +1,6 @@
+<!-- res/xml/network_security_config.xml -->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">postcode.map.daum.net</domain> <!-- Daum Postcode 서비스 허용 -->
+    </domain-config>
+</network-security-config>

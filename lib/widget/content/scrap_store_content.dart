@@ -139,6 +139,7 @@ class ScrapStoreContent extends StatelessWidget {
                           OutlinedBtn(
                             width: 180,
                             title: '구매하기',
+                            onPress: () {},
                           )
                         ],
                       ),

@@ -39,6 +39,8 @@ dependencies:
   flutter_naver_map: ^1.3.0+1
   geolocator:
   url_launcher:
+  webview_flutter:
+  daum_postcode_search:
 
 dev_dependencies:
   flutter_test:

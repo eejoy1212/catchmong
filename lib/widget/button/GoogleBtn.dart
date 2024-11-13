@@ -12,7 +12,7 @@ class GoogleBtn extends StatelessWidget {
           barrierDismissible: false, // 다이얼로그 바깥을 눌러도 닫히지 않도록 설정
         );
         // 라우팅 수행
-        await Get.toNamed('/location');
+        await Get.toNamed('/signup');
 
         // 라우팅 후 로딩 다이얼로그 닫기
         Get.back();

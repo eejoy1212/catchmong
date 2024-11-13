@@ -1,19 +1,17 @@
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:flutter/material.dart';
 
-class OutlinedBtn extends StatelessWidget {
+class YellowToggleBtn extends StatelessWidget {
   final double? width;
   final double height;
   final String title;
-  final double fontSize;
-  final void Function() onPress;
-  const OutlinedBtn({
+  final bool isSelected;
+  const YellowToggleBtn({
     super.key,
     this.width = 220,
-    this.height = 52,
+    this.height = 48,
     required this.title,
-    this.fontSize = 16,
-    required this.onPress,
+    required this.isSelected,
   });
 
   @override
@@ -21,8 +19,9 @@ class OutlinedBtn extends StatelessWidget {
     return Container(
       width: width,
       height: height,
-      decoration:
-          BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(8))),
+      decoration: BoxDecoration(
+          color: isSelected ? CatchmongColors.yellow_line : Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(8))),
       child: OutlinedButton(
           style: ButtonStyle(
             shape: MaterialStateProperty.all(
@@ -32,15 +31,18 @@ class OutlinedBtn extends StatelessWidget {
             ),
             side: MaterialStateProperty.all(
               BorderSide(
-                  color: CatchmongColors.gray100, width: 1), // 보더 컬러를 노란색으로 설정
+                  color: isSelected
+                      ? CatchmongColors.yellow_line
+                      : CatchmongColors.gray100,
+                  width: 1), // 보더 컬러를 노란색으로 설정
             ),
           ),
-          onPressed: onPress,
+          onPressed: () {},
           child: Text(
             title,
             style: TextStyle(
-                color: CatchmongColors.black,
-                fontSize: fontSize,
+                color: isSelected ? Colors.white : CatchmongColors.black,
+                fontSize: 14,
                 fontWeight: FontWeight.w700),
           )),
     );

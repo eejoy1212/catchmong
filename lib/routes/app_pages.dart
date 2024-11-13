@@ -1,9 +1,12 @@
+import 'package:catchmong/modules/loading/bindings/loading_binding.dart';
+import 'package:catchmong/modules/loading/views/loading_view.dart';
 import 'package:catchmong/modules/location/alarm/bindings/alarm_binding.dart';
 import 'package:catchmong/modules/location/alarm/views/alarm_setting_view.dart';
 import 'package:catchmong/modules/location/alarm/views/alarm_view.dart';
 import 'package:catchmong/modules/location/bindings/location_binding.dart';
 import 'package:catchmong/modules/location/scrap/bindings/scrap_binding.dart';
 import 'package:catchmong/modules/location/scrap/views/scrap_view.dart';
+import 'package:catchmong/modules/location/views/location_search_view.dart';
 import 'package:catchmong/modules/location/views/location_setting_view.dart';
 import 'package:catchmong/modules/location/views/location_view.dart';
 import 'package:catchmong/modules/login/bindings/login_binding.dart';
@@ -15,6 +18,9 @@ import 'package:catchmong/modules/partner/bindings/partner-binding.dart';
 import 'package:catchmong/modules/partner/views/partner-show-view.dart';
 import 'package:catchmong/modules/search/bindings/search_binding.dart';
 import 'package:catchmong/modules/search/views/search_view.dart';
+import 'package:catchmong/modules/signup/bindings/signup_binding.dart';
+import 'package:catchmong/modules/signup/views/certi_view.dart';
+import 'package:catchmong/modules/signup/views/signup_view.dart';
 import 'package:get/get.dart';
 
 class AppPages {
@@ -27,8 +33,28 @@ class AppPages {
       binding: LoginBinding(),
     ),
     GetPage(
+      name: '/loading',
+      page: () => LoadingView(),
+      binding: LoadingBinding(),
+    ),
+    GetPage(
+      name: '/signup',
+      page: () => SignupView(),
+      binding: SignupBinding(),
+    ),
+    GetPage(
+      name: '/certi',
+      page: () => CertiView(),
+      binding: SignupBinding(),
+    ),
+    GetPage(
       name: '/location',
       page: () => const LocationView(),
+      binding: LocationBinding(),
+    ),
+    GetPage(
+      name: '/location-search',
+      page: () => LocationSearchView(),
       binding: LocationBinding(),
     ),
     GetPage(

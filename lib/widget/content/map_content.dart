@@ -2,6 +2,7 @@ import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/modules/location/controllers/location_controller.dart';
 import 'package:catchmong/widget/bar/map_searchbar.dart';
 import 'package:catchmong/widget/chip/map_chip.dart';
+import 'package:catchmong/widget/map/custom_map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:geolocator/geolocator.dart';
@@ -99,17 +100,7 @@ class MapContent extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: NaverMap(
-                    options: NaverMapViewOptions(
-                      initialCameraPosition: NCameraPosition(
-                        target: currentPosition,
-                        zoom: 15,
-                      ),
-                    ),
-                    onMapReady: (controller) {
-                      controller.addOverlay(marker);
-                    },
-                  ),
+                  child: CustomMap(currentPosition: currentPosition),
                 ),
               ],
             );

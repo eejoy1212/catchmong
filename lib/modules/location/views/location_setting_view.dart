@@ -5,22 +5,45 @@ import 'package:catchmong/widget/button/AppbarBackBtn.dart';
 import 'package:catchmong/widget/button/GrayElevationBtn.dart';
 import 'package:catchmong/widget/button/InfoBtn.dart';
 import 'package:catchmong/widget/button/YellowElevationBtn.dart';
+import 'package:catchmong/widget/map/custom_map.dart';
 import 'package:catchmong/widget/slider/LocationSlider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_naver_map/flutter_naver_map.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 
 class LocationSettingView extends StatelessWidget {
   LocationSettingView({super.key});
   final LocationController controller = Get.put(LocationController());
+  final NaverMapController? _mapController = null;
+
+  // 현재 위치를 가져오는 메서드
+  Future<NLatLng> _getCurrentPosition() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Location services are disabled.');
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    Position position = await Geolocator.getCurrentPosition();
+    return NLatLng(position.latitude, position.longitude);
+  }
 
   @override
   Widget build(BuildContext context) {
     double _currentValue = 10.0;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      showBottomSheet(context);
-      showInitialDialog(context);
-    });
 
     return Scaffold(
       appBar: AppBar(
@@ -32,23 +55,44 @@ class LocationSettingView extends StatelessWidget {
         leading: const AppbarBackBtn(),
         title: const Text(
           "내 지역 설정",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: CatchmongColors.black,
+          ),
         ),
       ),
-      body: Center(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            const LocationBar(),
-            Expanded(
-              child: Container(
-                child: const Center(child: Text("지도")),
-              ),
-            ),
-          ],
-        ),
-      ),
+      body: FutureBuilder<NLatLng>(
+          future: _getCurrentPosition(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else {
+              final currentPosition = snapshot.data!;
+
+              // 지도 로딩 후 다이얼로그와 바텀시트 표시
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                showInitialDialog(context);
+                showBottomSheet(context);
+              });
+
+              return Center(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    const LocationBar(
+                      opacity: 0.4,
+                    ),
+                    Expanded(
+                        child: CustomMap(currentPosition: currentPosition)),
+                  ],
+                ),
+              );
+            }
+          }),
     );
   }
 
@@ -66,7 +110,8 @@ class LocationSettingView extends StatelessWidget {
                 TextSpan(
                   children: [
                     TextSpan(
-                      text: "파트너, 스토어 방문을 위해 \n",
+                      // text: "파트너, 스토어 방문을 위해 \n",
+                      text: "파트너 방문을 위해 \n",
                       style:
                           TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
                     ),
