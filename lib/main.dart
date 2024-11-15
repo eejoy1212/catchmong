@@ -23,6 +23,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       theme: ThemeData(
           useMaterial3: false,
+          scaffoldBackgroundColor: Colors.white,
           appBarTheme: AppBarTheme(color: Colors.white, elevation: 0),
           dialogTheme: DialogTheme(
             shape: RoundedRectangleBorder(

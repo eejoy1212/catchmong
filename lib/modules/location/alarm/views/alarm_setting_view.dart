@@ -70,7 +70,7 @@ class AlarmSettingView extends StatelessWidget {
                         height: 4,
                       ),
                       Container(
-                        width: 280,
+                        width: 220,
                         child: Text(
                           "알림을 꺼도 중요 공지 사항은 전송될 수 있어요.",
                           softWrap: true,
@@ -129,7 +129,7 @@ class AlarmSettingView extends StatelessWidget {
                         height: 4,
                       ),
                       Container(
-                        width: 280,
+                        width: 220,
                         child: Text(
                           "특가,상품, 이벤트 등의 정보를 가장 먼저 받아볼 수 있어요.",
                           softWrap: true,
@@ -189,7 +189,7 @@ class AlarmSettingView extends StatelessWidget {
                         height: 4,
                       ),
                       Container(
-                        width: 280,
+                        width: 220,
                         child: Text(
                           "오후 9시 ~ 오전 8시에 발송되는 혜택 알림까지 놓치지 않고 받아볼 수 있어요.",
                           softWrap: true,

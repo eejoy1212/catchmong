@@ -14,17 +14,22 @@ class MainViewAppbar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
-      title: Row(
-        children: [
-          const Text(
-            "모든지역",
-            style: TextStyle(
-                color: CatchmongColors.black,
-                fontSize: 18,
-                fontWeight: FontWeight.w600),
-          ),
-          Image.asset('assets/images/right-arrow.png')
-        ],
+      title: InkWell(
+        onTap: () {
+          Get.toNamed('/location-add');
+        },
+        child: Row(
+          children: [
+            const Text(
+              "모든지역",
+              style: TextStyle(
+                  color: CatchmongColors.black,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600),
+            ),
+            Image.asset('assets/images/right-arrow.png')
+          ],
+        ),
       ),
       actions: [
         SearchBtn(),

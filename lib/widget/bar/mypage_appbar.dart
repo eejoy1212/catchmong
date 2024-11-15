@@ -1,6 +1,7 @@
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/widget/button/AppbarBackBtn.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class MypageAppbar extends StatelessWidget implements PreferredSizeWidget {
   const MypageAppbar({super.key});
@@ -13,7 +14,7 @@ class MypageAppbar extends StatelessWidget implements PreferredSizeWidget {
       actions: [
         InkWell(
             onTap: () {
-              print("세팅");
+              Get.toNamed('/my-setting');
             },
             child: Image.asset('assets/images/setting-icon.png')),
         SizedBox(

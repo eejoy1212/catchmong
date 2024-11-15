@@ -90,24 +90,29 @@ class MyWriteCard extends StatelessWidget {
                   ],
                 ),
 
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    vertical: 4,
-                    horizontal: 8,
-                  ),
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(
-                        20,
-                      )),
-                      border: Border.all(
-                        color: CatchmongColors.gray,
-                      )),
-                  child: Center(
-                    child: Text(
-                      "삭제",
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w400,
+                InkWell(
+                  onTap: () {
+                    showConfirmDialog(context);
+                  },
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      vertical: 4,
+                      horizontal: 8,
+                    ),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(
+                          20,
+                        )),
+                        border: Border.all(
+                          color: CatchmongColors.gray,
+                        )),
+                    child: Center(
+                      child: Text(
+                        "삭제",
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w400,
+                        ),
                       ),
                     ),
                   ),
@@ -277,4 +282,96 @@ class MyWriteCard extends StatelessWidget {
       ),
     );
   }
+}
+
+void showConfirmDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        titlePadding: EdgeInsets.all(0),
+        contentPadding: EdgeInsets.all(0),
+        backgroundColor: Colors.white,
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 20,
+                ),
+                child: Text(
+                  "리뷰를 삭제하시면 재작성이 불가능합니다.\n 삭제하시겠습니까?",
+                  softWrap: true,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                    border: Border(
+                        top: BorderSide(color: CatchmongColors.gray_300))),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: () {
+                          Get.back();
+                        },
+                        child: Container(
+                          alignment: Alignment.center,
+                          height: 60,
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Text(
+                            "취소",
+                            style: TextStyle(
+                              color: CatchmongColors.sub_gray,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: 1, // 버튼 사이의 구분선
+                      height: 60,
+                      color: CatchmongColors.gray_300,
+                    ),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () {
+                          // 확인 버튼의 동작 추가
+                          Get.back();
+                        },
+                        child: Container(
+                          alignment: Alignment.center,
+                          height: 60,
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Text(
+                            "확인",
+                            style: TextStyle(
+                              color: CatchmongColors.red,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }

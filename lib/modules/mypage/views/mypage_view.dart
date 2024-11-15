@@ -1,4 +1,5 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/modules/mypage/controllers/mypage_controller.dart';
 import 'package:catchmong/widget/button/TxtBtn.dart';
 import 'package:catchmong/widget/dialog/UseDialog.dart';
 import 'package:flutter/material.dart';
@@ -6,8 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 class MyPageView extends StatelessWidget {
-  const MyPageView({super.key});
-
+  MyPageView({super.key});
+  final MypageController controller = MypageController();
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -109,26 +110,35 @@ class MyPageView extends StatelessWidget {
                     //추천인 버튼
                     Expanded(
                       child: InkWell(
-                        onTap: () {},
-                        child: Container(
-                          padding: EdgeInsets.symmetric(vertical: 12),
-                          decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(8)),
-                              border: Border.all(
-                                color: CatchmongColors.gray100,
-                              )),
-                          child: Center(
-                            child: Text(
-                              "내 추천인",
-                              style: TextStyle(
-                                  color: CatchmongColors.black,
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 16),
+                          onTap: () {
+                            if (controller.myPageToggle.value == 0) {
+                              controller.myPageToggle.value = 1;
+                            } else {
+                              controller.myPageToggle.value = 0;
+                            }
+                          },
+                          child: Obx(
+                            () => Container(
+                              padding: EdgeInsets.symmetric(vertical: 12),
+                              decoration: BoxDecoration(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(8)),
+                                  border: Border.all(
+                                    color: CatchmongColors.gray100,
+                                  )),
+                              child: Center(
+                                child: Text(
+                                  controller.myPageToggle.value == 0
+                                      ? "내 추천인"
+                                      : "추천인계정아이디",
+                                  style: TextStyle(
+                                      color: CatchmongColors.black,
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 16),
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                      ),
+                          )),
                     )
                     //추천인 목록 버튼
                     ,

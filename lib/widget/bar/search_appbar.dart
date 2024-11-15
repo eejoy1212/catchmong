@@ -1,14 +1,22 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/modules/bottom_nav/bottom_nav_controller.dart';
 import 'package:catchmong/widget/button/AppbarBackBtn.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class SearchAppbar extends StatelessWidget implements PreferredSizeWidget {
-  const SearchAppbar({super.key});
-
+  SearchAppbar({super.key});
+//임시
+  final BottomNavController _controller = Get.put(BottomNavController());
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      leading: const AppbarBackBtn(),
+      leading: AppbarBackBtn(
+        onTap: () {
+          //임시
+          _controller.onItemTapped(0);
+        },
+      ),
       centerTitle: true,
       title: const Text(
         "검색",

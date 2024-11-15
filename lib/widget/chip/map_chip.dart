@@ -7,6 +7,8 @@ class MapChip extends StatelessWidget {
   final double marginRight;
   final Widget leadingIcon;
   final bool useLeadingIcon;
+  final double fontSize;
+  final double verticalPadding;
   const MapChip({
     super.key,
     required this.title,
@@ -14,6 +16,8 @@ class MapChip extends StatelessWidget {
     required this.marginRight,
     required this.leadingIcon,
     required this.useLeadingIcon,
+    this.fontSize = 14,
+    this.verticalPadding = 8,
   });
 
   @override
@@ -23,7 +27,7 @@ class MapChip extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(
           horizontal: 12,
-          vertical: 8,
+          vertical: verticalPadding,
         ),
         margin: EdgeInsets.only(
           right: 8,
@@ -47,7 +51,7 @@ class MapChip extends StatelessWidget {
               title,
               style: TextStyle(
                 color: isActive ? Colors.white : CatchmongColors.sub_gray,
-                fontSize: 14,
+                fontSize: fontSize,
               ),
             ),
           ],

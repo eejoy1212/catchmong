@@ -6,6 +6,7 @@ import 'package:catchmong/modules/location/alarm/views/alarm_view.dart';
 import 'package:catchmong/modules/location/bindings/location_binding.dart';
 import 'package:catchmong/modules/location/scrap/bindings/scrap_binding.dart';
 import 'package:catchmong/modules/location/scrap/views/scrap_view.dart';
+import 'package:catchmong/modules/location/views/location_add_view.dart';
 import 'package:catchmong/modules/location/views/location_search_view.dart';
 import 'package:catchmong/modules/location/views/location_setting_view.dart';
 import 'package:catchmong/modules/location/views/location_view.dart';
@@ -13,7 +14,10 @@ import 'package:catchmong/modules/login/bindings/login_binding.dart';
 import 'package:catchmong/modules/login/views/login_view.dart';
 import 'package:catchmong/modules/main/bindings/main_bindings.dart';
 import 'package:catchmong/modules/main/views/main_view.dart';
+import 'package:catchmong/modules/mypage/bindings/mypage_binding.dart';
 import 'package:catchmong/modules/mypage/views/my_write_view.dart';
+import 'package:catchmong/modules/mypage/views/mypage_setting.dart';
+import 'package:catchmong/modules/mypage/views/profile_edit_view.dart';
 import 'package:catchmong/modules/partner/bindings/partner-binding.dart';
 import 'package:catchmong/modules/partner/views/partner-show-view.dart';
 import 'package:catchmong/modules/search/bindings/search_binding.dart';
@@ -24,7 +28,8 @@ import 'package:catchmong/modules/signup/views/signup_view.dart';
 import 'package:get/get.dart';
 
 class AppPages {
-  static const INITIAL = '/login';
+  // static const INITIAL = '/login';
+  static const INITIAL = '/main';
 
   static final routes = [
     GetPage(
@@ -55,6 +60,11 @@ class AppPages {
     GetPage(
       name: '/location-search',
       page: () => LocationSearchView(),
+      binding: LocationBinding(),
+    ),
+    GetPage(
+      name: '/location-add',
+      page: () => LocationAddView(),
       binding: LocationBinding(),
     ),
     GetPage(
@@ -90,7 +100,17 @@ class AppPages {
     GetPage(
       name: '/my-write',
       page: () => const MyWriteView(),
-      binding: ScrapBinding(),
+      binding: MypageBinding(),
+    ),
+    GetPage(
+      name: '/my-setting',
+      page: () => const MypageSetting(),
+      binding: MypageBinding(),
+    ),
+    GetPage(
+      name: '/profile-edit',
+      page: () => const ProfileEditView(),
+      binding: MypageBinding(),
     ),
     GetPage(
         name: '/partner-show',
