@@ -9,6 +9,7 @@ class MapChip extends StatelessWidget {
   final bool useLeadingIcon;
   final double fontSize;
   final double verticalPadding;
+  final void Function()? onTap;
   const MapChip({
     super.key,
     required this.title,
@@ -18,12 +19,13 @@ class MapChip extends StatelessWidget {
     required this.useLeadingIcon,
     this.fontSize = 14,
     this.verticalPadding = 8,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {},
+      onTap: onTap,
       child: Container(
         padding: EdgeInsets.symmetric(
           horizontal: 12,

@@ -237,7 +237,39 @@ class MyPageView extends StatelessWidget {
               ),
             ),
           )
-          //타일 3-서비스 이용약관
+          //타일 3-구매 내역
+          ,
+          InkWell(
+            onTap: () {
+              Get.toNamed('/my-purchase');
+            },
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                vertical: 21,
+                horizontal: 20,
+              ),
+              decoration: BoxDecoration(
+                  border: Border(
+                      bottom: BorderSide(
+                color: CatchmongColors.gray50,
+              ))),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "구매 내역",
+                    style: TextStyle(
+                      color: CatchmongColors.sub_gray,
+                      fontSize: 16,
+                    ),
+                  ),
+                  Image.asset('assets/images/right-arrow.png')
+                ],
+              ),
+            ),
+          )
+
+          //타일 4-서비스 이용약관
           ,
           InkWell(
             onTap: () {
@@ -271,7 +303,7 @@ class MyPageView extends StatelessWidget {
                 ],
               ),
             ),
-          ) //타일 4-개인정보 처리방침
+          ) //타일 5-개인정보 처리방침
           ,
           InkWell(
             onTap: () {},
@@ -299,7 +331,7 @@ class MyPageView extends StatelessWidget {
                 ],
               ),
             ),
-          ) //타일 5-위치정보 이용약관
+          ) //타일 6-위치정보 이용약관
           ,
           InkWell(
             onTap: () {},

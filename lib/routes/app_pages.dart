@@ -15,6 +15,7 @@ import 'package:catchmong/modules/login/views/login_view.dart';
 import 'package:catchmong/modules/main/bindings/main_bindings.dart';
 import 'package:catchmong/modules/main/views/main_view.dart';
 import 'package:catchmong/modules/mypage/bindings/mypage_binding.dart';
+import 'package:catchmong/modules/mypage/views/my_purchase_view.dart';
 import 'package:catchmong/modules/mypage/views/my_write_view.dart';
 import 'package:catchmong/modules/mypage/views/mypage_setting.dart';
 import 'package:catchmong/modules/mypage/views/profile_edit_view.dart';
@@ -100,6 +101,11 @@ class AppPages {
     GetPage(
       name: '/my-write',
       page: () => const MyWriteView(),
+      binding: MypageBinding(),
+    ),
+    GetPage(
+      name: '/my-purchase',
+      page: () => const MyPurchaseView(),
       binding: MypageBinding(),
     ),
     GetPage(
