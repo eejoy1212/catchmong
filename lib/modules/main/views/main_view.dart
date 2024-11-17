@@ -4,6 +4,7 @@ import 'package:catchmong/modules/mypage/views/mypage_view.dart';
 import 'package:catchmong/widget/bar/mainview_appbar.dart';
 import 'package:catchmong/widget/bar/map_appbar.dart';
 import 'package:catchmong/widget/bar/mypage_appbar.dart';
+import 'package:catchmong/widget/bar/qr_appbar.dart';
 import 'package:catchmong/widget/bar/search_appbar.dart';
 import 'package:catchmong/widget/card/MainCard.dart';
 import 'package:catchmong/widget/card/ReviewCard.dart';
@@ -13,6 +14,7 @@ import 'package:catchmong/widget/card/restaurant-type-card.dart';
 import 'package:catchmong/widget/chip/page-indicator.dart';
 import 'package:catchmong/widget/content/map_content.dart';
 import 'package:catchmong/widget/content/partner_content.dart';
+import 'package:catchmong/widget/content/qr_camera_content.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -23,14 +25,14 @@ class MainScreen extends StatelessWidget {
     MainView(),
     PartnerContent(),
     MapContent(),
-    Text('페이백'), // 예시용 추가 페이지
+    QrCameraContent(),
     MyPageView()
   ];
   final List<PreferredSizeWidget> _appbars = [
     MainViewAppbar(),
     SearchAppbar(),
     MapAppbar(),
-    AppBar(),
+    QrAppbar(),
     MypageAppbar()
   ];
   @override

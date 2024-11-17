@@ -41,6 +41,7 @@ dependencies:
   url_launcher:
   webview_flutter:
   daum_postcode_search:
+  qr_code_scanner:
 
 dev_dependencies:
   flutter_test:
