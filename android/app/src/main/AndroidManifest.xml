@@ -41,7 +41,13 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
+        <!-- Google 서비스 설정 -->
+        <meta-data
+            android:name="com.google.android.gms.auth.api.fallback"
+            android:value="true" />
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
         <!-- Flutter에서 사용되는 기본 메타데이터 -->
         <meta-data
             android:name="flutterEmbedding"

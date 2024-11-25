@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 class KakaoBtn extends StatelessWidget {
+  final Function onTap;
+
+  const KakaoBtn({super.key, required this.onTap});
   @override
   Widget build(BuildContext context) {
     return InkWell(

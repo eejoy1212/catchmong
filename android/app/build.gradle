@@ -65,8 +65,11 @@ android {
 flutter {
     source '../..'
 }
+apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
 
 dependencies {
+    implementation 'com.google.android.gms:play-services-auth:20.5.0' // Google Sign-In용
     implementation 'com.naver.maps:map-sdk:3.17.0'
     // 필요 시 추가 종속성을 여기에 추가
 }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "959905610521",
+    "project_id": "catchmong-83300",
+    "storage_bucket": "catchmong-83300.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:959905610521:android:19ccfc3bdcab5c3f29e388",
+        "android_client_info": {
+          "package_name": "com.example.catchmong"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCono7adejyLh1zLC-pMjx_wHYKWzILim0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

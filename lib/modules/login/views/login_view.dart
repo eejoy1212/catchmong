@@ -39,9 +39,21 @@ class LoginView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      KakaoBtn(),
+                      KakaoBtn(
+                        onTap: () {
+                          controller.loadUsers();
+                        },
+                      ),
                       NaverBtn(),
-                      GoogleBtn(),
+                      GoogleBtn(
+                        onTap: () async {
+                          final idToken = await controller.handleGoogleSignIn();
+                          if (idToken != null) {
+                            print("토큰..?$idToken");
+                            await controller.loginWithGoogle(idToken); // 서버 요청
+                          }
+                        },
+                      ),
                     ],
                   ),
                   Obx(() {

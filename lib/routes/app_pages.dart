@@ -29,8 +29,8 @@ import 'package:catchmong/modules/signup/views/signup_view.dart';
 import 'package:get/get.dart';
 
 class AppPages {
-  // static const INITIAL = '/login';
-  static const INITIAL = '/main';
+  static const INITIAL = '/login';
+  // static const INITIAL = '/main';
 
   static final routes = [
     GetPage(
