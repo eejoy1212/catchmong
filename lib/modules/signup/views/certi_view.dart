@@ -40,7 +40,10 @@ class CertiView extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(
-                    child: BorderTxtField(text: "휴대폰 번호(- 제외)"),
+                    child: BorderTxtField(
+                      controller: TextEditingController(),
+                      onChanged: (String) {},
+                    ),
                   ),
                   SizedBox(width: 10),
                   OutlinedBtn(
@@ -65,7 +68,10 @@ class CertiView extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(
-                    child: BorderTxtField(text: "인증번호 4자리"),
+                    child: BorderTxtField(
+                      controller: TextEditingController(),
+                      onChanged: (String) {},
+                    ),
                   ),
                   SizedBox(width: 10),
                   OutlinedBtn(

@@ -1,14 +1,14 @@
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:flutter/material.dart';
 
-class BorderTxtField extends StatelessWidget {
+class TestBorderTxtField extends StatelessWidget {
   final String? hintText; // 힌트 텍스트
   final TextEditingController controller; // 컨트롤러 추가
   // final String value;
   final void Function(String) onChanged;
   final TextInputType? textInputType;
   final int? maxLength;
-  const BorderTxtField({
+  const TestBorderTxtField({
     Key? key,
     this.hintText,
     // required this.value,

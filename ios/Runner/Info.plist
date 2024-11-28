@@ -9,6 +9,13 @@
     <key>NSAllowsArbitraryLoads</key>
     <true/>
 	</dict>
+	<!-- 갤러리 접근 -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>사진을 선택하려면 접근 권한이 필요합니다.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>사진을 찍으려면 접근 권한이 필요합니다.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>선택한 사진을 저장하려면 접근 권한이 필요합니다.</string>
 	<!-- qrcode카메라 권한 -->
 	<key>NSCameraUsageDescription</key>
 	<string>QR 코드를 스캔하기 위해 카메라를 사용합니다.</string>

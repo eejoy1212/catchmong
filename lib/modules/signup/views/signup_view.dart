@@ -1,13 +1,15 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/modules/login/controllers/login_controller.dart';
 import 'package:catchmong/widget/button/AppbarBackBtn.dart';
 import 'package:catchmong/widget/button/outlined_btn.dart';
 import 'package:catchmong/widget/button/yellow-toggle-btn.dart';
 import 'package:catchmong/widget/txtfield/border-txtfield.dart';
+import 'package:catchmong/widget/txtfield/text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SignupView extends StatelessWidget {
-  const SignupView({super.key});
+  final LoginController controller = Get.put(LoginController());
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +29,7 @@ class SignupView extends StatelessWidget {
         actions: [
           InkWell(
             onTap: () {
-              Get.toNamed('/certi');
+              controller.postAdditionalInfo();
             },
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -65,21 +67,30 @@ class SignupView extends StatelessWidget {
                         child: Container(
                           width: 60, // 아바타 너비 60px
                           height: 60, // 아바타 높이 60px
-                          child: Image.asset(
-                            'assets/images/profile2.jpg',
-                            fit: BoxFit.cover, // 이미지가 원형 안에 잘 맞도록 설정
-                          ),
+                          child: Obx(() {
+                            final imageFile = controller.selectedImage.value;
+                            return imageFile != null
+                                ? Image.file(
+                                    imageFile,
+                                    fit: BoxFit.cover,
+                                  )
+                                : Image.asset(
+                                    'assets/images/profile2.jpg', // 로컬 기본 이미지
+                                    fit: BoxFit.cover,
+                                  );
+                          }),
                         ),
                       ),
                       Positioned(
-                          right: 0,
-                          bottom: 0,
-                          child: InkWell(
-                              onTap: () {
-                                print("이미지 교체 버튼");
-                              },
-                              child:
-                                  Image.asset('assets/images/photo-icon.png')))
+                        right: 0,
+                        bottom: 0,
+                        child: InkWell(
+                          onTap: () async {
+                            await controller.pickImage(); // 갤러리에서 이미지 선택
+                          },
+                          child: Image.asset('assets/images/photo-icon.png'),
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -111,7 +122,20 @@ class SignupView extends StatelessWidget {
                   SizedBox(
                     height: 4,
                   ),
-                  BorderTxtField(text: "이원희"),
+                  BorderTxtField(
+                    controller: controller.nicknameController,
+                    onChanged: (String value) {
+                      if (controller.nicknameController.text.length > 300) {
+                        Future.microtask(() {
+                          controller.nicknameController.value =
+                              TextEditingValue(
+                            text: value.substring(0, 300),
+                            selection: TextSelection.collapsed(offset: 300),
+                          );
+                        });
+                      }
+                    },
+                  ),
                 ],
               ),
             ),
@@ -144,7 +168,15 @@ class SignupView extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: BorderTxtField(text: "010-1234-1234"),
+                        child: TestBorderTxtField(
+                          // maxLength: 13,
+                          textInputType: TextInputType.phone,
+                          controller: controller.phoneController,
+                          onChanged: (String value) {
+                            String formattedValue = _formatPhoneNumber(value);
+                            controller.phoneController.text = formattedValue;
+                          },
+                        ),
                       ),
                       SizedBox(width: 10),
                       OutlinedBtn(
@@ -188,24 +220,36 @@ class SignupView extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: YellowToggleBtn(
-                          title: "남성",
-                          isSelected: true,
-                        ),
+                        child: Obx(() => YellowToggleBtn(
+                              title: "남성",
+                              isSelected: controller.gender.value == "남성",
+                              onTap: () {
+                                controller.gender.value = "남성";
+                                print("현재 선택된 성별: ${controller.gender.value}");
+                              },
+                            )),
                       ),
                       SizedBox(width: 16),
                       Expanded(
-                        child: YellowToggleBtn(
-                          title: "여성",
-                          isSelected: false,
-                        ),
+                        child: Obx(() => YellowToggleBtn(
+                              title: "여성",
+                              isSelected: controller.gender.value == "여성",
+                              onTap: () {
+                                controller.gender.value = "여성";
+                                print("현재 선택된 성별: ${controller.gender.value}");
+                              },
+                            )),
                       ),
                       SizedBox(width: 16),
                       Expanded(
-                        child: YellowToggleBtn(
-                          title: "비공개",
-                          isSelected: false,
-                        ),
+                        child: Obx(() => YellowToggleBtn(
+                              title: "비공개",
+                              isSelected: controller.gender.value == "비공개",
+                              onTap: () {
+                                controller.gender.value = "비공개";
+                                print("현재 선택된 성별: ${controller.gender.value}");
+                              },
+                            )),
                       ),
                     ],
                   ),
@@ -241,18 +285,28 @@ class SignupView extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: YellowToggleBtn(
+                          child: Obx(
+                        () => YellowToggleBtn(
                           title: "바로바로 받기",
-                          isSelected: true,
+                          isSelected:
+                              controller.paybackMethod.value == "바로바로 받기",
+                          onTap: () {
+                            controller.paybackMethod.value = "바로바로 받기";
+                          },
                         ),
-                      ),
+                      )),
                       SizedBox(width: 16),
                       Expanded(
-                        child: YellowToggleBtn(
+                          child: Obx(
+                        () => YellowToggleBtn(
                           title: "월말에 받기",
-                          isSelected: false,
+                          isSelected:
+                              controller.paybackMethod.value == "월말에 받기",
+                          onTap: () {
+                            controller.paybackMethod.value = "월말에 받기";
+                          },
                         ),
-                      ),
+                      )),
                     ],
                   ),
                 ],
@@ -284,7 +338,21 @@ class SignupView extends StatelessWidget {
                   SizedBox(
                     height: 4,
                   ),
-                  BorderTxtField(text: "이해피"),
+                  BorderTxtField(
+                    controller: controller.referrerNicknameController,
+                    onChanged: (String value) {
+                      if (controller.referrerNicknameController.text.length >
+                          300) {
+                        Future.microtask(() {
+                          controller.referrerNicknameController.value =
+                              TextEditingValue(
+                            text: value.substring(0, 300),
+                            selection: TextSelection.collapsed(offset: 300),
+                          );
+                        });
+                      }
+                    },
+                  ),
                 ],
               ),
             ),
@@ -292,5 +360,25 @@ class SignupView extends StatelessWidget {
         ),
       )),
     );
+  }
+
+  // 번호 입력값 포맷팅 함수
+  String _formatPhoneNumber(String input) {
+    // 숫자만 추출
+    String digits = input.replaceAll(RegExp(r'[^0-9]'), '');
+    print("digits>>> $input");
+    // 최대 길이 제한: "010-1234-5678" => 13자리
+    if (digits.length > 11) {
+      digits = digits.substring(0, 11);
+    }
+
+    // 형식 적용: 010-XXXX-XXXX
+    if (digits.length <= 3) {
+      return digits; // 3자리 이하
+    } else if (digits.length <= 7) {
+      return '${digits.substring(0, 3)}-${digits.substring(3)}'; // 3-4 형식
+    } else {
+      return '${digits.substring(0, 3)}-${digits.substring(3, 7)}-${digits.substring(7)}'; // 3-4-4 형식
+    }
   }
 }

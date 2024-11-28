@@ -111,7 +111,10 @@ class ProfileEditView extends StatelessWidget {
                   SizedBox(
                     height: 4,
                   ),
-                  BorderTxtField(text: "이원희"),
+                  BorderTxtField(
+                    controller: TextEditingController(),
+                    onChanged: (String) {},
+                  ),
                 ],
               ),
             ),
@@ -144,7 +147,10 @@ class ProfileEditView extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: BorderTxtField(text: "010-1234-1234"),
+                        child: BorderTxtField(
+                          controller: TextEditingController(),
+                          onChanged: (String) {},
+                        ),
                       ),
                       SizedBox(width: 10),
                       OutlinedBtn(
@@ -284,7 +290,10 @@ class ProfileEditView extends StatelessWidget {
                   SizedBox(
                     height: 4,
                   ),
-                  BorderTxtField(text: "이해피"),
+                  BorderTxtField(
+                    controller: TextEditingController(),
+                    onChanged: (String) {},
+                  ),
                 ],
               ),
             ),

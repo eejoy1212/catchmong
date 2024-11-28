@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 
 class KakaoBtn extends StatelessWidget {
-  final Function onTap;
+  final void Function() onTap;
 
   const KakaoBtn({super.key, required this.onTap});
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {
-        print('카카오 버튼 클릭');
-      },
+      onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

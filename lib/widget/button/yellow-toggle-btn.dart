@@ -6,12 +6,14 @@ class YellowToggleBtn extends StatelessWidget {
   final double height;
   final String title;
   final bool isSelected;
+  final void Function()? onTap;
   const YellowToggleBtn({
     super.key,
     this.width = 220,
     this.height = 48,
     required this.title,
     required this.isSelected,
+    this.onTap,
   });
 
   @override
@@ -37,7 +39,7 @@ class YellowToggleBtn extends StatelessWidget {
                   width: 1), // 보더 컬러를 노란색으로 설정
             ),
           ),
-          onPressed: () {},
+          onPressed: onTap,
           child: Text(
             title,
             style: TextStyle(
