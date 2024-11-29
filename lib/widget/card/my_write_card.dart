@@ -49,6 +49,7 @@ class MyWriteCard extends StatelessWidget {
                         ),
                       ],
                     ),
+
                     //별점
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -89,7 +90,37 @@ class MyWriteCard extends StatelessWidget {
                     ,
                   ],
                 ),
-
+                Spacer(),
+                InkWell(
+                  onTap: () {
+                    showConfirmDialog(context);
+                  },
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      vertical: 4,
+                      horizontal: 8,
+                    ),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(
+                          20,
+                        )),
+                        border: Border.all(
+                          color: CatchmongColors.gray,
+                        )),
+                    child: Center(
+                      child: Text(
+                        "수정",
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 4,
+                ),
                 InkWell(
                   onTap: () {
                     showConfirmDialog(context);
