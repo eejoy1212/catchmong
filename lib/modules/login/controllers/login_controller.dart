@@ -23,6 +23,7 @@ class LoginController extends GetxController {
   RxString gender = RxString("남성");
   RxString paybackMethod = RxString("바로바로 받기");
   RxString referrerNickname = RxString("");
+  RxString ageGroup = RxString("10대");
   final TextEditingController nicknameController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController paybackMethodController = TextEditingController();

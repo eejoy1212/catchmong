@@ -7,6 +7,7 @@ class YellowToggleBtn extends StatelessWidget {
   final String title;
   final bool isSelected;
   final void Function()? onTap;
+  final EdgeInsetsGeometry? margin;
   const YellowToggleBtn({
     super.key,
     this.width = 220,
@@ -14,6 +15,7 @@ class YellowToggleBtn extends StatelessWidget {
     required this.title,
     required this.isSelected,
     this.onTap,
+    this.margin,
   });
 
   @override
@@ -21,6 +23,7 @@ class YellowToggleBtn extends StatelessWidget {
     return Container(
       width: width,
       height: height,
+      margin: margin,
       decoration: BoxDecoration(
           color: isSelected ? CatchmongColors.yellow_line : Colors.white,
           borderRadius: BorderRadius.all(Radius.circular(8))),

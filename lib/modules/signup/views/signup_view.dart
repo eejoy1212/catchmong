@@ -256,6 +256,61 @@ class SignupView extends StatelessWidget {
                 ],
               ),
             ),
+            // 연령
+            Container(
+              margin: EdgeInsets.only(
+                top: 16,
+                left: 20,
+                right: 20,
+                bottom: 8,
+              ),
+              width: double.infinity,
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        "연령",
+                        style: TextStyle(
+                          color: CatchmongColors.gray_800,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 4,
+                  ),
+                  Container(
+                    width: double.infinity,
+                    child: Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.start,
+                      alignment: WrapAlignment.start,
+                      runSpacing: 4,
+                      spacing: 4,
+                      children: [
+                        ...["10대", "20대", "30대", "40대", "50대", "60대", "70대+"]
+                            .map((ageGroup) {
+                          return Obx(() => YellowToggleBtn(
+                                width: MediaQuery.of(context).size.width / 5,
+                                title: ageGroup,
+                                isSelected:
+                                    controller.ageGroup.value == ageGroup,
+                                onTap: () {
+                                  controller.ageGroup.value = ageGroup;
+                                  print(
+                                      "현재 선택된 연령대: ${controller.ageGroup.value}");
+                                },
+                              ));
+                        }).toList(),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
             // 페이백
             Container(
               margin: EdgeInsets.only(
