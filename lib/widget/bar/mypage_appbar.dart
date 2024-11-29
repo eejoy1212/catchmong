@@ -17,9 +17,6 @@ class MypageAppbar extends StatelessWidget implements PreferredSizeWidget {
               Get.toNamed('/my-setting');
             },
             child: Image.asset('assets/images/setting-icon.png')),
-        SizedBox(
-          width: 20,
-        )
       ],
       title: const Text(
         "마이페이지",

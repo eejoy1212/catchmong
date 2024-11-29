@@ -4,7 +4,6 @@ import 'package:catchmong/widget/button/AppbarBackBtn.dart';
 import 'package:catchmong/widget/button/outlined_btn.dart';
 import 'package:catchmong/widget/button/yellow-toggle-btn.dart';
 import 'package:catchmong/widget/txtfield/border-txtfield.dart';
-import 'package:catchmong/widget/txtfield/text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -13,13 +12,14 @@ class SignupView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("연령대>>>${controller.user.value?.toJson()}");
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         centerTitle: true,
         leading: const AppbarBackBtn(),
-        title: const Text(
-          "회원가입",
+        title: Text(
+          controller.user.value == null ? "회원가입" : "프로필 수정",
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -70,15 +70,35 @@ class SignupView extends StatelessWidget {
                           height: 60, // 아바타 높이 60px
                           child: Obx(() {
                             final imageFile = controller.selectedImage.value;
-                            return imageFile != null
-                                ? Image.file(
-                                    imageFile,
+                            return imageFile == null || imageFile.path == ""
+                                ? Image.asset(
+                                    'assets/images/default-profile.png', // 로컬 기본 이미지
                                     fit: BoxFit.cover,
                                   )
-                                : Image.asset(
-                                    'assets/images/profile2.jpg', // 로컬 기본 이미지
+                                : Image.file(
+                                    imageFile,
                                     fit: BoxFit.cover,
                                   );
+                            //회원가입 시
+                            // if (controller.user.value == null) {
+                            //   final imageFile = controller.selectedImage.value;
+                            //   return imageFile != null
+                            //       ? Image.file(
+                            //           imageFile,
+                            //           fit: BoxFit.cover,
+                            //         )
+                            //       : Image.asset(
+                            //           'assets/images/default-profile.png', // 로컬 기본 이미지
+                            //           fit: BoxFit.cover,
+                            //         );
+                            // }
+                            // //프로필 수정 시
+                            // else {
+                            //   return Image.asset(
+                            //     'assets/images/default-profile.png', // 로컬 기본 이미지
+                            //     fit: BoxFit.cover,
+                            //   );
+                            // }
                           }),
                         ),
                       ),

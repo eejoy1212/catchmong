@@ -6,6 +6,7 @@ import 'package:catchmong/model/catchmong_user.dart';
 import 'package:catchmong/services/user_service.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
@@ -40,6 +41,17 @@ class LoginController extends GetxController {
   Timer? countdownTimer;
   RxBool isVerified = false.obs; // 인증 성공 여부
   RxInt generatedCode = RxInt(0); // 서버에서 생성된 인증번호 저장
+  @override
+  void onInit() {
+    super.onInit();
+    loadUsers();
+
+    // 5초 후에 이미지 표시를 중단합니다.
+    Timer(Duration(seconds: 5), () {
+      showLatestLoginImage.value = false;
+    });
+  }
+
   Future<void> pickImage() async {
     final ImagePicker picker = ImagePicker();
 
@@ -56,16 +68,16 @@ class LoginController extends GetxController {
     }
   }
 
-  void setUser(User userData) {
-    print("user value 00>>>${userData}");
-    user.value = userData;
-    print("user value>>>${user.value}");
-  }
+  // void setUser(User userData) {
+  //   print("user value 00>>>${userData}");
+  //   user.value = userData;
+  //   print("user value>>>${user.value}");
+  // }
 
   // 로그아웃 시 사용자 정보 초기화
-  void clearUser() {
-    user.value = null;
-  }
+  // void clearUser() {
+  //   user.value = null;
+  // }
 
   String generateRandomEmail() {
     // 랜덤 ID 생성
@@ -105,8 +117,7 @@ class LoginController extends GetxController {
         auth.idToken,
         randomEmail,
         randomSub,
-        selectedImage.value?.path ??
-            'https://image-notepet.akamaized.net/resize/620x-/seimage/20210225/61068120b0bf7d35a6a53367f121dd8a.jpg',
+        selectedImage.value?.path,
         randomSub,
       ]; // ID 토큰 반환
     } catch (e) {
@@ -115,8 +126,7 @@ class LoginController extends GetxController {
         "temp",
         randomEmail,
         randomSub,
-        selectedImage.value?.path ??
-            'https://image-notepet.akamaized.net/resize/620x-/seimage/20210225/61068120b0bf7d35a6a53367f121dd8a.jpg',
+        selectedImage.value?.path,
         randomSub,
       ];
       return null;
@@ -131,38 +141,57 @@ class LoginController extends GetxController {
 
     var url = '$baseUrl/api/user/additional-info';
     final Map<String, dynamic> body = {
-      'name': user.value?.name,
-      'email': user.value?.email,
-      'sub': user.value?.sub,
+      'name': generateRandomSub(),
+      'email': generateRandomEmail(),
+      'sub': generateRandomSub(),
       'nickname': nicknameController.text,
       'phone': phoneController.text,
       'gender': gender.value,
       'paybackMethod': paybackMethod.value,
       'referrerNickname': referrerNicknameController.text,
       'ageGroup': ageGroup.value,
+      'picture': "",
     };
-    print('닉네임: ${nicknameController.text}');
 
     try {
       final response = await http.post(
         Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode(body),
       );
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
-        print('서버 응답: ${responseData['message']}');
-        print('저장된 데이터: ${responseData['data']}');
-        Get.toNamed('/success'); // 회원가입 완료 화면으로 이동
+        if (responseData['data'] == null) {
+          print("서버에서 'data' 필드가 비어 있습니다.");
+          return;
+        }
+
+        // user.value 업데이트
+        try {
+          final storage = GetStorage();
+
+// 데이터 저장
+          storage.write('user', responseData['data']);
+
+          user.value = User.fromJson(responseData['data']);
+          if (user.value != null) {
+            nicknameController.text = user.value!.nickname;
+            phoneController.text = user.value!.phone;
+            gender.value = user.value!.gender;
+            ageGroup.value = user.value!.ageGroup;
+            paybackMethod.value = user.value!.paybackMethod;
+            referrerNicknameController.text = user.value!.referrerId.toString();
+          }
+          print("user.value 업데이트 완료: ${responseData['data'].toJson()}");
+        } catch (e) {
+          print("User.fromJson에서 오류 발생: $e");
+        }
       } else {
-        final errorData = jsonDecode(response.body);
-        print("회원가입 실패: ${errorData['error'] ?? response.body}");
+        print("회원가입 실패: ${response.body}");
       }
     } catch (error) {
-      print('서버 요청 중 오류 발생: $error');
+      print("서버 요청 중 오류 발생: $error");
     }
   }
 
@@ -239,7 +268,7 @@ class LoginController extends GetxController {
           'idToken': auth[0],
           'email': auth[1],
           'sub': auth[2],
-          'picture': auth[3],
+          'picture': auth[3] ?? "",
           'name': auth[4],
         }),
       );
@@ -247,10 +276,7 @@ class LoginController extends GetxController {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseData = jsonDecode(response.body);
         print("구글 로그인 성공: ${responseData['user']}");
-        User user = User.fromJson(responseData['user']);
-        // selectedImage.value = File(user.picture );
 
-        setUser(user);
         Get.toNamed("/signup");
       } else {
         print("구글 로그인 실패: ${response.body}");
@@ -298,15 +324,5 @@ class LoginController extends GetxController {
   void onClose() {
     super.onClose();
     stopTimer(); // 컨트롤러 종료 시 타이머 중단
-  }
-
-  @override
-  void onInit() {
-    super.onInit();
-    loadUsers();
-    // 5초 후에 이미지 표시를 중단합니다.
-    Timer(Duration(seconds: 5), () {
-      showLatestLoginImage.value = false;
-    });
   }
 }

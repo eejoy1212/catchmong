@@ -1,14 +1,31 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/model/catchmong_user.dart';
+import 'package:catchmong/modules/login/controllers/login_controller.dart';
 import 'package:catchmong/widget/button/AppbarBackBtn.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 class MypageSetting extends StatelessWidget {
-  const MypageSetting({super.key});
-
+  final LoginController controller = LoginController();
   @override
   Widget build(BuildContext context) {
+    //임시로 유저 넣어놓음
+    // controller.user.value = User(
+    //   email: "lwh1212@example.com",
+    //   name: "이원희",
+    //   sub: "1234567890",
+    //   nickname: "이원희",
+    //   phone: '010-7596-6578',
+    //   picture: null,
+    //   id: 1,
+    //   createdAt: DateTime.parse("2024-11-29 14:40:37"),
+    //   updatedAt: DateTime.parse("2024-11-29 14:40:37"),
+    //   gender: '여성',
+    //   paybackMethod: '바로바로 받기',
+    //   ageGroup: '30대',
+    // );
+    print("now user>>> ${controller.user.value?.email}");
     return Scaffold(
       appBar: AppBar(
         leading: const AppbarBackBtn(),
@@ -27,7 +44,7 @@ class MypageSetting extends StatelessWidget {
           children: [
             InkWell(
               onTap: () {
-                Get.toNamed('/profile-edit');
+                Get.toNamed('/signup');
               },
               child: Container(
                 padding: EdgeInsets.symmetric(

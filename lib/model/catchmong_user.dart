@@ -1,37 +1,95 @@
 class User {
-  final String email;
-  final String name;
-  final String? nickname;
-  final String? picture;
-  final String sub;
+  final int id; // SQL: int
+  final String name; // SQL: varchar(255)
+  final String email; // SQL: varchar(255)
+  final String nickname; // SQL: varchar(255)
+  final String phone; // SQL: varchar(20)
+  final String gender; // SQL: enum('남성', '여성', '비공개')
+  final String paybackMethod; // SQL: varchar(255)
+  final int? regionId; // SQL: int (nullable, foreign key)
+  final int? referrerId; // SQL: int (nullable, foreign key)
+  final String sub; // SQL: varchar(255)
+  final String
+      ageGroup; // SQL: enum('10대', '20대', '30대', '40대', '50대', '60대', '70대+')
+  final String? picture; // SQL: varchar(255)
+  final DateTime? createdAt; // SQL: datetime
+  final DateTime? updatedAt; // SQL: datetime
 
   User({
-    required this.email,
+    required this.id,
     required this.name,
-    this.nickname,
-    this.picture,
+    required this.email,
+    required this.nickname,
+    required this.phone,
+    required this.gender,
+    required this.paybackMethod,
+    this.regionId,
+    this.referrerId,
     required this.sub,
+    required this.ageGroup,
+    this.picture,
+    this.createdAt,
+    this.updatedAt,
   });
 
   // JSON 데이터를 Dart 객체로 변환
-  factory User.fromJson(Map<String, dynamic> json) {
+  factory User.fromJson(Map<dynamic, dynamic> json) {
+    print("from json >>> $json");
     return User(
-      email: json['email'] as String,
-      name: json['name'] as String,
-      nickname: json['nickname'] as String?,
-      picture: json['picture'] as String?,
-      sub: json['sub'] as String,
+      id: json['id'] as int,
+      name: json['name'] ?? "알 수 없음", // null일 경우 기본값
+      email: json['email'] ?? "알 수 없음",
+      nickname: json['nickname'] ?? "알 수 없음",
+      phone: json['phone'] ?? "없음",
+      gender: json['gender'] ?? "비공개",
+      paybackMethod: json['paybackMethod'] ?? "미정",
+      regionId: json['regionId'] != null ? json['regionId'] as int : null,
+      referrerId: json['referrerId'] != null ? json['referrerId'] as int : null,
+      sub: json['sub'] ?? "",
+      ageGroup: json['ageGroup'] ?? "미정",
+      picture: json['picture'] ?? "/images/default-profile.png",
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'] as String)
+          : null,
     );
   }
 
   // Dart 객체를 JSON으로 변환
-  Map<String, dynamic> toJson() {
-    return {
-      'email': email,
+  Map<dynamic, dynamic> toJson() {
+    print("to json ${{
+      'id': id,
       'name': name,
+      'email': email,
       'nickname': nickname,
-      'picture': picture,
+      'phone': phone,
+      'gender': gender,
+      'paybackMethod': paybackMethod,
+      'regionId': regionId,
+      'referrerId': referrerId,
       'sub': sub,
+      'ageGroup': ageGroup,
+      'picture': picture,
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
+    }}");
+    return {
+      'id': id,
+      'name': name,
+      'email': email,
+      'nickname': nickname,
+      'phone': phone,
+      'gender': gender,
+      'paybackMethod': paybackMethod,
+      'regionId': regionId,
+      'referrerId': referrerId,
+      'sub': sub,
+      'ageGroup': ageGroup,
+      'picture': picture,
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 }

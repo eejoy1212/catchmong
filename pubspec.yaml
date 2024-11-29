@@ -46,6 +46,7 @@ dependencies:
   flutter_dotenv:
   google_sign_in: ^6.2.2
   image_picker:
+  get_storage:
 
 dev_dependencies:
   flutter_test:

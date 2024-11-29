@@ -1,6 +1,5 @@
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/modules/mypage/controllers/mypage_controller.dart';
-import 'package:catchmong/widget/button/TxtBtn.dart';
 import 'package:catchmong/widget/dialog/UseDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -206,6 +205,38 @@ class MyPageView extends StatelessWidget {
               ),
             ),
           )
+          //타일 1-내 예약
+          ,
+          InkWell(
+            onTap: () {
+              Get.toNamed('/scrap');
+            },
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                vertical: 21,
+                horizontal: 20,
+              ),
+              decoration: BoxDecoration(
+                  border: Border(
+                      bottom: BorderSide(
+                color: CatchmongColors.gray50,
+              ))),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "내 예약",
+                    style: TextStyle(
+                      color: CatchmongColors.sub_gray,
+                      fontSize: 16,
+                    ),
+                  ),
+                  Image.asset('assets/images/right-arrow.png')
+                ],
+              ),
+            ),
+          )
+
           //타일 2-내가 쓴 글
           ,
           InkWell(
@@ -258,6 +289,68 @@ class MyPageView extends StatelessWidget {
                 children: [
                   Text(
                     "구매 내역",
+                    style: TextStyle(
+                      color: CatchmongColors.sub_gray,
+                      fontSize: 16,
+                    ),
+                  ),
+                  Image.asset('assets/images/right-arrow.png')
+                ],
+              ),
+            ),
+          )
+//타일 3-내 가게
+          ,
+          InkWell(
+            onTap: () {
+              Get.toNamed('/my-purchase');
+            },
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                vertical: 21,
+                horizontal: 20,
+              ),
+              decoration: BoxDecoration(
+                  border: Border(
+                      bottom: BorderSide(
+                color: CatchmongColors.gray50,
+              ))),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "내 가게",
+                    style: TextStyle(
+                      color: CatchmongColors.sub_gray,
+                      fontSize: 16,
+                    ),
+                  ),
+                  Image.asset('assets/images/right-arrow.png')
+                ],
+              ),
+            ),
+          )
+//타일 3-고객센터
+          ,
+          InkWell(
+            onTap: () {
+              Get.toNamed('/my-purchase');
+            },
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                vertical: 21,
+                horizontal: 20,
+              ),
+              decoration: BoxDecoration(
+                  border: Border(
+                      bottom: BorderSide(
+                color: CatchmongColors.gray50,
+              ))),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "고객센터",
                     style: TextStyle(
                       color: CatchmongColors.sub_gray,
                       fontSize: 16,

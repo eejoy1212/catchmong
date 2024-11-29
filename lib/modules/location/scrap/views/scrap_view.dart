@@ -16,7 +16,6 @@ class ScrapView extends StatelessWidget {
           backgroundColor: CatchmongColors.gray50,
           appBar: AppBar(
             backgroundColor: Colors.white,
-            elevation: 1,
             leading: const AppbarBackBtn(),
             centerTitle: true,
             title: const Text(

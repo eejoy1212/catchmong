@@ -110,7 +110,7 @@ class AppPages {
     ),
     GetPage(
       name: '/my-setting',
-      page: () => const MypageSetting(),
+      page: () => MypageSetting(),
       binding: MypageBinding(),
     ),
     GetPage(

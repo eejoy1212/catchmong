@@ -3,6 +3,7 @@ import 'package:catchmong/widget/button/AppbarBackBtn.dart';
 import 'package:catchmong/widget/button/alert-btn.dart';
 import 'package:catchmong/widget/button/location-copy-btn.dart';
 import 'package:catchmong/widget/button/more-btn.dart';
+import 'package:catchmong/widget/button/outlined_btn.dart';
 import 'package:catchmong/widget/button/phone-call-btn.dart';
 import 'package:catchmong/widget/card/partner-review-card.dart';
 import 'package:catchmong/widget/chip/partner-content-chip.dart';
@@ -360,13 +361,8 @@ class PartnerShowView extends StatelessWidget {
               padding: EdgeInsets.only(
                 left: 20,
                 right: 20,
-                bottom: 20,
+                bottom: 12,
               ),
-              decoration: BoxDecoration(
-                  border: Border(
-                      bottom: BorderSide(
-                color: CatchmongColors.gray50,
-              ))),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -455,47 +451,55 @@ class PartnerShowView extends StatelessWidget {
                       SizedBox(
                         width: 8,
                       ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "가게 소개 문구 작성해주세요.",
-                            style: TextStyle(
-                              color: CatchmongColors.sub_gray,
-                              fontSize: 14,
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "가게 소개 문구 작성해주세요.",
+                              style: TextStyle(
+                                color: CatchmongColors.sub_gray,
+                                fontSize: 14,
+                              ),
                             ),
-                          ),
-                          SizedBox(
-                            height: 8,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              PartnerContentChip(
-                                title: "아기의자",
-                                image:
-                                    Image.asset('assets/images/baby-icon.png'),
+                            SizedBox(
+                              height: 8,
+                            ),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal, // 가로 스크롤 활성화
+                              child: Row(
+                                mainAxisSize:
+                                    MainAxisSize.min, // Row의 크기를 자식 크기에 맞게 설정
+                                children: [
+                                  PartnerContentChip(
+                                    title: "아기의자",
+                                    image: Image.asset(
+                                        'assets/images/baby-icon.png'),
+                                  ),
+                                  SizedBox(width: 8), // 간격 추가
+                                  PartnerContentChip(
+                                    title: "쿠폰",
+                                    image: Image.asset(
+                                        'assets/images/coupon-icon.png'),
+                                  ),
+                                  SizedBox(width: 8), // 간격 추가
+                                  PartnerContentChip(
+                                    title: "주차",
+                                    image: Image.asset(
+                                        'assets/images/parking-icon.png'),
+                                  ),
+                                  SizedBox(width: 8), // 간격 추가
+                                  PartnerContentChip(
+                                    title: "애견동반",
+                                    image: Image.asset(
+                                        'assets/images/pet-icon.png'),
+                                  ),
+                                ],
                               ),
-                              PartnerContentChip(
-                                title: "쿠폰",
-                                image: Image.asset(
-                                    'assets/images/coupon-icon.png'),
-                              ),
-                              PartnerContentChip(
-                                title: "주차",
-                                image: Image.asset(
-                                    'assets/images/parking-icon.png'),
-                              ),
-                              PartnerContentChip(
-                                title: "애견동반",
-                                image:
-                                    Image.asset('assets/images/pet-icon.png'),
-                              )
-                            ],
-                          )
-                        ],
+                            )
+                          ],
+                        ),
                       ),
                     ],
                   )
@@ -504,6 +508,18 @@ class PartnerShowView extends StatelessWidget {
                 ],
               ),
             ),
+            Container(
+                width: double.infinity,
+                margin: EdgeInsets.only(
+                  left: 20,
+                  right: 20,
+                  bottom: 20,
+                ),
+                child: OutlinedBtn(title: "예약하기", onPress: () {})),
+            Divider(
+              color: CatchmongColors.gray50,
+            ),
+
             Column(
               children: List.generate(10, (index) => PartnerReviewCard()),
             ),

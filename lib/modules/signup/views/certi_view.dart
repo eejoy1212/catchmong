@@ -16,8 +16,8 @@ class CertiView extends StatelessWidget {
       appBar: AppBar(
         centerTitle: true,
         leading: const AppbarBackBtn(),
-        title: const Text(
-          "회원가입",
+        title: Text(
+          controller.user.value == null ? "회원가입" : "휴대폰 번호 변경",
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
