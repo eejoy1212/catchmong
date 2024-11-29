@@ -29,6 +29,7 @@ class SignupView extends StatelessWidget {
         actions: [
           InkWell(
             onTap: () {
+              Get.toNamed('/certi');
               controller.postAdditionalInfo();
             },
             child: Column(
@@ -122,20 +123,25 @@ class SignupView extends StatelessWidget {
                   SizedBox(
                     height: 4,
                   ),
-                  BorderTxtField(
-                    controller: controller.nicknameController,
-                    onChanged: (String value) {
-                      if (controller.nicknameController.text.length > 300) {
-                        Future.microtask(() {
-                          controller.nicknameController.value =
-                              TextEditingValue(
-                            text: value.substring(0, 300),
-                            selection: TextSelection.collapsed(offset: 300),
-                          );
-                        });
-                      }
-                    },
-                  ),
+                  Obx(
+                    () => BorderTxtField(
+                      controller: controller.nicknameController,
+                      errorText: controller.nicknameErrTxt.value == ""
+                          ? null
+                          : controller.nicknameErrTxt.value,
+                      onChanged: (String value) {
+                        if (controller.nicknameController.text.length > 300) {
+                          Future.microtask(() {
+                            controller.nicknameController.value =
+                                TextEditingValue(
+                              text: value.substring(0, 300),
+                              selection: TextSelection.collapsed(offset: 300),
+                            );
+                          });
+                        }
+                      },
+                    ),
+                  )
                 ],
               ),
             ),
@@ -166,10 +172,16 @@ class SignupView extends StatelessWidget {
                     height: 4,
                   ),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: TestBorderTxtField(
+                          child: Obx(
+                        () => BorderTxtField(
                           // maxLength: 13,
+                          errorText: controller.phoneErrTxt.value == ""
+                              ? null
+                              : controller.phoneErrTxt.value,
                           textInputType: TextInputType.phone,
                           controller: controller.phoneController,
                           onChanged: (String value) {
@@ -177,7 +189,7 @@ class SignupView extends StatelessWidget {
                             controller.phoneController.text = formattedValue;
                           },
                         ),
-                      ),
+                      )),
                       SizedBox(width: 10),
                       OutlinedBtn(
                         title: "변경하기",
@@ -393,21 +405,26 @@ class SignupView extends StatelessWidget {
                   SizedBox(
                     height: 4,
                   ),
-                  BorderTxtField(
-                    controller: controller.referrerNicknameController,
-                    onChanged: (String value) {
-                      if (controller.referrerNicknameController.text.length >
-                          300) {
-                        Future.microtask(() {
-                          controller.referrerNicknameController.value =
-                              TextEditingValue(
-                            text: value.substring(0, 300),
-                            selection: TextSelection.collapsed(offset: 300),
-                          );
-                        });
-                      }
-                    },
-                  ),
+                  Obx(
+                    () => BorderTxtField(
+                      errorText: controller.referrerNicknameErrTxt.value == ""
+                          ? null
+                          : controller.referrerNicknameErrTxt.value,
+                      controller: controller.referrerNicknameController,
+                      onChanged: (String value) {
+                        if (controller.referrerNicknameController.text.length >
+                            300) {
+                          Future.microtask(() {
+                            controller.referrerNicknameController.value =
+                                TextEditingValue(
+                              text: value.substring(0, 300),
+                              selection: TextSelection.collapsed(offset: 300),
+                            );
+                          });
+                        }
+                      },
+                    ),
+                  )
                 ],
               ),
             ),

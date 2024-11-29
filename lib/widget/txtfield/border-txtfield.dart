@@ -4,60 +4,93 @@ import 'package:flutter/material.dart';
 class BorderTxtField extends StatelessWidget {
   final String? hintText; // 힌트 텍스트
   final TextEditingController controller; // 컨트롤러 추가
-  // final String value;
-  final void Function(String) onChanged;
+  final void Function(String) onChanged; // 텍스트 변경 콜백
   final TextInputType? textInputType;
   final int? maxLength;
+  final String? errorText; // 에러 메시지
+  final bool? readOnly;
+  final Widget? suffix;
+  final Widget? helper;
   const BorderTxtField({
     Key? key,
     this.hintText,
-    // required this.value,
     required this.controller,
     required this.onChanged,
     this.textInputType,
-    this.maxLength, // 생성자에서 컨트롤러 받기
+    this.maxLength,
+    this.errorText,
+    this.readOnly = false,
+    this.suffix,
+    this.helper, // 에러 메시지 추가
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // TextEditingController를 동적으로 생성 및 업데이트
-
     return TextField(
+      readOnly: readOnly ?? false,
       maxLength: maxLength,
-
       keyboardType: textInputType,
-      controller: controller, // 텍스트 컨트롤러 연결
+      controller: controller,
       onChanged: onChanged,
       decoration: InputDecoration(
         hintText: hintText,
-        contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+        errorText: errorText, // 에러 메시지 설정
+        errorStyle: TextStyle(
+          color: CatchmongColors.red, // 에러 메시지 색상
+          fontSize: 12, // 에러 메시지 크기 조정
+          height: 1.0, // 에러 메시지 줄 간격 조정 (패딩 제거 효과)
+        ),
+        helper: helper,
+        contentPadding: EdgeInsets.symmetric(
+            vertical: 14, horizontal: 8), // 텍스트 필드 안의 텍스트 패딩
         filled: true,
         fillColor: Colors.white,
+        suffix: suffix,
+        suffixIcon: errorText != null
+            ? Icon(
+                Icons.error_outline, // 에러 아이콘
+                color: CatchmongColors.red, // 에러 아이콘 색상
+              )
+            : null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(
-            color: CatchmongColors.gray100,
+            color: Colors.grey.shade300,
             width: 1.0,
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(
-            color: CatchmongColors.gray100,
+            color: Colors.grey.shade300,
             width: 1.0,
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(
-            color: CatchmongColors.yellow_line,
+            color: CatchmongColors.yellow_line, // 포커스 시 보더 색상
+            width: 1.0,
+          ),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(
+            color: CatchmongColors.red, // 에러 보더 색상
+            width: 1.0,
+          ),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(
+            color: CatchmongColors.red, // 에러 상태에서 포커스 시 보더 색상
             width: 1.0,
           ),
         ),
       ),
       style: TextStyle(
         fontSize: 14,
-        color: CatchmongColors.gray_800,
+        color: Colors.black,
         fontWeight: FontWeight.w400,
       ),
     );

@@ -25,35 +25,35 @@ class UserService {
     }
   }
 
-  Future<void> loginWithGoogle(String? idToken) async {
-    if (idToken == null) {
-      print("ID 토큰이 없습니다.");
-      return;
-    }
+  // Future<void> loginWithGoogle(String? idToken) async {
+  //   if (idToken == null) {
+  //     print("ID 토큰이 없습니다.");
+  //     return;
+  //   }
 
-    try {
-      var url = '$baseUrl/auth/google';
-      final response = await http.post(
-        Uri.parse(url), // 서버 URL
+  //   try {
+  //     var url = '$baseUrl/auth/google';
+  //     final response = await http.post(
+  //       Uri.parse(url), // 서버 URL
 
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'idToken': idToken,
-        }),
-      );
-      print("url>>>${url}");
-      print("구글 로그인 ??>>>${response.statusCode} // ${idToken}");
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final responseData = jsonDecode(response.body);
-        print("구글 로그인 성공: ${responseData['user']}");
-        // 여기서 추가 정보 입력 화면으로 이동
-      } else {
-        print("구글 로그인 실패: ${response.body}");
-      }
-    } catch (e) {
-      print("서버 요청 중 오류 발생: $e");
-    }
-  }
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: jsonEncode({
+  //         'idToken': idToken,
+  //       }),
+  //     );
+  //     print("url>>>${url}");
+  //     print("구글 로그인 ??>>>${response.statusCode} // ${idToken}");
+  //     if (response.statusCode == 200 || response.statusCode == 201) {
+  //       final responseData = jsonDecode(response.body);
+  //       print("구글 로그인 성공: ${responseData['user']}");
+  //       // 여기서 추가 정보 입력 화면으로 이동
+  //     } else {
+  //       print("구글 로그인 실패: ${response.body}");
+  //     }
+  //   } catch (e) {
+  //     print("서버 요청 중 오류 발생: $e");
+  //   }
+  // }
 }
