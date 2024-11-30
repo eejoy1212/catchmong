@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/modules/login/controllers/login_controller.dart';
 import 'package:catchmong/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
@@ -14,6 +15,7 @@ Future<void> main() async {
   //   WebView.platform = AndroidWebView();
   // }
   await NaverMapSdk.instance.initialize(clientId: "9ue8t44jzd");
+  Get.put(LoginController());
   runApp(MyApp());
 }
 

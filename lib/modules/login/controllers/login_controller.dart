@@ -45,6 +45,7 @@ class LoginController extends GetxController {
   void onInit() {
     super.onInit();
     loadUsers();
+    print("now user>>> ${user.value?.email}");
 
     // 5초 후에 이미지 표시를 중단합니다.
     Timer(Duration(seconds: 5), () {
@@ -183,7 +184,7 @@ class LoginController extends GetxController {
             paybackMethod.value = user.value!.paybackMethod;
             referrerNicknameController.text = user.value!.referrerId.toString();
           }
-          print("user.value 업데이트 완료: ${responseData['data'].toJson()}");
+          print("user.value 업데이트 완료: ${user.value?.toJson()}");
         } catch (e) {
           print("User.fromJson에서 오류 발생: $e");
         }
@@ -252,32 +253,43 @@ class LoginController extends GetxController {
 
   Future<void> loginWithGoogle(List? auth) async {
     print("auth $auth");
-    if (auth == null) {
-      print("ID 토큰이 없습니다.");
+    if (auth == null || auth.length < 5) {
+      print("Google 인증 데이터가 올바르지 않습니다.");
       return;
     }
 
     try {
-      var url = '$baseUrl/auth/google';
+      var url = '$baseUrl/auth/google'; // 서버의 구글 로그인 엔드포인트
       final response = await http.post(
-        Uri.parse(url), // 서버 URL
+        Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'idToken': auth[0],
-          'email': auth[1],
-          'sub': auth[2],
-          'picture': auth[3] ?? "",
-          'name': auth[4],
+          'idToken': auth[0], // Google ID Token
+          'email': auth[1], // Google Email
+          'sub': '2jxgq02ry2', //auth[2], // Google User ID (sub)
+          'picture': auth[3] ?? "", // Profile Picture
+          'name': auth[4], // Name
         }),
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
+      if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
-        print("구글 로그인 성공: ${responseData['user']}");
 
-        Get.toNamed("/signup");
+        if (responseData['requiresAdditionalInfo'] == true) {
+          // 신규 회원: 추가 정보 입력 페이지로 이동
+          final googleUser = responseData['googleUser'];
+          print("추가 정보 필요: $googleUser");
+          Get.toNamed("/signup", arguments: googleUser); // 추가 정보 페이지로 이동
+        } else {
+          // 기존 회원: 로그인 성공 처리
+          final originUser = responseData['user'];
+
+          user.value = User.fromJson(originUser);
+          print("구글 로그인 성공: ${user.value}");
+          Get.toNamed("/main"); // 메인 페이지로 이동
+        }
       } else {
         print("구글 로그인 실패: ${response.body}");
       }
@@ -286,7 +298,7 @@ class LoginController extends GetxController {
     }
   }
 
-  // 사용자 목록 가져오기
+// 사용자 목록 가져오기
   Future<void> loadUsers() async {
     try {
       print("load user");

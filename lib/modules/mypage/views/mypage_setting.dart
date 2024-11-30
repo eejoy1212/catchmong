@@ -10,22 +10,6 @@ class MypageSetting extends StatelessWidget {
   final LoginController controller = LoginController();
   @override
   Widget build(BuildContext context) {
-    //임시로 유저 넣어놓음
-    // controller.user.value = User(
-    //   email: "lwh1212@example.com",
-    //   name: "이원희",
-    //   sub: "1234567890",
-    //   nickname: "이원희",
-    //   phone: '010-7596-6578',
-    //   picture: null,
-    //   id: 1,
-    //   createdAt: DateTime.parse("2024-11-29 14:40:37"),
-    //   updatedAt: DateTime.parse("2024-11-29 14:40:37"),
-    //   gender: '여성',
-    //   paybackMethod: '바로바로 받기',
-    //   ageGroup: '30대',
-    // );
-    print("now user>>> ${controller.user.value?.email}");
     return Scaffold(
       appBar: AppBar(
         leading: const AppbarBackBtn(),

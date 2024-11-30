@@ -33,7 +33,7 @@ class User {
   });
 
   // JSON 데이터를 Dart 객체로 변환
-  factory User.fromJson(Map<dynamic, dynamic> json) {
+  factory User.fromJson(Map<String, dynamic> json) {
     print("from json >>> $json");
     return User(
       id: json['id'] as int,
@@ -42,11 +42,11 @@ class User {
       nickname: json['nickname'] ?? "알 수 없음",
       phone: json['phone'] ?? "없음",
       gender: json['gender'] ?? "비공개",
-      paybackMethod: json['paybackMethod'] ?? "미정",
+      paybackMethod: json['paybackMethod'] ?? "바로바로 받기",
       regionId: json['regionId'] != null ? json['regionId'] as int : null,
       referrerId: json['referrerId'] != null ? json['referrerId'] as int : null,
       sub: json['sub'] ?? "",
-      ageGroup: json['ageGroup'] ?? "미정",
+      ageGroup: json['ageGroup'] ?? "10대",
       picture: json['picture'] ?? "/images/default-profile.png",
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
@@ -58,7 +58,7 @@ class User {
   }
 
   // Dart 객체를 JSON으로 변환
-  Map<dynamic, dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     print("to json ${{
       'id': id,
       'name': name,

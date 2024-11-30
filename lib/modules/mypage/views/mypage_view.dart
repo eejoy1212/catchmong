@@ -1,4 +1,6 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/model/catchmong_user.dart';
+import 'package:catchmong/modules/login/controllers/login_controller.dart';
 import 'package:catchmong/modules/mypage/controllers/mypage_controller.dart';
 import 'package:catchmong/widget/dialog/UseDialog.dart';
 import 'package:flutter/material.dart';
@@ -6,10 +8,14 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 class MyPageView extends StatelessWidget {
-  MyPageView({super.key});
-  final MypageController controller = MypageController();
+  final LoginController loginController = Get.find<LoginController>();
+  final MypageController myPageController = MypageController();
+
   @override
   Widget build(BuildContext context) {
+    bool isLogin = loginController.user.value != null;
+    print("in mypage user>>>${loginController.user} // $isLogin ");
+
     return SafeArea(
         child: SingleChildScrollView(
       child: Column(
@@ -45,16 +51,18 @@ class MyPageView extends StatelessWidget {
                       width: 8,
                     ),
                     Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "이원희님",
+                          "${loginController.user.value?.nickname}님",
                           style: TextStyle(
                               color: CatchmongColors.black,
                               fontSize: 14,
                               fontWeight: FontWeight.w500),
                         ),
                         Text(
-                          "계정아이디",
+                          loginController.user.value?.email ?? "",
                           style: TextStyle(
                               color: CatchmongColors.gray_300,
                               fontSize: 12,
@@ -110,10 +118,10 @@ class MyPageView extends StatelessWidget {
                     Expanded(
                       child: InkWell(
                           onTap: () {
-                            if (controller.myPageToggle.value == 0) {
-                              controller.myPageToggle.value = 1;
+                            if (myPageController.myPageToggle.value == 0) {
+                              myPageController.myPageToggle.value = 1;
                             } else {
-                              controller.myPageToggle.value = 0;
+                              myPageController.myPageToggle.value = 0;
                             }
                           },
                           child: Obx(
@@ -127,7 +135,7 @@ class MyPageView extends StatelessWidget {
                                   )),
                               child: Center(
                                 child: Text(
-                                  controller.myPageToggle.value == 0
+                                  myPageController.myPageToggle.value == 0
                                       ? "내 추천인"
                                       : "추천인계정아이디",
                                   style: TextStyle(
