@@ -2,9 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/model/catchmong_user.dart';
 import 'package:catchmong/model/referrer.dart';
 import 'package:catchmong/services/user_service.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -137,38 +139,58 @@ class LoginController extends GetxController {
     }
   }
 
-  Future<void> postAdditionalInfo() async {
+  Future<bool> postAdditionalInfo() async {
     if (!isVerified.value) {
       print("회원가입 실패: 인증이 완료되지 않았습니다.");
-      return;
+      return false;
     }
 
     var url = '$baseUrl/api/user/additional-info';
-    final Map<String, dynamic> body = {
-      'name': generateRandomSub(),
-      'email': generateRandomEmail(),
-      'sub': generateRandomSub(),
-      'nickname': nicknameController.text,
-      'phone': phoneController.text,
-      'gender': gender.value,
-      'paybackMethod': paybackMethod.value,
-      'referrerNickname': referrerNicknameController.text,
-      'ageGroup': ageGroup.value,
-      'picture': "",
-    };
 
     try {
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(body),
-      );
+      // MultipartRequest 생성
+      var request = http.MultipartRequest('POST', Uri.parse(url));
+
+      // JSON 데이터 추가
+      request.fields['name'] = generateRandomSub();
+      request.fields['email'] = generateRandomEmail();
+      request.fields['sub'] = generateRandomSub();
+      request.fields['nickname'] = nicknameController.text;
+      request.fields['phone'] = phoneController.text;
+      request.fields['gender'] = gender.value;
+      request.fields['paybackMethod'] = paybackMethod.value;
+      request.fields['referrerNickname'] = referrerNicknameController.text;
+      request.fields['ageGroup'] = ageGroup.value;
+
+      // 이미지 파일 추가 (선택적)
+      if (selectedImage.value != null) {
+        try {
+          var stream = http.ByteStream(selectedImage.value!.openRead());
+          var length = await selectedImage.value!.length();
+          var multipartFile = http.MultipartFile(
+            'picture', // 백엔드에서 기대하는 필드 이름
+            stream,
+            length,
+            filename: selectedImage.value!.path.split('/').last,
+          );
+          request.files.add(multipartFile);
+        } catch (e) {
+          print("이미지 파일 처리 중 오류 발생: $e");
+          return false;
+        }
+      }
+
+      // 요청 보내기
+      var streamedResponse = await request.send();
+
+      // 응답 처리
+      var response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         if (responseData['data'] == null) {
           print("서버에서 'data' 필드가 비어 있습니다.");
-          return;
+          return false;
         }
 
         // user.value 업데이트
@@ -185,14 +207,18 @@ class LoginController extends GetxController {
             await getReferredInfos(user.value!.id);
           }
           print("user.value 업데이트 완료: ${user.value?.toJson()}");
+          return true;
         } catch (e) {
           print("User.fromJson에서 오류 발생: $e");
+          return false;
         }
       } else {
         print("회원가입 실패: ${response.body}");
+        return false;
       }
     } catch (error) {
       print("서버 요청 중 오류 발생: $error");
+      return false;
     }
   }
 
@@ -222,6 +248,121 @@ class LoginController extends GetxController {
       nicknameErrTxt.value = "닉네임 확인 중 오류 발생";
       print("닉네임 확인 중 오류 발생: $e // $nickname");
     }
+  }
+
+  void showConfirmDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          titlePadding: EdgeInsets.all(0),
+          contentPadding: EdgeInsets.all(0),
+          content: SizedBox(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                    padding: EdgeInsets.symmetric(
+                      vertical: 20,
+                      horizontal: 16,
+                    ),
+                    child: Text(
+                      "인증되었습니다.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    )),
+                InkWell(
+                  onTap: () {
+                    Get.toNamed("/main");
+                  },
+                  child: Container(
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                        border: Border(
+                            top: BorderSide(
+                      color: CatchmongColors.gray_300,
+                    ))),
+                    height: 60,
+                    child: Text(
+                      "확인",
+                      style: TextStyle(
+                        color: CatchmongColors.blue1,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void showNoConfirmDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          titlePadding: EdgeInsets.all(0),
+          contentPadding: EdgeInsets.all(0),
+          content: SizedBox(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                    padding: EdgeInsets.symmetric(
+                      vertical: 20,
+                      horizontal: 16,
+                    ),
+                    child: Text(
+                      "인증번호가 일치하지 않습니다.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    )),
+                InkWell(
+                  onTap: () {
+                    // 확인 버튼의 동작 추가
+                    Get.back();
+                  },
+                  child: Container(
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                        border: Border(
+                            top: BorderSide(
+                      color: CatchmongColors.gray_300,
+                    ))),
+                    height: 60,
+                    child: Text(
+                      "확인",
+                      style: TextStyle(
+                        color: CatchmongColors.blue1,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Future<void> checkReferrer(String referrerNickname) async {
@@ -352,7 +493,7 @@ class LoginController extends GetxController {
         body: jsonEncode({
           'idToken': auth[0], // Google ID Token
           'email': auth[1], // Google Email
-          'sub': "o301s4dgmq", //auth[2], // Google User ID (sub)
+          'sub': "o301s4dgmq", //auth[2],  // Google User ID (sub)
           'picture': auth[3] ?? "", // Profile Picture
           'name': auth[4], // Name
         }),

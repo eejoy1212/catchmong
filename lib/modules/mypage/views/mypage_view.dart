@@ -15,7 +15,7 @@ class MyPageView extends StatelessWidget {
   Widget build(BuildContext context) {
     bool isLogin = loginController.user.value != null;
     print("in mypage user>>>${loginController.user} // $isLogin ");
-
+    final String baseUrl = 'http://192.168.200.102:3000';
     return SafeArea(
         child: SingleChildScrollView(
       child: Column(
@@ -41,10 +41,15 @@ class MyPageView extends StatelessWidget {
                       child: Container(
                         width: 36, // 아바타 너비 36px
                         height: 36, // 아바타 높이 36px
-                        child: Image.asset(
-                          'assets/images/profile2.jpg',
-                          fit: BoxFit.cover, // 이미지가 원형 안에 잘 맞도록 설정
-                        ),
+                        child: loginController.user.value?.picture == null
+                            ? Image.asset(
+                                'assets/images/default-profile.png',
+                                fit: BoxFit.cover,
+                              )
+                            : Image.network(
+                                '${loginController.baseUrl}${loginController.user.value?.picture}',
+                                fit: BoxFit.cover, // 이미지가 원형 안에 잘 맞도록 설정
+                              ),
                       ),
                     ),
                     SizedBox(

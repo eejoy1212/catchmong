@@ -47,7 +47,7 @@ class User {
       referrerId: json['referrerId'] != null ? json['referrerId'] as int : null,
       sub: json['sub'] ?? "",
       ageGroup: json['ageGroup'] ?? "10대",
-      picture: json['picture'] ?? "/images/default-profile.png",
+      picture: json['picture'],
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
           : null,
