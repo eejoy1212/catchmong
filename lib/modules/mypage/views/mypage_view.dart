@@ -137,7 +137,9 @@ class MyPageView extends StatelessWidget {
                                 child: Text(
                                   myPageController.myPageToggle.value == 0
                                       ? "내 추천인"
-                                      : "추천인계정아이디",
+                                      : loginController
+                                              .referrer.value?.nickname ??
+                                          "없음",
                                   style: TextStyle(
                                       color: CatchmongColors.black,
                                       fontWeight: FontWeight.w400,
@@ -469,6 +471,7 @@ class MyPageView extends StatelessWidget {
 
 //추천인 창
 void showRecommenderDialog(BuildContext context) {
+  final LoginController loginController = Get.find<LoginController>();
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -498,7 +501,7 @@ void showRecommenderDialog(BuildContext context) {
         content: SizedBox(
           height: 350,
           child: ListView.builder(
-            itemCount: 10, // 원하는 데이터 개수로 설정
+            itemCount: loginController.referreds.length, // 원하는 데이터 개수로 설정
             itemBuilder: (BuildContext context, int index) {
               return Container(
                 padding: EdgeInsets.symmetric(
@@ -529,16 +532,18 @@ void showRecommenderDialog(BuildContext context) {
                       width: 8,
                     ),
                     Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "이원희님",
+                          "${loginController.referreds[index].nickname}님",
                           style: TextStyle(
                               color: CatchmongColors.black,
                               fontSize: 14,
                               fontWeight: FontWeight.w500),
                         ),
                         Text(
-                          "계정아이디",
+                          "${loginController.referreds[index].email}",
                           style: TextStyle(
                               color: CatchmongColors.gray_300,
                               fontSize: 12,

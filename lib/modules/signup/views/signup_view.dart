@@ -28,10 +28,7 @@ class SignupView extends StatelessWidget {
         ),
         actions: [
           InkWell(
-            onTap: () {
-              Get.toNamed('/certi');
-              controller.postAdditionalInfo();
-            },
+            onTap: controller.checkAndGoVerti,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

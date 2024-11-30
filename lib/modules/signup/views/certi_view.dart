@@ -110,7 +110,9 @@ class CertiView extends StatelessWidget {
                     onPress: () async {
                       await controller.verifyCode(); // 인증번호 검증
                       if (controller.isVerified.value) {
-                        controller.postAdditionalInfo(); // 인증 성공 시 추가 정보 전송
+                        await controller
+                            .postAdditionalInfo(); // 인증 성공 시 추가 정보 전송
+
                         showConfirmDialog(context); // 성공 메시지 표시
                       } else {
                         showNoConfirmDialog(context); // 실패 메시지 표시

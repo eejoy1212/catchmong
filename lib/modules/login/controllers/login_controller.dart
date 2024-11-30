@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'package:catchmong/model/catchmong_user.dart';
+import 'package:catchmong/model/referrer.dart';
 import 'package:catchmong/services/user_service.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
@@ -19,6 +20,8 @@ class LoginController extends GetxController {
   var isLoading = false.obs;
   final String baseUrl = 'http://192.168.200.102:3000';
   var user = Rxn<User>();
+  var referrer = Rxn<Referrer>();
+  var referreds = <Referrer>[].obs;
   Rx<File?> selectedImage = Rx<File?>(null);
   RxString nickname = RxString("");
   RxString phone = RxString("");
@@ -170,11 +173,6 @@ class LoginController extends GetxController {
 
         // user.value 업데이트
         try {
-          final storage = GetStorage();
-
-// 데이터 저장
-          storage.write('user', responseData['data']);
-
           user.value = User.fromJson(responseData['data']);
           if (user.value != null) {
             nicknameController.text = user.value!.nickname;
@@ -183,6 +181,8 @@ class LoginController extends GetxController {
             ageGroup.value = user.value!.ageGroup;
             paybackMethod.value = user.value!.paybackMethod;
             referrerNicknameController.text = user.value!.referrerId.toString();
+            await getReferrerInfo(user.value!.referrerId);
+            await getReferredInfos(user.value!.id);
           }
           print("user.value 업데이트 완료: ${user.value?.toJson()}");
         } catch (e) {
@@ -193,6 +193,90 @@ class LoginController extends GetxController {
       }
     } catch (error) {
       print("서버 요청 중 오류 발생: $error");
+    }
+  }
+
+  Future<void> checkNickname(String nickname) async {
+    var url = '$baseUrl/api/user/check-nickname';
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'nickname': nickname}),
+      );
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        if (responseData['isDuplicate'] == true) {
+          nicknameErrTxt.value = "이미 사용중인 닉네임입니다.";
+        } else {
+          nicknameErrTxt.value = "";
+          print("닉네임 사용 가능: ${responseData['message']}");
+        }
+      } else {
+        nicknameErrTxt.value = "닉네임 확인 실패";
+        print("닉네임 확인 실패: ${response.body}");
+      }
+    } catch (e) {
+      nicknameErrTxt.value = "닉네임 확인 중 오류 발생";
+      print("닉네임 확인 중 오류 발생: $e // $nickname");
+    }
+  }
+
+  Future<void> checkReferrer(String referrerNickname) async {
+    var url = '$baseUrl/api/user/check-referrer';
+    try {
+      if (referrerNickname.isEmpty) return;
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'referrerNickname': referrerNickname}),
+      );
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        if (responseData['exists'] == true) {
+          print("추천인 유효: ${responseData['message']}");
+          referrerNicknameErrTxt.value = "";
+        } else {
+          referrerNicknameErrTxt.value = "추천인이 유효하지 않습니다.";
+        }
+      } else {
+        referrerNicknameErrTxt.value = "추천인 확인 실패";
+        print("추천인 확인 실패: ${response.body}");
+      }
+    } catch (e) {
+      referrerNicknameErrTxt.value = "추천인 확인 중 오류 발생";
+      print("추천인 확인 중 오류 발생: $e");
+    }
+  }
+
+  Future<void> checkPhone(String phone) async {
+    try {
+      if (phoneController.text.isEmpty) {
+        phoneErrTxt.value = "폰번호를 입력해주세요";
+      } else {
+        phoneErrTxt.value = "";
+      }
+    } catch (e) {
+      print("폰번호를 입력해주세요: $e");
+    }
+  }
+
+  Future<void> checkAndGoVerti() async {
+    // 저장 버튼 누르기 전에 1.닉네임 중복인지 2.추천인 유효한지 3. 텍스트필드 필수정보 모두 입력했는지 체크
+    await checkNickname(nicknameController.text);
+    await checkReferrer(referrerNicknameController.text);
+    await checkPhone(phoneController.text);
+    // 닉네임과 추천인 검증이 성공한 경우 추가 정보 등록 진행
+    if (nicknameErrTxt.value.isEmpty &&
+        referrerNicknameErrTxt.value.isEmpty &&
+        phoneErrTxt.value.isEmpty) {
+      Get.toNamed('/certi');
+    } else {
+      print("검증 실패: 닉네임 중복 또는 추천인 유효하지 않음");
     }
   }
 
@@ -268,7 +352,7 @@ class LoginController extends GetxController {
         body: jsonEncode({
           'idToken': auth[0], // Google ID Token
           'email': auth[1], // Google Email
-          'sub': '2jxgq02ry2', //auth[2], // Google User ID (sub)
+          'sub': "o301s4dgmq", //auth[2], // Google User ID (sub)
           'picture': auth[3] ?? "", // Profile Picture
           'name': auth[4], // Name
         }),
@@ -287,11 +371,67 @@ class LoginController extends GetxController {
           final originUser = responseData['user'];
 
           user.value = User.fromJson(originUser);
-          print("구글 로그인 성공: ${user.value}");
+          await getReferrerInfo(user.value!.referrerId);
+          await getReferredInfos(user.value!.id);
+          update();
+          print("구글 로그인 성공 추천인 목록: ${referreds} ");
           Get.toNamed("/main"); // 메인 페이지로 이동
         }
       } else {
         print("구글 로그인 실패: ${response.body}");
+      }
+    } catch (e) {
+      print("서버 요청 중 오류 발생: $e");
+    }
+  }
+
+//내가 회원가입 시 추천한 추천인
+  Future<void> getReferrerInfo(int? userId) async {
+    final String url = '$baseUrl/api/user/referrer/$userId'; // API 엔드포인트
+
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['referrer'] != null) {
+          referrer.value = Referrer.fromJson(data["referrer"]);
+          print("내 추천인 ${referrer.value?.nickname}");
+        } else {
+          print("추천인 정보가 없습니다.");
+        }
+      } else if (response.statusCode == 404) {
+        print("사용자 또는 추천인을 찾을 수 없습니다.");
+      } else {
+        print("오류 발생: ${response.body}");
+      }
+    } catch (e) {
+      print("서버 요청 중 오류 발생: $e");
+    }
+  }
+
+  //나를 추천한 추천인 목록
+  Future<void> getReferredInfos(int? userId) async {
+    final String url = '$baseUrl/api/user/referred/$userId'; // API 엔드포인트
+
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        final List<dynamic> referredUsers = data['referredUsers'];
+        referreds.addAll(referredUsers.map((e) => Referrer.fromJson(e)));
+      } else if (response.statusCode == 404) {
+        print("사용자 또는 추천인을 찾을 수 없습니다.");
+      } else {
+        print("오류 발생: ${response.body}");
       }
     } catch (e) {
       print("서버 요청 중 오류 발생: $e");
