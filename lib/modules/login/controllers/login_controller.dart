@@ -202,7 +202,10 @@ class LoginController extends GetxController {
             gender.value = user.value!.gender;
             ageGroup.value = user.value!.ageGroup;
             paybackMethod.value = user.value!.paybackMethod;
-            referrerNicknameController.text = user.value!.referrerId.toString();
+            referrerNicknameController.text = referrerNicknameController.text;
+            // if (user.value!.picture != null) {
+            //   selectedImage.value = File("${baseUrl}${user.value!.picture!}");
+            // }
             await getReferrerInfo(user.value!.referrerId);
             await getReferredInfos(user.value!.id);
           }
@@ -529,17 +532,18 @@ class LoginController extends GetxController {
   Future<bool> updateUser() async {
     final success = await updateUserInfo(
       userId: user.value!.id, // 수정할 사용자 ID
-      nickname: nicknameController.text,
-      phone: phoneController.text,
-      gender: gender.value,
-      ageGroup: ageGroup.value,
-      paybackMethod: paybackMethod.value,
-      referrerId: null, //referrerNicknameController.text,
+      newNickname: nicknameController.text,
+      newPhone: phoneController.text,
+      newGender: gender.value,
+      newAgeGroup: ageGroup.value,
+      newPaybackMethod: paybackMethod.value,
+      newReferrerNickname: referrerNicknameController.text,
       pictureFile: selectedImage.value, // 선택적으로 이미지 파일
     );
 
     if (success) {
       print("회원정보 수정 성공");
+
       return true;
     } else {
       print("회원정보 수정 실패");
@@ -549,36 +553,36 @@ class LoginController extends GetxController {
 
   Future<bool> updateUserInfo({
     required int userId,
-    String? nickname,
-    String? phone,
-    String? gender,
-    String? paybackMethod,
-    String? ageGroup,
-    int? referrerId,
+    String? newNickname,
+    String? newPhone,
+    String? newGender,
+    String? newPaybackMethod,
+    String? newAgeGroup,
+    String? newReferrerNickname, // 추천인 닉네임
     File? pictureFile,
   }) async {
-    final String url = '$baseUrl/api/user/$userId'; // 서버 API URL
+    final String url = '$baseUrl/api/user/$userId';
 
     try {
       // MultipartRequest 생성
       var request = http.MultipartRequest('PUT', Uri.parse(url));
 
       // JSON 데이터 추가 (선택적)
-      if (nickname != null) request.fields['nickname'] = nickname;
-      if (phone != null) request.fields['phone'] = phone;
-      if (gender != null) request.fields['gender'] = gender;
-      if (paybackMethod != null)
-        request.fields['paybackMethod'] = paybackMethod;
-      if (ageGroup != null) request.fields['ageGroup'] = ageGroup;
-      if (referrerId != null)
-        request.fields['referrerId'] = referrerId.toString();
+      if (newNickname != null) request.fields['nickname'] = newNickname;
+      if (newPhone != null) request.fields['phone'] = newPhone;
+      if (newGender != null) request.fields['gender'] = newGender;
+      if (newPaybackMethod != null)
+        request.fields['paybackMethod'] = newPaybackMethod;
+      if (newAgeGroup != null) request.fields['ageGroup'] = newAgeGroup;
+      if (newReferrerNickname != null)
+        request.fields['referrerNickname'] = newReferrerNickname;
 
       // 이미지 파일 추가 (선택적)
       if (pictureFile != null) {
         var stream = http.ByteStream(pictureFile.openRead());
         var length = await pictureFile.length();
         var multipartFile = http.MultipartFile(
-          'picture', // 백엔드에서 기대하는 필드 이름
+          'picture',
           stream,
           length,
           filename: pictureFile.path.split('/').last,
@@ -593,6 +597,21 @@ class LoginController extends GetxController {
       var response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        user.value = User.fromJson(responseData['data']);
+        if (user.value != null) {
+          nicknameController.text = user.value!.nickname;
+          phoneController.text = user.value!.phone;
+          gender.value = user.value!.gender;
+          ageGroup.value = user.value!.ageGroup;
+          paybackMethod.value = user.value!.paybackMethod;
+          referrerNicknameController.text = user.value!.referrerId.toString();
+          // if (user.value!.picture != null) {
+          //   selectedImage.value = File("${baseUrl}${user.value!.picture!}");
+          // }
+          await getReferrerInfo(user.value!.referrerId);
+          await getReferredInfos(user.value!.id);
+        }
         print("회원정보 수정 성공: ${response.body}");
         return true;
       } else {
@@ -622,7 +641,7 @@ class LoginController extends GetxController {
         body: jsonEncode({
           'idToken': auth[0], // Google ID Token
           'email': auth[1], // Google Email
-          'sub': "o301s4dgmq", //auth[2],  // Google User ID (sub)
+          'sub': "nlbka0wbcm", // auth[2], // Google User ID (sub)
           'picture': auth[3] ?? "", // Profile Picture
           'name': auth[4], // Name
         }),
@@ -648,6 +667,10 @@ class LoginController extends GetxController {
             ageGroup.value = user.value!.ageGroup;
             paybackMethod.value = user.value!.paybackMethod;
             referrerNicknameController.text = user.value!.referrerId.toString();
+            // if (user.value!.picture != null) {
+            //   selectedImage.value = File("${baseUrl}${user.value!.picture!}");
+            // }
+
             await getReferrerInfo(user.value!.referrerId);
             await getReferredInfos(user.value!.id);
             update();
@@ -677,6 +700,10 @@ class LoginController extends GetxController {
         final data = jsonDecode(response.body);
         if (data['referrer'] != null) {
           referrer.value = Referrer.fromJson(data["referrer"]);
+          if (referrer.value != null) {
+            referrerNicknameController.text = referrer.value!.nickname;
+          }
+
           print("내 추천인 ${referrer.value?.nickname}");
         } else {
           print("추천인 정보가 없습니다.");
@@ -693,6 +720,7 @@ class LoginController extends GetxController {
 
   //나를 추천한 추천인 목록
   Future<void> getReferredInfos(int? userId) async {
+    referreds.clear();
     final String url = '$baseUrl/api/user/referred/$userId'; // API 엔드포인트
 
     try {

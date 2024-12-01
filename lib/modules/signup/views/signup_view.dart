@@ -8,12 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SignupView extends StatelessWidget {
-  final LoginController controller = Get.put(LoginController());
+  final LoginController loginController = Get.find<LoginController>();
 
   @override
   Widget build(BuildContext context) {
-    bool isLogin = controller.user.value != null;
-    print("연령대>>>${controller.user.value?.toJson()}");
+    bool isLogin = loginController.user.value != null;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -30,8 +29,8 @@ class SignupView extends StatelessWidget {
         actions: [
           InkWell(
             onTap: isLogin
-                ? controller.checkUpdateUserAndGoVerti
-                : controller.checkAndGoVerti,
+                ? loginController.checkUpdateUserAndGoVerti
+                : loginController.checkAndGoVerti,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -69,36 +68,42 @@ class SignupView extends StatelessWidget {
                           width: 60, // 아바타 너비 60px
                           height: 60, // 아바타 높이 60px
                           child: Obx(() {
-                            final imageFile = controller.selectedImage.value;
-                            return imageFile == null || imageFile.path == ""
-                                ? Image.asset(
-                                    'assets/images/default-profile.png', // 로컬 기본 이미지
-                                    fit: BoxFit.cover,
-                                  )
-                                : Image.file(
-                                    imageFile,
-                                    fit: BoxFit.cover,
-                                  );
-                            //회원가입 시
-                            // if (controller.user.value == null) {
-                            //   final imageFile = controller.selectedImage.value;
-                            //   return imageFile != null
-                            //       ? Image.file(
-                            //           imageFile,
-                            //           fit: BoxFit.cover,
-                            //         )
-                            //       : Image.asset(
-                            //           'assets/images/default-profile.png', // 로컬 기본 이미지
-                            //           fit: BoxFit.cover,
-                            //         );
-                            // }
-                            // //프로필 수정 시
-                            // else {
-                            //   return Image.asset(
-                            //     'assets/images/default-profile.png', // 로컬 기본 이미지
-                            //     fit: BoxFit.cover,
-                            //   );
-                            // }
+                            if (isLogin) {
+                              //회원수정 시
+                              final imageFile =
+                                  loginController.selectedImage.value;
+                              bool hasPicture =
+                                  loginController.user.value!.picture != null;
+                              return imageFile == null || imageFile.path == ""
+                                  //기존에 이미지가 있는 상태에서 수정 하는 거
+                                  ? hasPicture
+                                      ? Image.network(
+                                          "${loginController.baseUrl}${loginController.user.value!.picture}", // 로컬 기본 이미지
+                                          fit: BoxFit.cover,
+                                        )
+                                      : Image.asset(
+                                          'assets/images/default-profile.png', // 로컬 기본 이미지
+                                          fit: BoxFit.cover,
+                                        )
+                                  //새로 선택하는거
+                                  : Image.file(
+                                      imageFile,
+                                      fit: BoxFit.cover,
+                                    );
+                            } else {
+                              //회원가입 시
+                              final imageFile =
+                                  loginController.selectedImage.value;
+                              return imageFile == null || imageFile.path == ""
+                                  ? Image.asset(
+                                      'assets/images/default-profile.png', // 로컬 기본 이미지
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Image.file(
+                                      imageFile,
+                                      fit: BoxFit.cover,
+                                    );
+                            }
                           }),
                         ),
                       ),
@@ -107,7 +112,7 @@ class SignupView extends StatelessWidget {
                         bottom: 0,
                         child: InkWell(
                           onTap: () async {
-                            await controller.pickImage(); // 갤러리에서 이미지 선택
+                            await loginController.pickImage(); // 갤러리에서 이미지 선택
                           },
                           child: Image.asset('assets/images/photo-icon.png'),
                         ),
@@ -145,14 +150,15 @@ class SignupView extends StatelessWidget {
                   ),
                   Obx(
                     () => BorderTxtField(
-                      controller: controller.nicknameController,
-                      errorText: controller.nicknameErrTxt.value == ""
+                      controller: loginController.nicknameController,
+                      errorText: loginController.nicknameErrTxt.value == ""
                           ? null
-                          : controller.nicknameErrTxt.value,
+                          : loginController.nicknameErrTxt.value,
                       onChanged: (String value) {
-                        if (controller.nicknameController.text.length > 300) {
+                        if (loginController.nicknameController.text.length >
+                            300) {
                           Future.microtask(() {
-                            controller.nicknameController.value =
+                            loginController.nicknameController.value =
                                 TextEditingValue(
                               text: value.substring(0, 300),
                               selection: TextSelection.collapsed(offset: 300),
@@ -199,14 +205,15 @@ class SignupView extends StatelessWidget {
                           child: Obx(
                         () => BorderTxtField(
                           // maxLength: 13,
-                          errorText: controller.phoneErrTxt.value == ""
+                          errorText: loginController.phoneErrTxt.value == ""
                               ? null
-                              : controller.phoneErrTxt.value,
+                              : loginController.phoneErrTxt.value,
                           textInputType: TextInputType.phone,
-                          controller: controller.phoneController,
+                          controller: loginController.phoneController,
                           onChanged: (String value) {
                             String formattedValue = _formatPhoneNumber(value);
-                            controller.phoneController.text = formattedValue;
+                            loginController.phoneController.text =
+                                formattedValue;
                           },
                         ),
                       )),
@@ -254,10 +261,9 @@ class SignupView extends StatelessWidget {
                       Expanded(
                         child: Obx(() => YellowToggleBtn(
                               title: "남성",
-                              isSelected: controller.gender.value == "남성",
+                              isSelected: loginController.gender.value == "남성",
                               onTap: () {
-                                controller.gender.value = "남성";
-                                print("현재 선택된 성별: ${controller.gender.value}");
+                                loginController.gender.value = "남성";
                               },
                             )),
                       ),
@@ -265,10 +271,11 @@ class SignupView extends StatelessWidget {
                       Expanded(
                         child: Obx(() => YellowToggleBtn(
                               title: "여성",
-                              isSelected: controller.gender.value == "여성",
+                              isSelected: loginController.gender.value == "여성",
                               onTap: () {
-                                controller.gender.value = "여성";
-                                print("현재 선택된 성별: ${controller.gender.value}");
+                                loginController.gender.value = "여성";
+                                print(
+                                    "현재 선택된 성별: ${loginController.gender.value}");
                               },
                             )),
                       ),
@@ -276,10 +283,9 @@ class SignupView extends StatelessWidget {
                       Expanded(
                         child: Obx(() => YellowToggleBtn(
                               title: "비공개",
-                              isSelected: controller.gender.value == "비공개",
+                              isSelected: loginController.gender.value == "비공개",
                               onTap: () {
-                                controller.gender.value = "비공개";
-                                print("현재 선택된 성별: ${controller.gender.value}");
+                                loginController.gender.value = "비공개";
                               },
                             )),
                       ),
@@ -328,11 +334,9 @@ class SignupView extends StatelessWidget {
                                 width: MediaQuery.of(context).size.width / 5,
                                 title: ageGroup,
                                 isSelected:
-                                    controller.ageGroup.value == ageGroup,
+                                    loginController.ageGroup.value == ageGroup,
                                 onTap: () {
-                                  controller.ageGroup.value = ageGroup;
-                                  print(
-                                      "현재 선택된 연령대: ${controller.ageGroup.value}");
+                                  loginController.ageGroup.value = ageGroup;
                                 },
                               ));
                         }).toList(),
@@ -376,9 +380,9 @@ class SignupView extends StatelessWidget {
                         () => YellowToggleBtn(
                           title: "바로바로 받기",
                           isSelected:
-                              controller.paybackMethod.value == "바로바로 받기",
+                              loginController.paybackMethod.value == "바로바로 받기",
                           onTap: () {
-                            controller.paybackMethod.value = "바로바로 받기";
+                            loginController.paybackMethod.value = "바로바로 받기";
                           },
                         ),
                       )),
@@ -388,9 +392,9 @@ class SignupView extends StatelessWidget {
                         () => YellowToggleBtn(
                           title: "월말에 받기",
                           isSelected:
-                              controller.paybackMethod.value == "월말에 받기",
+                              loginController.paybackMethod.value == "월말에 받기",
                           onTap: () {
-                            controller.paybackMethod.value = "월말에 받기";
+                            loginController.paybackMethod.value = "월말에 받기";
                           },
                         ),
                       )),
@@ -427,15 +431,17 @@ class SignupView extends StatelessWidget {
                   ),
                   Obx(
                     () => BorderTxtField(
-                      errorText: controller.referrerNicknameErrTxt.value == ""
-                          ? null
-                          : controller.referrerNicknameErrTxt.value,
-                      controller: controller.referrerNicknameController,
+                      errorText:
+                          loginController.referrerNicknameErrTxt.value == ""
+                              ? null
+                              : loginController.referrerNicknameErrTxt.value,
+                      controller: loginController.referrerNicknameController,
                       onChanged: (String value) {
-                        if (controller.referrerNicknameController.text.length >
+                        if (loginController
+                                .referrerNicknameController.text.length >
                             300) {
                           Future.microtask(() {
-                            controller.referrerNicknameController.value =
+                            loginController.referrerNicknameController.value =
                                 TextEditingValue(
                               text: value.substring(0, 300),
                               selection: TextSelection.collapsed(offset: 300),
