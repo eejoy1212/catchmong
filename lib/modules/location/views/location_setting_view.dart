@@ -74,10 +74,11 @@ class LocationSettingView extends StatelessWidget {
               final currentPosition = snapshot.data!;
 
               // 지도 로딩 후 다이얼로그와 바텀시트 표시
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                showBottomSheet(context);
-                showInitialDialog(context);
-              });
+              // WidgetsBinding.instance.addPostFrameCallback((_) {
+              //   showBottomSheet(context);
+              //   showInitialDialog(context);
+              // });
+// API 호출
 
               return Center(
                 child: Column(
@@ -89,9 +90,13 @@ class LocationSettingView extends StatelessWidget {
                         nowAddress: controller.newLocation.value?.address,
                         onSearch: (DataModel newData) {
                           controller.setLocation(newData);
+                          // controller.fetchCoordinates(newData.roadAddress ??
+                          //     newData.jibunAddress ??
+                          //     "");
                         })),
                     Expanded(
-                        child: CustomMap(currentPosition: currentPosition)),
+                        child: CustomMap(
+                            currentPosition: NLatLng(37.504198, 127.047967))),
                   ],
                 ),
               );
@@ -159,6 +164,9 @@ class LocationSettingView extends StatelessWidget {
                             nowAddress: controller.newLocation.value?.address,
                             onSearch: (DataModel newData) {
                               controller.setLocation(newData);
+                              // controller.fetchCoordinates(newData.roadAddress ??
+                              //     newData.jibunAddress ??
+                              //     "");
                             })),
                       ],
                     ),
@@ -198,6 +206,7 @@ class LocationSettingView extends StatelessWidget {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
+        final LocationController controller = Get.find<LocationController>();
         return AlertDialog(
           backgroundColor: Colors.white,
           title: const Stack(
@@ -247,9 +256,14 @@ class LocationSettingView extends StatelessWidget {
                         const SizedBox(height: 20),
                         Image.asset('assets/images/map.png'),
                         const SizedBox(height: 40),
-                        const Padding(
+                        Padding(
                           padding: EdgeInsets.symmetric(horizontal: 12),
-                          child: LocationSlider(currentValue: 10.0),
+                          child: Obx(() => LocationSlider(
+                                currentValue: controller.radius.value,
+                                onChange: (double val) {
+                                  controller.radius.value = val;
+                                },
+                              )),
                         ),
                       ],
                     ),
@@ -324,6 +338,7 @@ class LocationSettingView extends StatelessWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (BuildContext context) {
+        final LocationController controller = Get.find<LocationController>();
         return Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -354,36 +369,41 @@ class LocationSettingView extends StatelessWidget {
                         ],
                       ),
                     ),
-                    VerticalDivider(
-                      thickness: 1,
-                      color: CatchmongColors.gray,
-                    ),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Text(
-                            "스토어",
-                            style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                                color: CatchmongColors.sub_gray),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            "10개",
-                            style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: CatchmongColors.black),
-                          ),
-                        ],
-                      ),
-                    ),
+                    // VerticalDivider(
+                    //   thickness: 1,
+                    //   color: CatchmongColors.gray,
+                    // ),
+                    // Expanded(
+                    //   child: Column(
+                    //     children: [
+                    //       Text(
+                    //         "스토어",
+                    //         style: TextStyle(
+                    //             fontSize: 14,
+                    //             fontWeight: FontWeight.w400,
+                    //             color: CatchmongColors.sub_gray),
+                    //       ),
+                    //       SizedBox(height: 8),
+                    //       Text(
+                    //         "10개",
+                    //         style: TextStyle(
+                    //             fontSize: 16,
+                    //             fontWeight: FontWeight.w700,
+                    //             color: CatchmongColors.black),
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
               const SizedBox(height: 24),
-              const LocationSlider(currentValue: 10.0),
+              Obx(() => LocationSlider(
+                    currentValue: controller.radius.value,
+                    onChange: (double val) {
+                      controller.radius.value = val;
+                    },
+                  )),
               const SizedBox(height: 24),
               YellowElevationBtn(
                 onPressed: () {
