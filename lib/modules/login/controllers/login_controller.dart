@@ -222,6 +222,42 @@ class LoginController extends GetxController {
     }
   }
 
+  Future<void> checkNicknameForUpdate(
+      String currentNickname, String newNickname) async {
+    var url = '$baseUrl/api/user/check-nickname';
+    try {
+      if (currentNickname == newNickname) {
+        // 기존 닉네임과 같으면 중복 체크 필요 없음
+        nicknameErrTxt.value = "";
+        print("닉네임 변경 없음: $newNickname");
+        return;
+      }
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'nickname': newNickname}),
+      );
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        if (responseData['isDuplicate'] == true) {
+          nicknameErrTxt.value = "이미 사용중인 닉네임입니다.";
+        } else {
+          nicknameErrTxt.value = "";
+          print("닉네임 사용 가능: ${responseData['message']}");
+        }
+      } else {
+        nicknameErrTxt.value = "닉네임 확인 실패";
+        print("닉네임 확인 실패: ${response.body}");
+      }
+    } catch (e) {
+      nicknameErrTxt.value = "닉네임 확인 중 오류 발생";
+      print("닉네임 확인 중 오류 발생: $e");
+    }
+  }
+
   Future<void> checkNickname(String nickname) async {
     var url = '$baseUrl/api/user/check-nickname';
     try {
@@ -406,6 +442,20 @@ class LoginController extends GetxController {
     }
   }
 
+  Future<void> checkUpdateUserAndGoVerti() async {
+    await checkNicknameForUpdate(user.value!.nickname, nicknameController.text);
+    await checkReferrer(referrerNicknameController.text);
+    await checkPhone(phoneController.text);
+
+    if (nicknameErrTxt.value.isEmpty &&
+        referrerNicknameErrTxt.value.isEmpty &&
+        phoneErrTxt.value.isEmpty) {
+      Get.toNamed('/certi');
+    } else {
+      print("검증 실패: 닉네임 중복 또는 추천인 유효하지 않음");
+    }
+  }
+
   Future<void> checkAndGoVerti() async {
     // 저장 버튼 누르기 전에 1.닉네임 중복인지 2.추천인 유효한지 3. 텍스트필드 필수정보 모두 입력했는지 체크
     await checkNickname(nicknameController.text);
@@ -476,6 +526,85 @@ class LoginController extends GetxController {
     }
   }
 
+  Future<bool> updateUser() async {
+    final success = await updateUserInfo(
+      userId: user.value!.id, // 수정할 사용자 ID
+      nickname: nicknameController.text,
+      phone: phoneController.text,
+      gender: gender.value,
+      ageGroup: ageGroup.value,
+      paybackMethod: paybackMethod.value,
+      referrerId: null, //referrerNicknameController.text,
+      pictureFile: selectedImage.value, // 선택적으로 이미지 파일
+    );
+
+    if (success) {
+      print("회원정보 수정 성공");
+      return true;
+    } else {
+      print("회원정보 수정 실패");
+      return false;
+    }
+  }
+
+  Future<bool> updateUserInfo({
+    required int userId,
+    String? nickname,
+    String? phone,
+    String? gender,
+    String? paybackMethod,
+    String? ageGroup,
+    int? referrerId,
+    File? pictureFile,
+  }) async {
+    final String url = '$baseUrl/api/user/$userId'; // 서버 API URL
+
+    try {
+      // MultipartRequest 생성
+      var request = http.MultipartRequest('PUT', Uri.parse(url));
+
+      // JSON 데이터 추가 (선택적)
+      if (nickname != null) request.fields['nickname'] = nickname;
+      if (phone != null) request.fields['phone'] = phone;
+      if (gender != null) request.fields['gender'] = gender;
+      if (paybackMethod != null)
+        request.fields['paybackMethod'] = paybackMethod;
+      if (ageGroup != null) request.fields['ageGroup'] = ageGroup;
+      if (referrerId != null)
+        request.fields['referrerId'] = referrerId.toString();
+
+      // 이미지 파일 추가 (선택적)
+      if (pictureFile != null) {
+        var stream = http.ByteStream(pictureFile.openRead());
+        var length = await pictureFile.length();
+        var multipartFile = http.MultipartFile(
+          'picture', // 백엔드에서 기대하는 필드 이름
+          stream,
+          length,
+          filename: pictureFile.path.split('/').last,
+        );
+        request.files.add(multipartFile);
+      }
+
+      // 요청 보내기
+      var streamedResponse = await request.send();
+
+      // 응답 처리
+      var response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        print("회원정보 수정 성공: ${response.body}");
+        return true;
+      } else {
+        print("회원정보 수정 실패: ${response.body}");
+        return false;
+      }
+    } catch (e) {
+      print("서버 요청 중 오류 발생: $e");
+      return false;
+    }
+  }
+
   Future<void> loginWithGoogle(List? auth) async {
     print("auth $auth");
     if (auth == null || auth.length < 5) {
@@ -512,11 +641,19 @@ class LoginController extends GetxController {
           final originUser = responseData['user'];
 
           user.value = User.fromJson(originUser);
-          await getReferrerInfo(user.value!.referrerId);
-          await getReferredInfos(user.value!.id);
-          update();
-          print("구글 로그인 성공 추천인 목록: ${referreds} ");
-          Get.toNamed("/main"); // 메인 페이지로 이동
+          if (user.value != null) {
+            nicknameController.text = user.value!.nickname;
+            phoneController.text = user.value!.phone;
+            gender.value = user.value!.gender;
+            ageGroup.value = user.value!.ageGroup;
+            paybackMethod.value = user.value!.paybackMethod;
+            referrerNicknameController.text = user.value!.referrerId.toString();
+            await getReferrerInfo(user.value!.referrerId);
+            await getReferredInfos(user.value!.id);
+            update();
+            print("구글 로그인 성공 추천인 목록: ${referreds} ");
+            Get.toNamed("/main"); // 메인 페이지로 이동
+          }
         }
       } else {
         print("구글 로그인 실패: ${response.body}");

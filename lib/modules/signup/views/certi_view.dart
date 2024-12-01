@@ -7,17 +7,18 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class CertiView extends StatelessWidget {
-  final LoginController controller = Get.put(LoginController());
+  final LoginController loginController = Get.find<LoginController>();
 
   @override
   Widget build(BuildContext context) {
+    bool isLogin = loginController.user.value != null;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         centerTitle: true,
         leading: const AppbarBackBtn(),
         title: Text(
-          controller.user.value == null ? "회원가입" : "휴대폰 번호 변경",
+          loginController.user.value == null ? "회원가입" : "휴대폰 번호 변경",
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -43,7 +44,7 @@ class CertiView extends StatelessWidget {
                   Expanded(
                     child: BorderTxtField(
                       readOnly: true,
-                      controller: controller.phoneController,
+                      controller: loginController.phoneController,
                       onChanged: (String) {},
                     ),
                   ),
@@ -53,7 +54,7 @@ class CertiView extends StatelessWidget {
                     width: 120,
                     height: 48,
                     fontSize: 14,
-                    onPress: controller.postSendVerti,
+                    onPress: loginController.postSendVerti,
                   ),
                 ],
               ),
@@ -76,8 +77,10 @@ class CertiView extends StatelessWidget {
                       readOnly: true,
                       suffix: Obx(() {
                         // 남은 시간을 분:초 형식으로 표시
-                        int minutes = controller.remainingSeconds.value ~/ 60;
-                        int seconds = controller.remainingSeconds.value % 60;
+                        int minutes =
+                            loginController.remainingSeconds.value ~/ 60;
+                        int seconds =
+                            loginController.remainingSeconds.value % 60;
                         return Text(
                           '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
                           style: TextStyle(
@@ -87,7 +90,7 @@ class CertiView extends StatelessWidget {
                         );
                       }),
                       helper: InkWell(
-                        onTap: controller.postSendVerti,
+                        onTap: loginController.postSendVerti,
                         child: Text(
                           "인증번호 재발송",
                           style: TextStyle(
@@ -97,7 +100,7 @@ class CertiView extends StatelessWidget {
                           ),
                         ),
                       ),
-                      controller: controller.vertiCodeController,
+                      controller: loginController.vertiCodeController,
                       onChanged: (String) {},
                     ),
                   ),
@@ -108,10 +111,12 @@ class CertiView extends StatelessWidget {
                     height: 48,
                     fontSize: 14,
                     onPress: () async {
-                      await controller.verifyCode(); // 인증번호 검증
-                      if (controller.isVerified.value) {
-                        bool res = await controller
-                            .postAdditionalInfo(); // 인증 성공 시 추가 정보 전송
+                      await loginController.verifyCode(); // 인증번호 검증
+                      if (loginController.isVerified.value) {
+                        bool res = isLogin
+                            ? await loginController.updateUser()
+                            : await loginController
+                                .postAdditionalInfo(); // 인증 성공 시 추가 정보 전송
                         res
                             ? showConfirmDialog(context)
                             : showNoConfirmDialog(context);

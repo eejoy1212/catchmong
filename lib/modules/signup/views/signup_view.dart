@@ -12,6 +12,7 @@ class SignupView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isLogin = controller.user.value != null;
     print("연령대>>>${controller.user.value?.toJson()}");
     return Scaffold(
       backgroundColor: Colors.white,
@@ -19,7 +20,7 @@ class SignupView extends StatelessWidget {
         centerTitle: true,
         leading: const AppbarBackBtn(),
         title: Text(
-          controller.user.value == null ? "회원가입" : "프로필 수정",
+          isLogin ? "프로필 수정" : "회원가입",
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -28,7 +29,9 @@ class SignupView extends StatelessWidget {
         ),
         actions: [
           InkWell(
-            onTap: controller.checkAndGoVerti,
+            onTap: isLogin
+                ? controller.checkUpdateUserAndGoVerti
+                : controller.checkAndGoVerti,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
