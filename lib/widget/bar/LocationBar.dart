@@ -1,10 +1,20 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/modules/location/controllers/location_controller.dart';
+import 'package:catchmong/modules/location/views/location_search_view.dart';
+import 'package:daum_postcode_search/daum_postcode_search.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class LocationBar extends StatelessWidget {
   final double opacity;
-  const LocationBar({super.key, this.opacity = 0.6});
+  final void Function(DataModel) onSearch;
+  final String? nowAddress;
+  const LocationBar({
+    super.key,
+    this.opacity = 0.6,
+    required this.onSearch,
+    this.nowAddress,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +28,7 @@ class LocationBar extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              "울산광역시 울주군 삼남읍 도호1길 9-15 울산광역시 울주군 삼남읍 도호1길 9-15",
+              nowAddress ?? "위치를 선택 해 주세요",
               style: TextStyle(color: Colors.white),
               overflow: TextOverflow.ellipsis, // 오버플로우시 말줄임표 처리
               maxLines: 1, // 한 줄로 제한
@@ -33,8 +43,13 @@ class LocationBar extends StatelessWidget {
                 borderRadius: BorderRadius.circular(28),
               ),
             ),
-            onPressed: () {
-              Get.toNamed('/location-search');
+            onPressed: () async {
+              // Get.toNamed('/location-search');
+              DataModel model = await Get.to(
+                () => LocationSearchView(),
+              );
+              onSearch(model);
+              print("주소 검색 결과>>> ${model.address}");
             },
             child: Text(
               "주소검색",

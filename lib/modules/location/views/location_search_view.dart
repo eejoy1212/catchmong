@@ -11,9 +11,8 @@ class LocationSearchView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final LocationController controller = Get.find<LocationController>();
-
     DaumPostcodeSearch daumPostcodeSearch = DaumPostcodeSearch(
-      onConsoleMessage: (_, message) => print(message),
+      onConsoleMessage: (_, message) => print('$message'),
       onReceivedError: (webController, request, error) {
         // LocationController의 isError와 errorMessage 업데이트
         controller.isError.value = true;

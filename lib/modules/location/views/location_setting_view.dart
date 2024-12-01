@@ -1,5 +1,6 @@
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/modules/location/controllers/location_controller.dart';
+import 'package:catchmong/modules/location/views/location_search_view.dart';
 import 'package:catchmong/widget/bar/LocationBar.dart';
 import 'package:catchmong/widget/button/AppbarBackBtn.dart';
 import 'package:catchmong/widget/button/GrayElevationBtn.dart';
@@ -7,6 +8,7 @@ import 'package:catchmong/widget/button/InfoBtn.dart';
 import 'package:catchmong/widget/button/YellowElevationBtn.dart';
 import 'package:catchmong/widget/map/custom_map.dart';
 import 'package:catchmong/widget/slider/LocationSlider.dart';
+import 'package:daum_postcode_search/daum_postcode_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:geolocator/geolocator.dart';
@@ -82,9 +84,12 @@ class LocationSettingView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    const LocationBar(
-                      opacity: 0.4,
-                    ),
+                    Obx(() => LocationBar(
+                        opacity: 0.4,
+                        nowAddress: controller.newLocation.value?.address,
+                        onSearch: (DataModel newData) {
+                          controller.setLocation(newData);
+                        })),
                     Expanded(
                         child: CustomMap(currentPosition: currentPosition)),
                   ],
@@ -150,7 +155,11 @@ class LocationSettingView extends StatelessWidget {
                         const SizedBox(height: 20),
                         Image.asset('assets/images/map.png'),
                         const SizedBox(height: 40),
-                        const LocationBar(),
+                        Obx(() => LocationBar(
+                            nowAddress: controller.newLocation.value?.address,
+                            onSearch: (DataModel newData) {
+                              controller.setLocation(newData);
+                            })),
                       ],
                     ),
                   ),
