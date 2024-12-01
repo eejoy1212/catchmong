@@ -14,8 +14,7 @@ import 'package:get/get.dart';
 
 class LocationSettingView extends StatelessWidget {
   LocationSettingView({super.key});
-  final LocationController controller = Get.put(LocationController());
-  final NaverMapController? _mapController = null;
+  final LocationController controller = Get.find<LocationController>();
 
   // 현재 위치를 가져오는 메서드
   Future<NLatLng> _getCurrentPosition() async {
@@ -74,8 +73,8 @@ class LocationSettingView extends StatelessWidget {
 
               // 지도 로딩 후 다이얼로그와 바텀시트 표시
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                showInitialDialog(context);
                 showBottomSheet(context);
+                showInitialDialog(context);
               });
 
               return Center(
@@ -308,6 +307,10 @@ class LocationSettingView extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isDismissible: false,
+      isScrollControlled: false,
+      enableDrag: false,
+
+      showDragHandle: false, //아래로 슬라이드 해서 바텀시트 닫는 변수
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),

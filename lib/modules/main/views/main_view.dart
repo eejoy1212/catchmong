@@ -8,7 +8,6 @@ import 'package:catchmong/widget/bar/qr_appbar.dart';
 import 'package:catchmong/widget/bar/search_appbar.dart';
 import 'package:catchmong/widget/card/MainCard.dart';
 import 'package:catchmong/widget/card/ReviewCard.dart';
-import 'package:catchmong/widget/card/StoreGiftCard.dart';
 import 'package:catchmong/widget/card/hot-type-card.dart';
 import 'package:catchmong/widget/card/restaurant-type-card.dart';
 import 'package:catchmong/widget/chip/page-indicator.dart';
@@ -17,38 +16,35 @@ import 'package:catchmong/widget/content/partner_content.dart';
 import 'package:catchmong/widget/content/qr_camera_content.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:catchmong/modules/bottom_nav/bottom_nav_controller.dart';
 
 class MainScreen extends StatelessWidget {
-  final BottomNavController _controller = Get.put(BottomNavController());
+  final BottomNavController bottomNavController =
+      Get.find<BottomNavController>();
 
   final List<Widget> _pages = [
     MainView(),
     PartnerContent(),
     MapContent(),
     QrCameraContent(),
-    MyPageView()
+    MyPageView(),
   ];
-  final List<PreferredSizeWidget> _appbars = [
-    MainViewAppbar(),
-    SearchAppbar(),
-    MapAppbar(),
-    QrAppbar(),
-    MypageAppbar()
-  ];
+
   @override
   Widget build(BuildContext context) {
     return Obx(() => Scaffold(
-          body: _pages[_controller.selectedIndex.value],
-          appBar: _appbars[_controller.selectedIndex.value],
+          body: IndexedStack(
+            index: bottomNavController.selectedIndex.value,
+            children: _pages,
+          ),
+          appBar: _getAppBar(bottomNavController.selectedIndex.value),
           bottomNavigationBar: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed, // 라벨이 항상 보이도록 설정
+            type: BottomNavigationBarType.fixed,
             selectedItemColor: CatchmongColors.gray400,
-            currentIndex: _controller.selectedIndex.value,
-            onTap: _controller.onItemTapped,
+            currentIndex: bottomNavController.selectedIndex.value,
+            onTap: bottomNavController.onItemTapped,
             items: [
               BottomNavigationBarItem(
-                activeIcon:
-                    Image.asset('assets/images/bottom-home-selected.png'),
                 icon: Image.asset('assets/images/bottom-home.png'),
                 label: '홈',
               ),
@@ -57,8 +53,6 @@ class MainScreen extends StatelessWidget {
                 label: '검색',
               ),
               BottomNavigationBarItem(
-                activeIcon:
-                    Image.asset('assets/images/bottom-pin-selected.png'),
                 icon: Image.asset('assets/images/bottom-pin.png'),
                 label: '지도',
               ),
@@ -73,6 +67,17 @@ class MainScreen extends StatelessWidget {
             ],
           ),
         ));
+  }
+
+  PreferredSizeWidget _getAppBar(int index) {
+    final List<PreferredSizeWidget> appbars = [
+      MainViewAppbar(),
+      SearchAppbar(),
+      MapAppbar(),
+      QrAppbar(),
+      MypageAppbar(),
+    ];
+    return appbars[index];
   }
 }
 

@@ -18,6 +18,7 @@ import 'package:catchmong/modules/mypage/bindings/mypage_binding.dart';
 import 'package:catchmong/modules/mypage/views/my_purchase_view.dart';
 import 'package:catchmong/modules/mypage/views/my_write_view.dart';
 import 'package:catchmong/modules/mypage/views/mypage_setting.dart';
+import 'package:catchmong/modules/mypage/views/mypage_view.dart';
 import 'package:catchmong/modules/mypage/views/profile_edit_view.dart';
 import 'package:catchmong/modules/partner/bindings/partner-binding.dart';
 import 'package:catchmong/modules/partner/views/partner-show-view.dart';
@@ -26,6 +27,9 @@ import 'package:catchmong/modules/search/views/search_view.dart';
 import 'package:catchmong/modules/signup/bindings/signup_binding.dart';
 import 'package:catchmong/modules/signup/views/certi_view.dart';
 import 'package:catchmong/modules/signup/views/signup_view.dart';
+import 'package:catchmong/widget/content/map_content.dart';
+import 'package:catchmong/widget/content/partner_content.dart';
+import 'package:catchmong/widget/content/qr_camera_content.dart';
 import 'package:get/get.dart';
 
 class AppPages {
@@ -36,91 +40,96 @@ class AppPages {
     GetPage(
       name: '/login',
       page: () => LoginView(),
-      binding: LoginBinding(),
     ),
     GetPage(
       name: '/loading',
       page: () => LoadingView(),
-      binding: LoadingBinding(),
     ),
     GetPage(
       name: '/signup',
       page: () => SignupView(),
-      binding: SignupBinding(),
     ),
     GetPage(
       name: '/certi',
       page: () => CertiView(),
-      binding: SignupBinding(),
     ),
     GetPage(
       name: '/location',
       page: () => const LocationView(),
-      binding: LocationBinding(),
     ),
     GetPage(
       name: '/location-search',
       page: () => LocationSearchView(),
-      binding: LocationBinding(),
     ),
     GetPage(
       name: '/location-add',
       page: () => LocationAddView(),
-      binding: LocationBinding(),
     ),
     GetPage(
       name: '/location-setting',
       page: () => LocationSettingView(),
-      binding: LocationBinding(),
     ),
     GetPage(
       name: '/main',
       page: () => MainScreen(),
-      binding: MainBinding(),
+      children: [
+        GetPage(
+          name: '/home',
+          page: () => MainView(),
+        ),
+        GetPage(
+          name: '/search',
+          page: () => PartnerContent(),
+        ),
+        GetPage(
+          name: '/map',
+          page: () => MapContent(),
+        ),
+        GetPage(
+          name: '/qr',
+          page: () => QrCameraContent(),
+        ),
+        GetPage(
+          name: '/mypage',
+          page: () => MyPageView(),
+        ),
+      ],
     ),
     GetPage(
       name: '/search',
       page: () => const SearchView(),
-      binding: SearchBinding(),
     ),
     GetPage(
       name: '/alarm',
       page: () => const AlarmView(),
-      binding: AlarmBinding(),
     ),
     GetPage(
       name: '/alarm-setting',
       page: () => const AlarmSettingView(),
-      binding: AlarmBinding(),
     ),
     GetPage(
       name: '/scrap',
       page: () => const ScrapView(),
-      binding: ScrapBinding(),
     ),
     GetPage(
       name: '/my-write',
       page: () => const MyWriteView(),
-      binding: MypageBinding(),
     ),
     GetPage(
       name: '/my-purchase',
       page: () => const MyPurchaseView(),
-      binding: MypageBinding(),
     ),
     GetPage(
       name: '/my-setting',
       page: () => MypageSetting(),
-      binding: MypageBinding(),
     ),
     GetPage(
       name: '/profile-edit',
       page: () => const ProfileEditView(),
-      binding: MypageBinding(),
     ),
     GetPage(
-        name: '/partner-show',
-        page: () => const PartnerShowView(),
-        binding: PartnerBinding()),
+      name: '/partner-show',
+      page: () => const PartnerShowView(),
+    ),
   ];
 }

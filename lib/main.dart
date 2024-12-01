@@ -1,12 +1,16 @@
 import 'dart:io';
 
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/modules/bottom_nav/bottom_nav_controller.dart';
+import 'package:catchmong/modules/loading/controllers/loading_controller.dart';
+import 'package:catchmong/modules/location/alarm/controllers/alarm_controller.dart';
+import 'package:catchmong/modules/location/controllers/location_controller.dart';
 import 'package:catchmong/modules/login/controllers/login_controller.dart';
 import 'package:catchmong/routes/app_pages.dart';
+import 'package:catchmong/widget/content/payback_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:get/get.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +20,11 @@ Future<void> main() async {
   // }
   await NaverMapSdk.instance.initialize(clientId: "9ue8t44jzd");
   Get.put(LoginController());
+  Get.put(LoadingController());
+  Get.put(LocationController());
+  Get.put(BottomNavController());
+  Get.put(AlarmController());
+  Get.put(PaybackController());
   runApp(MyApp());
 }
 

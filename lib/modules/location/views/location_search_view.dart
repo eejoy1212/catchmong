@@ -10,7 +10,7 @@ class LocationSearchView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final LocationController controller = Get.put(LocationController());
+    final LocationController controller = Get.find<LocationController>();
 
     DaumPostcodeSearch daumPostcodeSearch = DaumPostcodeSearch(
       onConsoleMessage: (_, message) => print(message),

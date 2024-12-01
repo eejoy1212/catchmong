@@ -11,7 +11,7 @@ class AlarmSettingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // 컨트롤러 인스턴스 생성
-    final AlarmController controller = Get.put(AlarmController());
+    final AlarmController controller = Get.find<AlarmController>();
 
     return Scaffold(
       backgroundColor: CatchmongColors.gray50,

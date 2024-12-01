@@ -118,7 +118,7 @@ class CertiView extends StatelessWidget {
                             : await loginController
                                 .postAdditionalInfo(); // 인증 성공 시 추가 정보 전송
                         res
-                            ? showConfirmDialog(context)
+                            ? showConfirmDialog(context, isLogin)
                             : showNoConfirmDialog(context);
                       }
                     },
@@ -133,7 +133,7 @@ class CertiView extends StatelessWidget {
   }
 }
 
-void showConfirmDialog(BuildContext context) {
+void showConfirmDialog(BuildContext context, bool isLogin) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -162,7 +162,7 @@ void showConfirmDialog(BuildContext context) {
                   )),
               InkWell(
                 onTap: () {
-                  Get.toNamed("/main");
+                  isLogin ? Get.back() : Get.toNamed("/loading");
                 },
                 child: Container(
                   alignment: Alignment.center,

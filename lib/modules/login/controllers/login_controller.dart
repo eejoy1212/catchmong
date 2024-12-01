@@ -289,120 +289,120 @@ class LoginController extends GetxController {
     }
   }
 
-  void showConfirmDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          titlePadding: EdgeInsets.all(0),
-          contentPadding: EdgeInsets.all(0),
-          content: SizedBox(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                    padding: EdgeInsets.symmetric(
-                      vertical: 20,
-                      horizontal: 16,
-                    ),
-                    child: Text(
-                      "인증되었습니다.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    )),
-                InkWell(
-                  onTap: () {
-                    Get.toNamed("/main");
-                  },
-                  child: Container(
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                        border: Border(
-                            top: BorderSide(
-                      color: CatchmongColors.gray_300,
-                    ))),
-                    height: 60,
-                    child: Text(
-                      "확인",
-                      style: TextStyle(
-                        color: CatchmongColors.blue1,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
+  // void showConfirmDialog(BuildContext context) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         backgroundColor: Colors.white,
+  //         titlePadding: EdgeInsets.all(0),
+  //         contentPadding: EdgeInsets.all(0),
+  //         content: SizedBox(
+  //           child: Column(
+  //             mainAxisSize: MainAxisSize.min,
+  //             mainAxisAlignment: MainAxisAlignment.center,
+  //             crossAxisAlignment: CrossAxisAlignment.center,
+  //             children: [
+  //               Container(
+  //                   padding: EdgeInsets.symmetric(
+  //                     vertical: 20,
+  //                     horizontal: 16,
+  //                   ),
+  //                   child: Text(
+  //                     "인증되었습니다.",
+  //                     textAlign: TextAlign.center,
+  //                     style: TextStyle(
+  //                       fontSize: 17,
+  //                       fontWeight: FontWeight.w400,
+  //                     ),
+  //                   )),
+  //               InkWell(
+  //                 onTap: () {
+  //                   Get.toNamed("/main");
+  //                 },
+  //                 child: Container(
+  //                   alignment: Alignment.center,
+  //                   decoration: BoxDecoration(
+  //                       border: Border(
+  //                           top: BorderSide(
+  //                     color: CatchmongColors.gray_300,
+  //                   ))),
+  //                   height: 60,
+  //                   child: Text(
+  //                     "확인",
+  //                     style: TextStyle(
+  //                       color: CatchmongColors.blue1,
+  //                       fontSize: 17,
+  //                       fontWeight: FontWeight.w600,
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 
-  void showNoConfirmDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          titlePadding: EdgeInsets.all(0),
-          contentPadding: EdgeInsets.all(0),
-          content: SizedBox(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                    padding: EdgeInsets.symmetric(
-                      vertical: 20,
-                      horizontal: 16,
-                    ),
-                    child: Text(
-                      "인증번호가 일치하지 않습니다.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    )),
-                InkWell(
-                  onTap: () {
-                    // 확인 버튼의 동작 추가
-                    Get.back();
-                  },
-                  child: Container(
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                        border: Border(
-                            top: BorderSide(
-                      color: CatchmongColors.gray_300,
-                    ))),
-                    height: 60,
-                    child: Text(
-                      "확인",
-                      style: TextStyle(
-                        color: CatchmongColors.blue1,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
+  // void showNoConfirmDialog(BuildContext context) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         backgroundColor: Colors.white,
+  //         titlePadding: EdgeInsets.all(0),
+  //         contentPadding: EdgeInsets.all(0),
+  //         content: SizedBox(
+  //           child: Column(
+  //             mainAxisSize: MainAxisSize.min,
+  //             mainAxisAlignment: MainAxisAlignment.center,
+  //             crossAxisAlignment: CrossAxisAlignment.center,
+  //             children: [
+  //               Container(
+  //                   padding: EdgeInsets.symmetric(
+  //                     vertical: 20,
+  //                     horizontal: 16,
+  //                   ),
+  //                   child: Text(
+  //                     "인증번호가 일치하지 않습니다.",
+  //                     textAlign: TextAlign.center,
+  //                     style: TextStyle(
+  //                       fontSize: 17,
+  //                       fontWeight: FontWeight.w400,
+  //                     ),
+  //                   )),
+  //               InkWell(
+  //                 onTap: () {
+  //                   // 확인 버튼의 동작 추가
+  //                   Get.back();
+  //                 },
+  //                 child: Container(
+  //                   alignment: Alignment.center,
+  //                   decoration: BoxDecoration(
+  //                       border: Border(
+  //                           top: BorderSide(
+  //                     color: CatchmongColors.gray_300,
+  //                   ))),
+  //                   height: 60,
+  //                   child: Text(
+  //                     "확인",
+  //                     style: TextStyle(
+  //                       color: CatchmongColors.blue1,
+  //                       fontSize: 17,
+  //                       fontWeight: FontWeight.w600,
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 
   Future<void> checkReferrer(String referrerNickname) async {
     var url = '$baseUrl/api/user/check-referrer';
@@ -641,7 +641,7 @@ class LoginController extends GetxController {
         body: jsonEncode({
           'idToken': auth[0], // Google ID Token
           'email': auth[1], // Google Email
-          'sub': "nlbka0wbcm", // auth[2], // Google User ID (sub)
+          'sub': "1234567890", // auth[2], // Google User ID (sub)
           'picture': auth[3] ?? "", // Profile Picture
           'name': auth[4], // Name
         }),
@@ -675,7 +675,7 @@ class LoginController extends GetxController {
             await getReferredInfos(user.value!.id);
             update();
             print("구글 로그인 성공 추천인 목록: ${referreds} ");
-            Get.toNamed("/main"); // 메인 페이지로 이동
+            Get.toNamed("/loading"); // 로딩후 메인 페이지로 이동
           }
         }
       } else {

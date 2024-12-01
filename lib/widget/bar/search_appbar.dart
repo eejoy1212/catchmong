@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 class SearchAppbar extends StatelessWidget implements PreferredSizeWidget {
   SearchAppbar({super.key});
 //임시
-  final BottomNavController _controller = Get.put(BottomNavController());
+  final BottomNavController _controller = Get.find<BottomNavController>();
   @override
   Widget build(BuildContext context) {
     return AppBar(

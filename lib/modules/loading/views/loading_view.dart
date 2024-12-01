@@ -6,7 +6,8 @@ import 'package:get/get.dart';
 class LoadingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final LoadingController controller = Get.put(LoadingController());
+    final LoadingController loadingController = Get.find<LoadingController>();
+    loadingController.goLocation();
     return Scaffold(
       body: Center(
         child: Container(
