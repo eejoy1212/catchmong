@@ -4,9 +4,15 @@ import 'package:flutter/material.dart';
 class LocationSlider extends StatelessWidget {
   final double currentValue;
   final void Function(double) onChange;
+  final void Function(double) onChangeEnd;
 
-  const LocationSlider(
-      {super.key, required this.currentValue, required this.onChange});
+  const LocationSlider({
+    super.key,
+    required this.currentValue,
+    required this.onChange,
+    required this.onChangeEnd,
+  });
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -14,17 +20,18 @@ class LocationSlider extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            '$currentValue m',
+            '${currentValue.toInt()} m', // 정수로 출력
             style: TextStyle(color: CatchmongColors.sub_gray, fontSize: 14),
           ),
           Expanded(
             child: Slider(
               value: currentValue,
               min: 100,
-              max: 2000, //임시, 모든지역이 어느정도여야하나,.,?
-              divisions: 10,
-              label: '${currentValue.toStringAsFixed(1)} km',
+              max: 100000,
+              divisions: 99900, // 최소값과 최대값 사이를 1m 단위로 나눔
+              label: '${currentValue.toInt()} m', // 슬라이더의 레이블도 정수로 표시
               onChanged: onChange,
+              onChangeEnd: onChangeEnd,
               thumbColor: Colors.white,
               activeColor: CatchmongColors.yellow_main,
             ),

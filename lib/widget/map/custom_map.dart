@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/modules/login/controllers/login_controller.dart';
 import 'package:flutter/material.dart';
@@ -21,18 +23,15 @@ class CustomMap extends StatelessWidget {
           zoom: 15,
         ),
       ),
-
       onMapReady: (naverMapController) async {
         // Fetch and add markers when map is ready
+        //아래는 커스텀이 안됨
+        // naverMapController
+        //     .setLocationTrackingMode(NLocationTrackingMode.follow);
         naverMapController.clearOverlays();
+
         List<NCircleOverlay> markers = await controller.getNearbyPartners();
         naverMapController.addOverlayAll(markers.toSet());
-
-        // controller.fetchPartnersMarkers().then((_) {
-        //   print("fetchPartnersMarkers");
-
-        // naverMapController.addOverlay(controller.markers[0]);
-        // });
       },
       // markers: controller.markers,
     );

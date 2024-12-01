@@ -10,7 +10,7 @@ class LocationController extends GetxController {
   RxBool isError = RxBool(false);
   RxString errorMessage = RxString("");
   Rxn<DataModel> newLocation = Rxn<DataModel>();
-  RxDouble radius = RxDouble(100);
+  RxDouble radius = RxDouble(100); //m단위임, 5200이면 5200m반경
   final String baseUrl = 'http://192.168.200.102:3000';
   @override
   void onInit() {
@@ -59,10 +59,10 @@ class LocationController extends GetxController {
   Future<List<NCircleOverlay>> getNearbyPartners() async {
     try {
       final partners = await fetchNearbyPartners(
-          latitude: 37.504198,
-          longitude: 127.047967,
-          radius: 5200 //radius.value,
-          );
+        latitude: 37.504198,
+        longitude: 127.047967,
+        radius: radius.value,
+      );
       print("내가 설정한 반경 내 파트너>>>${partners}//${partners.length}");
 
       // 마커 데이터 추가

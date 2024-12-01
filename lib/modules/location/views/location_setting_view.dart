@@ -263,6 +263,7 @@ class LocationSettingView extends StatelessWidget {
                                 onChange: (double val) {
                                   controller.radius.value = val;
                                 },
+                                onChangeEnd: (double) {},
                               )),
                         ),
                       ],
@@ -344,7 +345,7 @@ class LocationSettingView extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const SizedBox(
+              SizedBox(
                 height: 52,
                 child: Row(
                   children: [
@@ -359,13 +360,13 @@ class LocationSettingView extends StatelessWidget {
                                 color: CatchmongColors.sub_gray),
                           ),
                           SizedBox(height: 8),
-                          Text(
-                            "10개",
-                            style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: CatchmongColors.black),
-                          ),
+                          Obx(() => Text(
+                                controller.markers.length.toString(),
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: CatchmongColors.black),
+                              )),
                         ],
                       ),
                     ),
@@ -402,6 +403,10 @@ class LocationSettingView extends StatelessWidget {
                     currentValue: controller.radius.value,
                     onChange: (double val) {
                       controller.radius.value = val;
+                    },
+                    onChangeEnd: (double val) {
+                      print("슬라이더 에서 손 뗌!");
+                      controller.getNearbyPartners();
                     },
                   )),
               const SizedBox(height: 24),
