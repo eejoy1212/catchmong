@@ -35,7 +35,7 @@ import 'package:get/get.dart';
 
 class AppPages {
   // static const INITIAL = '/login';
-  static const INITIAL = '/scrap';
+  static const INITIAL = '/main';
 
   static final routes = [
     GetPage(

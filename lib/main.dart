@@ -6,6 +6,7 @@ import 'package:catchmong/modules/loading/controllers/loading_controller.dart';
 import 'package:catchmong/modules/location/alarm/controllers/alarm_controller.dart';
 import 'package:catchmong/modules/location/controllers/location_controller.dart';
 import 'package:catchmong/modules/login/controllers/login_controller.dart';
+import 'package:catchmong/modules/mypage/controllers/mypage_controller.dart';
 import 'package:catchmong/modules/partner/controllers/partner-controller.dart';
 import 'package:catchmong/routes/app_pages.dart';
 import 'package:catchmong/widget/content/payback_controller.dart';
@@ -27,6 +28,7 @@ Future<void> main() async {
   Get.put(AlarmController());
   Get.put(PaybackController());
   Get.put(PartnerController());
+  Get.put(MypageController());
   runApp(MyApp());
 }
 

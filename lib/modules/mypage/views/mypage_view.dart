@@ -2,6 +2,7 @@ import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/model/catchmong_user.dart';
 import 'package:catchmong/modules/login/controllers/login_controller.dart';
 import 'package:catchmong/modules/mypage/controllers/mypage_controller.dart';
+import 'package:catchmong/modules/mypage/views/mypage_setting.dart';
 import 'package:catchmong/widget/dialog/UseDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,7 +10,7 @@ import 'package:get/get.dart';
 
 class MyPageView extends StatelessWidget {
   final LoginController loginController = Get.find<LoginController>();
-  final MypageController myPageController = MypageController();
+  final MypageController myPageController = Get.find<MypageController>();
 
   @override
   Widget build(BuildContext context) {
