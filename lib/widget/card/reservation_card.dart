@@ -1,4 +1,6 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/modules/partner/controllers/partner-controller.dart';
+import 'package:catchmong/widget/bar/close_appbar.dart';
 import 'package:catchmong/widget/bar/default_appbar.dart';
 import 'package:catchmong/widget/button/YellowElevationBtn.dart';
 import 'package:catchmong/widget/button/outline_btn_with_icon.dart';
@@ -7,6 +9,7 @@ import 'package:catchmong/widget/button/yellow-toggle-btn.dart';
 import 'package:catchmong/widget/txtfield/border-txtfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ReservationCard extends StatelessWidget {
@@ -16,6 +19,7 @@ class ReservationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
+    final PartnerController controller = Get.find<PartnerController>();
     return InkWell(
       onTap: () {
         showReservationPerPartner(context);
@@ -97,6 +101,7 @@ class ReservationCard extends StatelessWidget {
 
 void showReservationPerPartner(BuildContext context) {
   double width = MediaQuery.of(context).size.width;
+  final PartnerController controller = Get.find<PartnerController>();
   showGeneralDialog(
     context: context,
     barrierDismissible: true, // true로 설정했으므로 barrierLabel 필요
@@ -142,7 +147,9 @@ void showReservationPerPartner(BuildContext context) {
               ),
               Expanded(
                 child: YellowElevationBtn(
-                  onPressed: () {},
+                  onPressed: () {
+                    showReservationConfirm(context);
+                  },
                   title: Text("예약하기"),
                 ),
               ),
@@ -592,12 +599,311 @@ void showReservationPerPartner(BuildContext context) {
                                 ),
                               ),
                               // 정보 탭 내용
-                              ListView.builder(
-                                itemCount: 5,
-                                itemBuilder: (context, index) {
-                                  return Text("data");
-                                },
-                              ),
+
+                              Container(
+                                width: width,
+                                color: CatchmongColors.gray50,
+                                child: Column(
+                                  children: [
+                                    //안내문구
+                                    Container(
+                                      color: Colors.white,
+                                      padding: EdgeInsets.all(20),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "평일 예약(11시30분~20시00분)",
+                                            style: TextStyle(
+                                              color: CatchmongColors.gray_800,
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: 20,
+                                          ),
+                                          Text(
+                                            "*예약은 최소 1시간전 시간부터 가능합니다. 예약 시간맞춰서 방문 부탁드립니다. *예약시 이탈리아 최고급 탄산수(1병)를 서비스로 드리고 있습니다! 노쇼 혹은 당일취소는 저희들뿐 아니라 다른 고객분들께 피해가 됩니다. 신중하게 예약하시길 부탁드립니다!",
+                                            maxLines: 6, // 최대 줄 수
+                                            overflow: TextOverflow.ellipsis,
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 20,
+                                    ),
+                                    //예약시 확인해주세요
+                                    Container(
+                                      color: Colors.white,
+                                      padding: EdgeInsets.all(20),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "예약 시 확인해주세요",
+                                            style: TextStyle(
+                                              color: CatchmongColors.gray_800,
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: 20,
+                                          ),
+                                          Text(
+                                            "※ 예약자 주의사항 : 예약일시 및 시간 변경할 경우 예약전날까지 연락주시는 분 한해서 매장상황 등 고려하여 변경해 드립니다. 당일예약건 시간 변경에 한해서는 10분 변경해 드리며 사전연락없이 예약시간이 경과될 경우. 자동 노쇼처리됨을 안내해 드리오니 매장 이용에 착오없으시길 바랍니다.",
+                                            maxLines: 6, // 최대 줄 수
+                                            overflow: TextOverflow.ellipsis,
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 20,
+                                    ),
+                                    //가게정보
+                                    Container(
+                                      color: Colors.white,
+                                      padding: EdgeInsets.all(20),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "가게 정보",
+                                            style: TextStyle(
+                                              color: CatchmongColors.gray_800,
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: 20,
+                                          ),
+                                          Column(
+                                            children: [
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  SizedBox(
+                                                      width: 120,
+                                                      child: Text("상호",
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            color:
+                                                                CatchmongColors
+                                                                    .black,
+                                                          ))),
+                                                  Expanded(
+                                                      child: Text("호박꽃마차 대전점",
+                                                          softWrap: true,
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            color:
+                                                                CatchmongColors
+                                                                    .black,
+                                                          )))
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                height: 8,
+                                              ),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  SizedBox(
+                                                      width: 120,
+                                                      child: Text("상호",
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            color:
+                                                                CatchmongColors
+                                                                    .black,
+                                                          ))),
+                                                  Expanded(
+                                                      child: Text("호박꽃마차 대전점",
+                                                          softWrap: true,
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            color:
+                                                                CatchmongColors
+                                                                    .black,
+                                                          )))
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                height: 8,
+                                              ),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  SizedBox(
+                                                      width: 120,
+                                                      child: Text("대표자명",
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            color:
+                                                                CatchmongColors
+                                                                    .black,
+                                                          ))),
+                                                  Expanded(
+                                                      child: Text("가게주",
+                                                          softWrap: true,
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            color:
+                                                                CatchmongColors
+                                                                    .black,
+                                                          )))
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                height: 8,
+                                              ),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  SizedBox(
+                                                      width: 120,
+                                                      child: Text("소재지",
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            color:
+                                                                CatchmongColors
+                                                                    .black,
+                                                          ))),
+                                                  Expanded(
+                                                      child: Text(
+                                                          "경기도 파주시 목동동 1110, 1층 피셔맨스키친 파주운정점(경기도 파주시 심학산로423번길 30, 1층 피셔맨스키친 파주운정점)",
+                                                          softWrap: true,
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            color:
+                                                                CatchmongColors
+                                                                    .black,
+                                                          )))
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                height: 8,
+                                              ),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  SizedBox(
+                                                      width: 120,
+                                                      child: Text("사업자번호",
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            color:
+                                                                CatchmongColors
+                                                                    .black,
+                                                          ))),
+                                                  Expanded(
+                                                      child: Text(
+                                                          "219-43-00799",
+                                                          softWrap: true,
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            color:
+                                                                CatchmongColors
+                                                                    .black,
+                                                          )))
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                height: 8,
+                                              ),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  SizedBox(
+                                                      width: 120,
+                                                      child: Text("연락처",
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            color:
+                                                                CatchmongColors
+                                                                    .black,
+                                                          ))),
+                                                  Expanded(
+                                                      child: InkWell(
+                                                    onTap: () {
+                                                      _makePhoneCall(
+                                                          "010-7596-6578");
+                                                    },
+                                                    child: Text("031-945-5969",
+                                                        softWrap: true,
+                                                        style: TextStyle(
+                                                          fontSize: 16,
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                          color: Colors
+                                                              .blue, // 전화번호에 색상 추가하여 클릭 가능하게 보이도록 설정
+                                                          decoration: TextDecoration
+                                                              .underline, // 밑줄 추가
+                                                        )),
+                                                  ))
+                                                ],
+                                              ),
+                                            ],
+                                          )
+                                        ],
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              )
                             ],
                           ),
                         ),
@@ -676,6 +982,250 @@ void showReservationPerPartner(BuildContext context) {
                     ],
                   ),
                 )
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
+
+void showReservationConfirm(BuildContext context) {
+  double width = MediaQuery.of(context).size.width;
+  final PartnerController controller = Get.find<PartnerController>();
+  showGeneralDialog(
+    context: context,
+    barrierDismissible: true, // true로 설정했으므로 barrierLabel 필요
+    barrierLabel: "닫기", // 접근성 레이블 설정
+    barrierColor: Colors.black54, // 배경 색상
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return Scaffold(
+        backgroundColor: CatchmongColors.gray50,
+        appBar: CloseAppbar(title: "예약완료"),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Container(
+                  color: Colors.white,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          SvgPicture.asset('assets/images/file-edit-icon.svg'),
+                          Text(
+                            "신청 후 확정 매장",
+                            style: TextStyle(
+                              color: CatchmongColors.gray_800,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Text(
+                        "업체에서 확인 후 예약을 확정합니다.",
+                        style: TextStyle(
+                          color: CatchmongColors.gray_800,
+                          fontWeight: FontWeight.w400,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: 200, // 카드의 높이와 동일하게 설정
+
+                    child: Image.asset(
+                      "assets/images/temp-banner.jpg",
+                      width: MediaQuery.of(context).size.width,
+                      fit: BoxFit.cover,
+                    )),
+                //예약 안내문
+                Container(
+                  color: Colors.white,
+                  width: MediaQuery.of(context).size.width,
+                  height: 128,
+                  padding: EdgeInsets.only(
+                    left: 20,
+                    top: 10,
+                    right: 20,
+                    bottom: 20,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "평일 예약(11시30분~20시00분)",
+                        style: TextStyle(
+                          color: CatchmongColors.gray_800,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 8,
+                      ),
+                      Text(
+                        "*예약은 최소 1시간전 시간부터 가능합니다.\n예약 시간맞춰서 방문 부탁드립니다.\n*예약시 이탈리아 최고급 탄산수(1병)를 서비스로 드리고 있습니다!\n노쇼 혹은 당일취소는 저희들뿐 아니라 다른 고객분들께 피해가 됩니다.\n신중하게 예약하시길 부탁드립니다!",
+                        style: TextStyle(
+                          color: CatchmongColors.gray_800,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        maxLines: 3, // 최대 줄 수
+                        overflow: TextOverflow.ellipsis, // 초과된 텍스트를 ...로 표시
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+//예약 완료했을때 뜨는거
+                Container(
+                  width: width,
+                  color: Colors.white,
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 20,
+                      ),
+                      SvgPicture.asset('assets/images/check.svg'),
+                      SizedBox(
+                        height: 12,
+                      ),
+                      Text(
+                        "마이페이지에서 내 예약을 확인하세요!",
+                        style: TextStyle(
+                          color: CatchmongColors.sub_gray,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 16,
+                      ),
+                      Container(
+                        width: width,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                            border: Border.all(
+                              color: CatchmongColors.gray100,
+                            )),
+                        padding: EdgeInsets.all(16),
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 20,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "평일 예약(11시30분~20시00분)",
+                              style: TextStyle(
+                                color: CatchmongColors.gray_800,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16,
+                              ),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Row(
+                              children: [
+                                SizedBox(
+                                    width: 120,
+                                    child: Text(
+                                      "일정",
+                                      style: TextStyle(
+                                        color: CatchmongColors.black,
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: 14,
+                                      ),
+                                    )),
+                                Text(
+                                  "12.5 (목) 11:30",
+                                  style: TextStyle(
+                                    color: CatchmongColors.black,
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 14,
+                                  ),
+                                )
+                              ],
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Row(
+                              children: [
+                                SizedBox(
+                                    width: 120,
+                                    child: Text(
+                                      "인원",
+                                      style: TextStyle(
+                                        color: CatchmongColors.black,
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: 14,
+                                      ),
+                                    )),
+                                Text(
+                                  "2명",
+                                  style: TextStyle(
+                                    color: CatchmongColors.black,
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 14,
+                                  ),
+                                )
+                              ],
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Row(
+                              children: [
+                                SizedBox(
+                                    width: 120,
+                                    child: Text(
+                                      "요청사항",
+                                      style: TextStyle(
+                                        color: CatchmongColors.black,
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: 14,
+                                      ),
+                                    )),
+                                Expanded(
+                                  child: Text(
+                                    "유아의자 2개, 아기식기 2세트 부탁드립니다.",
+                                    softWrap: true,
+                                    style: TextStyle(
+                                      color: CatchmongColors.black,
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                )
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 36,
+                      )
+                    ],
+                  ),
+                ),
               ],
             ),
           ),

@@ -8,6 +8,7 @@ import 'package:catchmong/widget/button/outlined_btn.dart';
 import 'package:catchmong/widget/button/phone-call-btn.dart';
 import 'package:catchmong/widget/card/partner-review-card.dart';
 import 'package:catchmong/widget/card/reservation_card.dart';
+import 'package:catchmong/widget/chip/menu_chip.dart';
 import 'package:catchmong/widget/chip/partner-content-chip.dart';
 import 'package:catchmong/widget/status/star_status.dart';
 import 'package:flutter/material.dart';
@@ -640,11 +641,144 @@ class PartnerShowView extends StatelessWidget {
                       child: TabBarView(
                         children: [
                           // 메뉴 탭 내용
-                          Center(
-                            child: Text(
-                              "메뉴 정보가 없습니다.",
-                              style:
-                                  TextStyle(fontSize: 16, color: Colors.grey),
+                          Container(
+                            //
+                            child: Column(
+                              children: [
+                                //칩
+                                Container(
+                                  color: Colors.white,
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 12,
+                                      horizontal: 20), // 위아래 여백 추가
+                                  child: SizedBox(
+                                    height: 36, // ListView 높이 설정 (칩의 높이만큼 설정)
+                                    child: ListView.builder(
+                                      scrollDirection:
+                                          Axis.horizontal, // 가로 스크롤 설정
+                                      itemCount: 4, // 칩의 개수
+                                      itemBuilder: (context, index) {
+                                        String getTitle() {
+                                          switch (index) {
+                                            case 0:
+                                              return "에피타이저";
+                                            case 1:
+                                              return "메인 메뉴";
+                                            case 2:
+                                              return "사이드";
+                                            case 3:
+                                              return "음료&주류";
+                                            default:
+                                              return "";
+                                          }
+                                        }
+
+                                        return Container(
+                                            margin: EdgeInsets.only(right: 8),
+                                            child: MenuChip(title: getTitle()));
+                                      },
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "에피타이저",
+                                        style: TextStyle(
+                                          color: CatchmongColors.gray_800,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      Text(
+                                        "8,000 - 13,000원",
+                                        style: TextStyle(
+                                          color: CatchmongColors.gray400,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                //메뉴 카드
+                                Container(
+                                  width: MediaQuery.of(context).size.width,
+                                  decoration: BoxDecoration(
+                                      border: Border(
+                                          bottom: BorderSide(
+                                    color: CatchmongColors.gray50,
+                                  ))),
+                                  padding: EdgeInsets.only(
+                                    left: 20,
+                                    top: 16,
+                                    right: 20,
+                                    bottom: 32,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      //이미지
+                                      Container(
+                                        width: 100,
+                                        height: 100,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(8)),
+                                          border: Border.all(
+                                            color: CatchmongColors.gray50,
+                                            width: 1,
+                                          ), // 외부 테두리
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                              8), // 이미지를 둥글게 자르기
+                                          child: Image.asset(
+                                            'assets/images/review2.jpg', // 이미지 경로
+                                            fit: BoxFit
+                                                .cover, // 이미지가 Container 크기에 맞게 자르기
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 8,
+                                      ),
+                                      Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "메뉴 명",
+                                            style: TextStyle(
+                                              color: CatchmongColors.black,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: 8,
+                                          ),
+                                          Text(
+                                            "12,800원",
+                                            style: TextStyle(
+                                              color: CatchmongColors.black,
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          )
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                )
+                              ],
                             ),
                           ),
                           // 리뷰 탭 내용
