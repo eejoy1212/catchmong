@@ -16,7 +16,12 @@ class NaverBtn extends StatelessWidget {
             height: 52, // 적절한 크기로 설정
           ),
           SizedBox(height: 8), // 텍스트와 이미지 사이의 간격
-          Text('네이버로\n시작하기'),
+          Text(
+            '네이버로\n시작하기',
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
         ],
       ),
     );

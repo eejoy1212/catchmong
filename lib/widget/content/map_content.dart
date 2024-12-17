@@ -39,9 +39,10 @@ class MapContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      showBottomSheet(context);
-    });
+    //지우지 마세요
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   showBottomSheet(context);
+    // });
     return SafeArea(
       child: FutureBuilder<NLatLng>(
         future: _getCurrentPosition(),

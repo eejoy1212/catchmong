@@ -1,4 +1,5 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/widget/bar/default_appbar.dart';
 import 'package:catchmong/widget/button/AppbarBackBtn.dart';
 import 'package:catchmong/widget/button/alert-btn.dart';
 import 'package:catchmong/widget/button/location-copy-btn.dart';
@@ -6,9 +7,11 @@ import 'package:catchmong/widget/button/more-btn.dart';
 import 'package:catchmong/widget/button/outlined_btn.dart';
 import 'package:catchmong/widget/button/phone-call-btn.dart';
 import 'package:catchmong/widget/card/partner-review-card.dart';
+import 'package:catchmong/widget/card/reservation_card.dart';
 import 'package:catchmong/widget/chip/partner-content-chip.dart';
 import 'package:catchmong/widget/status/star_status.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 class PartnerShowView extends StatelessWidget {
@@ -515,13 +518,148 @@ class PartnerShowView extends StatelessWidget {
                   right: 20,
                   bottom: 20,
                 ),
-                child: OutlinedBtn(title: "예약하기", onPress: () {})),
+                child: OutlinedBtn(
+                    title: "예약하기",
+                    onPress: () {
+                      //파트너 아이디 넘기기
+                      // Get.toNamed("/reservation", parameters: {"partner": "2"});
+                      //full size 다이얼로그
+                      showGeneralDialog(
+                        context: context,
+                        barrierDismissible:
+                            true, // true로 설정했으므로 barrierLabel 필요
+                        barrierLabel: "닫기", // 접근성 레이블 설정
+                        barrierColor: Colors.black54, // 배경 색상
+                        pageBuilder: (context, animation, secondaryAnimation) {
+                          return Scaffold(
+                            backgroundColor: Colors.white,
+                            appBar: DefaultAppbar(title: "예약"),
+                            body: SafeArea(
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                        vertical: 12,
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              SvgPicture.asset(
+                                                  'assets/images/file-edit-icon.svg'),
+                                              Text(
+                                                "신청 후 확정 매장",
+                                                style: TextStyle(
+                                                  color:
+                                                      CatchmongColors.gray_800,
+                                                  fontWeight: FontWeight.w700,
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(
+                                            width: 10,
+                                          ),
+                                          Text(
+                                            "업체에서 확인 후 예약을 확정합니다.",
+                                            style: TextStyle(
+                                              color: CatchmongColors.gray_800,
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    ListView.builder(
+                                      shrinkWrap:
+                                          true, // 부모 위젯의 높이를 넘어가지 않도록 설정
+                                      physics:
+                                          NeverScrollableScrollPhysics(), // 스크롤 비활성화 (필요시)
+                                      itemCount: 6, // 아이템 개수 설정
+                                      itemBuilder: (context, index) {
+                                        return Container(
+                                          margin: EdgeInsets.only(
+                                              bottom: 12), // 각 아이템의 간격 추가
+                                          decoration: BoxDecoration(
+                                            border: Border(
+                                              top: BorderSide(
+                                                  color:
+                                                      CatchmongColors.gray50),
+                                            ),
+                                          ),
+                                          child: ReservationCard(
+                                            imageSrc: '',
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    })),
             Divider(
               color: CatchmongColors.gray50,
             ),
-
-            Column(
-              children: List.generate(10, (index) => PartnerReviewCard()),
+            Container(
+              color: Colors.white,
+              child: DefaultTabController(
+                length: 2, // 탭 개수: 메뉴와 리뷰
+                child: Column(
+                  children: [
+                    // 탭바
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      decoration: BoxDecoration(
+                          border: Border(
+                              bottom: BorderSide(
+                        color: CatchmongColors.gray50,
+                      ))),
+                      child: TabBar(
+                        indicatorColor: CatchmongColors.gray_800,
+                        labelColor: CatchmongColors.gray_800,
+                        tabs: [
+                          Tab(text: "메뉴"),
+                          Tab(text: "리뷰"),
+                        ],
+                      ),
+                    ),
+                    // 탭바 뷰
+                    SizedBox(
+                      height: 400, // 탭 뷰 높이 설정
+                      child: TabBarView(
+                        children: [
+                          // 메뉴 탭 내용
+                          Center(
+                            child: Text(
+                              "메뉴 정보가 없습니다.",
+                              style:
+                                  TextStyle(fontSize: 16, color: Colors.grey),
+                            ),
+                          ),
+                          // 리뷰 탭 내용
+                          ListView.builder(
+                            itemCount: 5,
+                            itemBuilder: (context, index) {
+                              return PartnerReviewCard();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),

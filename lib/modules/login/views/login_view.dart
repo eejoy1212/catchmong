@@ -1,9 +1,11 @@
+import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/widget/button/GoogleBtn.dart';
 import 'package:catchmong/widget/button/KakaoBtn.dart';
 import 'package:catchmong/widget/button/NaverBtn.dart';
 import 'package:catchmong/widget/dialog/UseDialog.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import '../controllers/login_controller.dart';
 
@@ -13,6 +15,7 @@ class LoginView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: CatchmongColors.yellow_main,
       body: Center(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -20,9 +23,8 @@ class LoginView extends StatelessWidget {
           children: [
             Container(
               margin: EdgeInsets.symmetric(horizontal: 40),
-              child: Image.asset(
-                'assets/images/login-logo.png',
-                // width: 360,
+              child: SvgPicture.asset(
+                "assets/images/login-logo.svg", // 동적으로 아이콘 경로 선택
               ),
             ),
             Container(
@@ -31,9 +33,8 @@ class LoginView extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  Image.asset(
-                    'assets/images/three-second.png',
-                    width: 115,
+                  SvgPicture.asset(
+                    "assets/images/three-second.svg", // 동적으로 아이콘 경로 선택
                   ),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -60,9 +61,8 @@ class LoginView extends StatelessWidget {
                   Obx(() {
                     return Opacity(
                       opacity: controller.showLatestLoginImage.value ? 1 : 0,
-                      child: Image.asset(
-                        'assets/images/latest-login.png',
-                        width: 115,
+                      child: SvgPicture.asset(
+                        "assets/images/latest-login.svg", // 동적으로 아이콘 경로 선택
                       ),
                     );
                   }),
@@ -74,6 +74,9 @@ class LoginView extends StatelessWidget {
                       Text.rich(
                         TextSpan(
                           text: "회원가입 없이 소셜 계정을 통해 바로 이용 가능하며 첫 로그인 시 ",
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
                           children: [
                             TextSpan(
                               text: "이용약관",

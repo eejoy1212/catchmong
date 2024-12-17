@@ -35,10 +35,10 @@ class MapChip extends StatelessWidget {
           right: 8,
         ),
         decoration: BoxDecoration(
-            color: isActive ? CatchmongColors.yellow_line : Colors.white,
+            color: isActive ? CatchmongColors.yellow_main : Colors.white,
             border: Border.all(
                 color: isActive
-                    ? CatchmongColors.yellow_line
+                    ? CatchmongColors.yellow_main
                     : CatchmongColors.gray),
             borderRadius: BorderRadius.all(Radius.circular(20))),
         child: Row(

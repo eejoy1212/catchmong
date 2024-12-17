@@ -20,7 +20,7 @@ class YellowElevationBtn extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed, // 전달받은 onPressed 콜백을 사용
         style: ElevatedButton.styleFrom(
-          backgroundColor: CatchmongColors.yellow_line, // 버튼 배경색 노랑으로 설정
+          backgroundColor: CatchmongColors.yellow_main, // 버튼 배경색 노랑으로 설정
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8), // 보더 반경 설정
           ),

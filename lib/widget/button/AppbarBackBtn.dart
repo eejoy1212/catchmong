@@ -12,7 +12,9 @@ class AppbarBackBtn extends StatelessWidget {
         if (onTap != null) {
           onTap!(); // onTap이 전달된 경우 실행
         } else {
-          Get.back(); // onTap이 전달되지 않은 경우 Get.back() 호출
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Get.back();
+          });
         }
       },
       child: Image.asset(

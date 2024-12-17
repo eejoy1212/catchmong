@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 class AlarmBtn extends StatelessWidget {
@@ -10,6 +11,6 @@ class AlarmBtn extends StatelessWidget {
         onTap: () {
           Get.toNamed('/alarm');
         },
-        child: Image.asset('assets/images/alarm-icon.png'));
+        child: SvgPicture.asset('assets/images/alarm-icon.svg'));
   }
 }

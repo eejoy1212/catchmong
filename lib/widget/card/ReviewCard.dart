@@ -1,6 +1,7 @@
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/widget/chip/TagChip.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class ReviewCard extends StatelessWidget {
   @override
@@ -142,7 +143,7 @@ class ReviewCard extends StatelessWidget {
                     ),
                     Row(
                       children: [
-                        Image.asset('assets/images/review-star.png'),
+                        SvgPicture.asset('assets/images/review-star.svg'),
                         SizedBox(
                           width: 4,
                         ),

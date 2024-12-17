@@ -25,7 +25,7 @@ class YellowToggleBtn extends StatelessWidget {
       height: height,
       margin: margin,
       decoration: BoxDecoration(
-          color: isSelected ? CatchmongColors.yellow_line : Colors.white,
+          color: isSelected ? CatchmongColors.yellow_main : Colors.white,
           borderRadius: BorderRadius.all(Radius.circular(8))),
       child: OutlinedButton(
           style: ButtonStyle(

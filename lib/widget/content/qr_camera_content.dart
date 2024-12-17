@@ -28,14 +28,15 @@ class QrCameraContent extends StatelessWidget {
           //     ),
           //   ),
           // ),
-          // Expanded(
-          //   flex: 1,
-          //   child: Obx(() => Center(
-          //         child: controller.result.value != null
-          //             ? Text('스캔 결과: ${controller.result.value}')
-          //             : Text('스캔 대기 중...'),
-          //       )),
-          // ),
+          Text("data"),
+          Expanded(
+            flex: 1,
+            child: Obx(() => Center(
+                  child: controller.result.value != null
+                      ? Text('스캔 결과: ${controller.result.value}')
+                      : Text('스캔 대기 중...'),
+                )),
+          ),
         ],
       ),
     );

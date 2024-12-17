@@ -3,6 +3,7 @@ import 'package:catchmong/widget/button/AppbarBackBtn.dart';
 import 'package:catchmong/widget/content/activity_content.dart';
 import 'package:catchmong/widget/content/alarm_content.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 class AlarmView extends StatelessWidget {
@@ -22,7 +23,7 @@ class AlarmView extends StatelessWidget {
                   onTap: () {
                     Get.toNamed('/alarm-setting');
                   },
-                  child: Image.asset('assets/images/setting-icon.png')),
+                  child: SvgPicture.asset('assets/images/setting-icon.svg')),
             )
           ],
           leading: const AppbarBackBtn(),

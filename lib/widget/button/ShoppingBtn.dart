@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 class ShoppingBtn extends StatelessWidget {
@@ -10,6 +11,6 @@ class ShoppingBtn extends StatelessWidget {
         onTap: () {
           Get.toNamed('/scrap');
         },
-        child: Image.asset('assets/images/shopping-icon.png'));
+        child: SvgPicture.asset('assets/images/shopping-icon.svg'));
   }
 }

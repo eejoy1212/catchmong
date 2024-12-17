@@ -15,69 +15,86 @@ import 'package:catchmong/widget/content/map_content.dart';
 import 'package:catchmong/widget/content/partner_content.dart';
 import 'package:catchmong/widget/content/qr_camera_content.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:catchmong/modules/bottom_nav/bottom_nav_controller.dart';
 
 class MainScreen extends StatelessWidget {
   final BottomNavController bottomNavController =
       Get.find<BottomNavController>();
 
-  final List<Widget> _pages = [
-    MainView(),
-    PartnerContent(),
-    MapContent(),
-    QrCameraContent(),
-    MyPageView(),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    return Obx(() => Scaffold(
-          body: IndexedStack(
-            index: bottomNavController.selectedIndex.value,
-            children: _pages,
-          ),
-          appBar: _getAppBar(bottomNavController.selectedIndex.value),
-          bottomNavigationBar: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            selectedItemColor: CatchmongColors.gray400,
-            currentIndex: bottomNavController.selectedIndex.value,
-            onTap: bottomNavController.onItemTapped,
-            items: [
-              BottomNavigationBarItem(
-                icon: Image.asset('assets/images/bottom-home.png'),
-                label: '홈',
-              ),
-              BottomNavigationBarItem(
-                icon: Image.asset('assets/images/bottom-search.png'),
-                label: '검색',
-              ),
-              BottomNavigationBarItem(
-                icon: Image.asset('assets/images/bottom-pin.png'),
-                label: '지도',
-              ),
-              BottomNavigationBarItem(
-                icon: Image.asset('assets/images/bottom-payback.png'),
-                label: '페이백',
-              ),
-              BottomNavigationBarItem(
-                icon: Image.asset('assets/images/bottom-my.png'),
-                label: '마이페이지',
-              ),
-            ],
-          ),
-        ));
+    return Obx(() {
+      int currentIndex = bottomNavController.selectedIndex.value;
+      return Scaffold(
+        appBar: _getAppBar(currentIndex), // 선택된 인덱스에 따라 AppBar 변경
+        body: _getBody(currentIndex), // 선택된 인덱스에 따라 Body 변경
+        bottomNavigationBar: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          selectedItemColor: CatchmongColors.gray400,
+          currentIndex: currentIndex,
+          onTap: bottomNavController.onItemTapped,
+          items: [
+            BottomNavigationBarItem(
+              icon: Image.asset('assets/images/bottom-home.png'),
+              label: '홈',
+            ),
+            BottomNavigationBarItem(
+              icon: Image.asset('assets/images/bottom-search.png'),
+              label: '검색',
+            ),
+            BottomNavigationBarItem(
+              icon: Image.asset('assets/images/bottom-pin.png'),
+              label: '지도',
+            ),
+            BottomNavigationBarItem(
+              icon: Image.asset('assets/images/bottom-payback.png'),
+              label: '페이백',
+            ),
+            BottomNavigationBarItem(
+              icon: Image.asset('assets/images/bottom-my.png'),
+              label: '마이페이지',
+            ),
+          ],
+        ),
+      );
+    });
   }
 
+  // 선택된 페이지 반환
+  Widget _getBody(int index) {
+    switch (index) {
+      case 0:
+        return MainView();
+      case 1:
+        return PartnerContent();
+      case 2:
+        return MapContent();
+      case 3:
+        return QrCameraContent();
+      case 4:
+        return MyPageView();
+      default:
+        return MainView();
+    }
+  }
+
+  // 선택된 AppBar 반환
   PreferredSizeWidget _getAppBar(int index) {
-    final List<PreferredSizeWidget> appbars = [
-      MainViewAppbar(),
-      SearchAppbar(),
-      MapAppbar(),
-      QrAppbar(),
-      MypageAppbar(),
-    ];
-    return appbars[index];
+    switch (index) {
+      case 0:
+        return MainViewAppbar();
+      case 1:
+        return SearchAppbar();
+      case 2:
+        return MapAppbar();
+      case 3:
+        return QrAppbar();
+      case 4:
+        return MypageAppbar();
+      default:
+        return MainViewAppbar();
+    }
   }
 }
 
@@ -133,7 +150,7 @@ class MainView extends StatelessWidget {
                         Expanded(
                             child: Column(
                           children: [
-                            Image.asset('assets/images/partner.png'),
+                            SvgPicture.asset('assets/images/partner.svg'),
                             SizedBox(
                               height: 7,
                             ),
@@ -158,7 +175,7 @@ class MainView extends StatelessWidget {
                         Expanded(
                             child: Column(
                           children: [
-                            Image.asset('assets/images/payback.png'),
+                            SvgPicture.asset('assets/images/payback.svg'),
                             SizedBox(
                               height: 7,
                             ),
@@ -174,12 +191,12 @@ class MainView extends StatelessWidget {
                         Expanded(
                             child: Column(
                           children: [
-                            Image.asset('assets/images/register-store.png'),
+                            SvgPicture.asset('assets/images/signin.svg'),
                             SizedBox(
                               height: 7,
                             ),
                             Text(
-                              "입점신청",
+                              "가입신청",
                               style: TextStyle(
                                   color: CatchmongColors.black,
                                   fontSize: 14,

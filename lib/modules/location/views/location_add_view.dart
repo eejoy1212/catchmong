@@ -2,6 +2,7 @@ import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/widget/button/AppbarBackBtn.dart';
 import 'package:catchmong/widget/chip/map_chip.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 class LocationAddView extends StatelessWidget {
@@ -98,8 +99,8 @@ class LocationAddView extends StatelessWidget {
                         children: [
                           Opacity(
                               opacity: index == 0 ? 1 : 0,
-                              child: Image.asset(
-                                  'assets/images/location-arrow.png')),
+                              child: SvgPicture.asset(
+                                  'assets/images/location-arrow.svg')),
                           SizedBox(
                             width: 20,
                           ),

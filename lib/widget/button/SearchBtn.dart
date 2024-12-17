@@ -1,5 +1,6 @@
 import 'package:catchmong/modules/bottom_nav/bottom_nav_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 class SearchBtn extends StatelessWidget {
@@ -10,6 +11,6 @@ class SearchBtn extends StatelessWidget {
         onTap: () {
           // Get.toNamed('/search');
         },
-        child: Image.asset('assets/images/search-icon.png'));
+        child: SvgPicture.asset('assets/images/search-icon.svg'));
   }
 }

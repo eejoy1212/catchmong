@@ -2,6 +2,7 @@ import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/widget/bar/CatchmongSearchBar.dart';
 import 'package:catchmong/widget/chip/TagChip.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class PartnerContent extends StatelessWidget {
   const PartnerContent({super.key});
@@ -279,8 +280,8 @@ class PartnerContent extends StatelessWidget {
                                             ),
                                             Row(
                                               children: [
-                                                Image.asset(
-                                                    'assets/images/review-star.png'),
+                                                SvgPicture.asset(
+                                                    'assets/images/review-star.svg'),
                                                 SizedBox(
                                                   width: 4,
                                                 ),
@@ -309,8 +310,8 @@ class PartnerContent extends StatelessWidget {
                                             )
                                           ],
                                         ),
-                                        Image.asset(
-                                            'assets/images/pin_yellow.png')
+                                        SvgPicture.asset(
+                                            'assets/images/pin.svg'),
                                       ],
                                     ),
                                   ),

@@ -34,6 +34,9 @@ class GoogleBtn extends StatelessWidget {
           Text(
             '구글로\n시작하기',
             textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white,
+            ),
           ),
         ],
       ),

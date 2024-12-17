@@ -138,7 +138,7 @@ class InfoBtn extends StatelessWidget {
                   title: const Text(
                     "확인",
                     style: TextStyle(
-                      color: Colors.black,
+                      color: Colors.white,
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
                     ),

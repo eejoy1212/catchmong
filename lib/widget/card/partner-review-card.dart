@@ -1,6 +1,7 @@
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/widget/button/more-btn.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 class PartnerReviewCard extends StatelessWidget {
@@ -94,8 +95,8 @@ class PartnerReviewCard extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: List.generate(5, (index) {
-                          return Image.asset(
-                            'assets/images/review-star.png',
+                          return SvgPicture.asset(
+                            'assets/images/review-star.svg',
                           );
                         }),
                       ),
@@ -238,8 +239,8 @@ class PartnerReviewCard extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: List.generate(5, (index) {
-                              return Image.asset(
-                                'assets/images/review-star.png',
+                              return SvgPicture.asset(
+                                'assets/images/review-star.svg',
                               );
                             }),
                           ),

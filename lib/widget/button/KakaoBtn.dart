@@ -1,3 +1,4 @@
+import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:flutter/material.dart';
 
 class KakaoBtn extends StatelessWidget {
@@ -17,7 +18,12 @@ class KakaoBtn extends StatelessWidget {
             height: 52, // 적절한 크기로 설정
           ),
           SizedBox(height: 8), // 텍스트와 이미지 사이의 간격
-          Text('카카오로\n시작하기'),
+          Text(
+            '카카오로\n시작하기',
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
         ],
       ),
     );

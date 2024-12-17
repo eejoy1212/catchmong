@@ -11,7 +11,7 @@ class CatchmongColors {
   static const Color gray_800 = Color(0xFF333333);
   static const Color sub_gray = Color(0xFF333333);
   static const Color black = Color(0xFF17171B);
-  static const Color yellow_main = Color(0xFFFFDD25);
+  static const Color yellow_main = Color(0xFFFFA31F);
   static const Color yellow_line = Color(0xFFF5C626);
   static const Color green_line = Color(0xFF285442);
   static const Color red = Color(0xFFF53333);

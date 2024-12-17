@@ -65,22 +65,71 @@ class ScrapPartnerContent extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
-                                  Text("영업중"),
+                                  Text(
+                                    "영업중",
+                                    style: TextStyle(
+                                      color: CatchmongColors.sub_gray,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 14,
+                                    ),
+                                  ),
                                   SizedBox(
                                     width: 4,
                                   ),
-                                  Text("•"),
-                                  Text("한식"),
+                                  Text(
+                                    "•",
+                                    style: TextStyle(
+                                      color: CatchmongColors.sub_gray,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  Text(
+                                    "한식",
+                                    style: TextStyle(
+                                      color: CatchmongColors.sub_gray,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 14,
+                                    ),
+                                  ),
                                   SizedBox(
                                     width: 4,
                                   ),
-                                  Text("•"),
-                                  Text("리뷰 999+"),
+                                  Text(
+                                    "•",
+                                    style: TextStyle(
+                                      color: CatchmongColors.sub_gray,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  Text(
+                                    "리뷰 999+",
+                                    style: TextStyle(
+                                      color: CatchmongColors.sub_gray,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 14,
+                                    ),
+                                  ),
                                   SizedBox(
                                     width: 4,
                                   ),
-                                  Text("•"),
-                                  Text("서울 강남구 청담동"),
+                                  Text(
+                                    "•",
+                                    style: TextStyle(
+                                      color: CatchmongColors.sub_gray,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  Text(
+                                    "서울 강남구 청담동",
+                                    style: TextStyle(
+                                      color: CatchmongColors.sub_gray,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 14,
+                                    ),
+                                  ),
                                   Image.asset(
                                       "assets/images/downward-arrow.png"),
                                 ],
@@ -156,7 +205,11 @@ class ScrapPartnerContent extends StatelessWidget {
                               maxLines: 2, // 최대 줄 수를 2줄로 제한
                               overflow:
                                   TextOverflow.ellipsis, // 글자가 넘칠 경우 '...' 표시
-                              style: TextStyle(fontSize: 14),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: CatchmongColors.sub_gray,
+                              ),
                             ),
                           );
                         },

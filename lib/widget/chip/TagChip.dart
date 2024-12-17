@@ -12,7 +12,7 @@ class TagChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12), // 좌우 패딩 12px
       decoration: BoxDecoration(
         border: Border.all(
-          color: CatchmongColors.yellow, // --yellow (#F5C626) 색상
+          color: CatchmongColors.yellow_main, // --yellow (#F5C626) 색상
           width: 1, // 테두리 두께 1px
         ),
         borderRadius: BorderRadius.circular(20), // 둥근 모서리 반지름 20px

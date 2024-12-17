@@ -22,6 +22,7 @@ import 'package:catchmong/modules/mypage/views/mypage_view.dart';
 import 'package:catchmong/modules/mypage/views/profile_edit_view.dart';
 import 'package:catchmong/modules/partner/bindings/partner-binding.dart';
 import 'package:catchmong/modules/partner/views/partner-show-view.dart';
+import 'package:catchmong/modules/partner/views/reservation-view.dart';
 import 'package:catchmong/modules/search/bindings/search_binding.dart';
 import 'package:catchmong/modules/search/views/search_view.dart';
 import 'package:catchmong/modules/signup/bindings/signup_binding.dart';
@@ -33,8 +34,8 @@ import 'package:catchmong/widget/content/qr_camera_content.dart';
 import 'package:get/get.dart';
 
 class AppPages {
-  static const INITIAL = '/location-setting';
-  // static const INITIAL = '/main';
+  // static const INITIAL = '/login';
+  static const INITIAL = '/scrap';
 
   static final routes = [
     GetPage(
@@ -131,5 +132,6 @@ class AppPages {
       name: '/partner-show',
       page: () => const PartnerShowView(),
     ),
+    GetPage(name: '/reservation', page: () => ReservationView()),
   ];
 }
