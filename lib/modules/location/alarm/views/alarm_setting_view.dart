@@ -3,6 +3,7 @@ import 'package:catchmong/modules/location/alarm/controllers/alarm_controller.da
 import 'package:catchmong/widget/button/AppbarBackBtn.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart'; // CupertinoSwitch를 위한 임포트
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 class AlarmSettingView extends StatelessWidget {
@@ -23,13 +24,13 @@ class AlarmSettingView extends StatelessWidget {
                 onTap: () {
                   // Get.toNamed('/alarm-setting');
                 },
-                child: Image.asset('assets/images/setting-icon.png')),
+                child: SvgPicture.asset('assets/images/setting-icon.svg')),
           )
         ],
         leading: const AppbarBackBtn(),
         centerTitle: true,
         title: const Text(
-          "알림",
+          "설정",
           style: TextStyle(
               color: CatchmongColors.black,
               fontSize: 18,

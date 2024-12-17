@@ -10,7 +10,7 @@ class SearchView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2, // 파트너와 스토어 두 개의 탭
+      length: 1, // 파트너와 스토어 두 개의 탭
       child: Scaffold(
         appBar: AppBar(
           leading: const AppbarBackBtn(),
@@ -25,7 +25,7 @@ class SearchView extends StatelessWidget {
           bottom: const TabBar(
             tabs: [
               Tab(text: "파트너"),
-              Tab(text: "스토어"),
+              // Tab(text: "스토어"),
             ],
             indicator: BoxDecoration(
               border: Border(
@@ -53,7 +53,7 @@ class SearchView extends StatelessWidget {
             // 파트너 탭
             PartnerContent(),
             // 스토어 탭
-            StoreContent()
+            // StoreContent()
           ],
         ),
       ),

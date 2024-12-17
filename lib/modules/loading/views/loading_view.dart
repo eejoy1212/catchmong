@@ -8,7 +8,7 @@ class LoadingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final LoadingController loadingController = Get.find<LoadingController>();
-    // loadingController.goLocation();
+    loadingController.goLocation();
     return Scaffold(
       backgroundColor: CatchmongColors.yellow_main,
       body: Center(

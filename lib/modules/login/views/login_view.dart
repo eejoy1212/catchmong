@@ -33,9 +33,9 @@ class LoginView extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  SvgPicture.asset(
-                    "assets/images/three-second.svg", // 동적으로 아이콘 경로 선택
-                  ),
+                  // SvgPicture.asset(
+                  //   "assets/images/three-second.svg", // 동적으로 아이콘 경로 선택
+                  // ),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,

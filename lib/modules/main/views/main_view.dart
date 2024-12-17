@@ -36,23 +36,63 @@ class MainScreen extends StatelessWidget {
           onTap: bottomNavController.onItemTapped,
           items: [
             BottomNavigationBarItem(
-              icon: Image.asset('assets/images/bottom-home.png'),
+              icon: SvgPicture.asset(
+                'assets/images/bottom-home.svg',
+                colorFilter: ColorFilter.mode(
+                  currentIndex == 0
+                      ? CatchmongColors.black
+                      : CatchmongColors.gray400,
+                  BlendMode.srcIn,
+                ),
+              ),
               label: '홈',
             ),
             BottomNavigationBarItem(
-              icon: Image.asset('assets/images/bottom-search.png'),
+              icon: SvgPicture.asset(
+                'assets/images/bottom-search.svg',
+                colorFilter: ColorFilter.mode(
+                  currentIndex == 1
+                      ? CatchmongColors.black
+                      : CatchmongColors.gray400,
+                  BlendMode.srcIn,
+                ),
+              ),
               label: '검색',
             ),
             BottomNavigationBarItem(
-              icon: Image.asset('assets/images/bottom-pin.png'),
-              label: '지도',
-            ),
-            BottomNavigationBarItem(
-              icon: Image.asset('assets/images/bottom-payback.png'),
+              icon: SvgPicture.asset(
+                'assets/images/bottom-payback.svg',
+                colorFilter: ColorFilter.mode(
+                  currentIndex == 2
+                      ? CatchmongColors.black
+                      : CatchmongColors.gray400,
+                  BlendMode.srcIn,
+                ),
+              ),
               label: '페이백',
             ),
             BottomNavigationBarItem(
-              icon: Image.asset('assets/images/bottom-my.png'),
+              icon: SvgPicture.asset(
+                'assets/images/bottom-pin.svg',
+                colorFilter: ColorFilter.mode(
+                  currentIndex == 3
+                      ? CatchmongColors.black
+                      : CatchmongColors.gray400,
+                  BlendMode.srcIn,
+                ),
+              ),
+              label: '지도',
+            ),
+            BottomNavigationBarItem(
+              icon: SvgPicture.asset(
+                'assets/images/bottom-my.svg',
+                colorFilter: ColorFilter.mode(
+                  currentIndex == 4
+                      ? CatchmongColors.black
+                      : CatchmongColors.gray400,
+                  BlendMode.srcIn,
+                ),
+              ),
               label: '마이페이지',
             ),
           ],

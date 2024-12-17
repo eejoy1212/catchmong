@@ -1,4 +1,5 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/modules/location/alarm/views/alarm_setting_view.dart';
 import 'package:catchmong/widget/button/AppbarBackBtn.dart';
 import 'package:catchmong/widget/content/activity_content.dart';
 import 'package:catchmong/widget/content/alarm_content.dart';
@@ -21,7 +22,8 @@ class AlarmView extends StatelessWidget {
               margin: const EdgeInsets.only(right: 20),
               child: InkWell(
                   onTap: () {
-                    Get.toNamed('/alarm-setting');
+                    // Get.toNamed('/alarm-setting');
+                    showAlarmSetting(context);
                   },
                   child: SvgPicture.asset('assets/images/setting-icon.svg')),
             )
@@ -72,4 +74,17 @@ class AlarmView extends StatelessWidget {
       ),
     );
   }
+}
+
+void showAlarmSetting(BuildContext context) {
+  double width = MediaQuery.of(context).size.width;
+  showGeneralDialog(
+    context: context,
+    barrierDismissible: true, // true로 설정했으므로 barrierLabel 필요
+    barrierLabel: "닫기", // 접근성 레이블 설정
+    barrierColor: Colors.black54, // 배경 색상
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return AlarmSettingView();
+    },
+  );
 }

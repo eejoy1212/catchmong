@@ -412,7 +412,8 @@ class LocationSettingView extends StatelessWidget {
               const SizedBox(height: 24),
               YellowElevationBtn(
                 onPressed: () {
-                  Get.back();
+                  // Get.back();
+                  Get.toNamed('/main');
                 },
                 title: const Text(
                   "저장하기",

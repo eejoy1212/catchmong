@@ -133,7 +133,7 @@ class InfoBtn extends StatelessWidget {
                 YellowElevationBtn(
                   onPressed: () {
                     Navigator.of(context).pop(); // 현재 다이얼로그 닫기
-                    Get.toNamed("/main");
+                    // Get.toNamed("/main");
                   },
                   title: const Text(
                     "확인",

@@ -8,9 +8,10 @@ class LoadingController extends GetxController {
   }
 
   void goLocation() {
-    Timer(Duration(seconds: 2), () {
+    Timer(Duration(seconds: 1), () {
       print("5초 지나면 location 페이지로 갑니다");
       Get.offAndToNamed('/location');
+      // Get.offAndToNamed('/signup');
     });
   }
 }
