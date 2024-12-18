@@ -17,4 +17,5 @@ class CatchmongColors {
   static const Color red = Color(0xFFF53333);
   static const Color yellow = Color(0xFFF5C626);
   static const Color blue1 = Color(0xFF43A0F5);
+  static const Color blue2 = Color(0xFF0066FF);
 }

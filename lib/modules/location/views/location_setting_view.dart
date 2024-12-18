@@ -74,10 +74,10 @@ class LocationSettingView extends StatelessWidget {
               final currentPosition = snapshot.data!;
 
               // 지도 로딩 후 다이얼로그와 바텀시트 표시
-              // WidgetsBinding.instance.addPostFrameCallback((_) {
-              //   showBottomSheet(context);
-              //   showInitialDialog(context);
-              // });
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                showBottomSheet(context);
+                showInitialDialog(context);
+              });
 // API 호출
 
               return Center(

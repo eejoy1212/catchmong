@@ -43,12 +43,14 @@ class YellowToggleBtn extends StatelessWidget {
             ),
           ),
           onPressed: onTap,
-          child: Text(
-            title,
-            style: TextStyle(
-                color: isSelected ? Colors.white : CatchmongColors.black,
-                fontSize: 14,
-                fontWeight: FontWeight.w700),
+          child: Center(
+            child: Text(
+              title,
+              style: TextStyle(
+                  color: isSelected ? Colors.white : CatchmongColors.black,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700),
+            ),
           )),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/modules/bottom_nav/bottom_nav_controller.dart';
 import 'package:catchmong/modules/mypage/views/mypage_view.dart';
+import 'package:catchmong/modules/partner/views/partner-show-view.dart';
 import 'package:catchmong/widget/bar/mainview_appbar.dart';
 import 'package:catchmong/widget/bar/map_appbar.dart';
 import 'package:catchmong/widget/bar/mypage_appbar.dart';
@@ -14,6 +15,7 @@ import 'package:catchmong/widget/chip/page-indicator.dart';
 import 'package:catchmong/widget/content/map_content.dart';
 import 'package:catchmong/widget/content/partner_content.dart';
 import 'package:catchmong/widget/content/qr_camera_content.dart';
+import 'package:catchmong/widget/content/scrap_partner_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -103,17 +105,30 @@ class MainScreen extends StatelessWidget {
 
   // 선택된 페이지 반환
   Widget _getBody(int index) {
+    final BottomNavController bottomNavController =
+        Get.find<BottomNavController>();
+
+    if (index == 3) {
+      // 지도 탭 처리
+      return Obx(() {
+        return bottomNavController.isShowingPartner.value
+            ? ScrapPartnerContent() // PartnerShowView 화면
+            : MapContent(); // 기본 MapContent 화면
+      });
+    }
     switch (index) {
       case 0:
         return MainView();
       case 1:
         return PartnerContent();
       case 2:
-        return MapContent();
-      case 3:
         return QrCameraContent();
+      // case 3:
+      //   return MapContent();
+
       case 4:
         return MyPageView();
+
       default:
         return MainView();
     }
@@ -121,17 +136,29 @@ class MainScreen extends StatelessWidget {
 
   // 선택된 AppBar 반환
   PreferredSizeWidget _getAppBar(int index) {
+    // final BottomNavController bottomNavController =
+    //     Get.find<BottomNavController>();
+
+    // if (index == 3) {
+    //   // 지도 탭 처리
+    //   return Obx(() {
+    //     return bottomNavController.isShowingPartner.value
+    //         ? ScrapPartnerContent() // PartnerShowView 화면
+    //         : MapAppbar(); // 기본 MapContent 화면
+    //   });
+    // }
     switch (index) {
       case 0:
         return MainViewAppbar();
       case 1:
         return SearchAppbar();
       case 2:
-        return MapAppbar();
-      case 3:
         return QrAppbar();
+      case 3:
+        return MapAppbar();
       case 4:
         return MypageAppbar();
+
       default:
         return MainViewAppbar();
     }

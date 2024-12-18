@@ -48,6 +48,7 @@ dependencies:
   image_picker:
   get_storage:
   flutter_svg:
+  fl_chart:
 
 dev_dependencies:
   flutter_test:

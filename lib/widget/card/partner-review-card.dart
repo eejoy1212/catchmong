@@ -6,7 +6,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 class PartnerReviewCard extends StatelessWidget {
-  const PartnerReviewCard({super.key});
+  final void Function()? onReplyTap;
+  PartnerReviewCard({super.key, this.onReplyTap});
 
   @override
   Widget build(BuildContext context) {
@@ -270,11 +271,14 @@ class PartnerReviewCard extends StatelessWidget {
                       SizedBox(
                         height: 10,
                       ),
-                      Text(
-                        "리뷰에 대한 답변을 작성해주세요.",
-                        style: TextStyle(
-                          color: CatchmongColors.sub_gray,
-                          fontSize: 14,
+                      InkWell(
+                        onTap: onReplyTap,
+                        child: Text(
+                          "리뷰에 대한 답변을 작성해주세요.",
+                          style: TextStyle(
+                            color: CatchmongColors.sub_gray,
+                            fontSize: 14,
+                          ),
                         ),
                       )
                     ],
