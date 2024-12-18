@@ -11,6 +11,7 @@ import 'package:catchmong/widget/button/YellowElevationBtn.dart';
 import 'package:catchmong/widget/button/outlined_btn.dart';
 import 'package:catchmong/widget/button/yellow-toggle-btn.dart';
 import 'package:catchmong/widget/card/partner-review-card.dart';
+import 'package:catchmong/widget/card/reservation_status_card.dart';
 import 'package:catchmong/widget/chart/horizontal_stacked_bar_chart.dart';
 import 'package:catchmong/widget/chart/half_pie_chart.dart';
 import 'package:catchmong/widget/dialog/UseDialog.dart';
@@ -1512,197 +1513,15 @@ void showStoreInfo(BuildContext context) {
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
-                                    ), // 예약상태 카드
-                                    Container(
-                                        padding: EdgeInsets.only(
-                                          left: 20,
-                                          top: 16,
-                                          right: 20,
-                                          bottom: 32,
-                                        ),
-                                        width: width,
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              "예약대기",
-                                              style: TextStyle(
-                                                color: CatchmongColors.red,
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w700,
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              height: 16,
-                                            ),
-                                            Row(
-                                              children: [
-                                                //이미지
-                                                Container(
-                                                  width: 100,
-                                                  height: 100,
-                                                  decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.all(
-                                                            Radius.circular(8)),
-                                                    border: Border.all(
-                                                      color:
-                                                          CatchmongColors.gray,
-                                                      width: 1,
-                                                    ), // 외부 테두리
-                                                  ),
-                                                  child: ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8), // 이미지를 둥글게 자르기
-                                                    child: Image.asset(
-                                                      'assets/images/review2.jpg', // 이미지 경로
-                                                      fit: BoxFit
-                                                          .cover, // 이미지가 Container 크기에 맞게 자르기
-                                                    ),
-                                                  ),
-                                                ),
-                                                SizedBox(
-                                                  width: 12,
-                                                )
-                                              ],
-                                            )
-                                          ],
-                                        )),
-                                    Container(
-                                      padding: EdgeInsets.all(20),
-                                      decoration: BoxDecoration(
-                                          border: Border.all(
-                                              color: CatchmongColors.gray),
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(20))),
-                                      width: width,
-                                      // height: 200,
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          Container(
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [
-                                                Text(
-                                                  "1",
-                                                  style: TextStyle(
-                                                    color: CatchmongColors.red,
-                                                    fontSize: 32,
-                                                    fontWeight: FontWeight.w700,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  "예약대기",
-                                                  style: TextStyle(
-                                                    color: CatchmongColors
-                                                        .sub_gray,
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w400,
-                                                  ),
-                                                )
-                                              ],
-                                            ),
-                                          ),
-                                          Container(
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [
-                                                Text(
-                                                  "1",
-                                                  style: TextStyle(
-                                                    color:
-                                                        CatchmongColors.blue1,
-                                                    fontSize: 32,
-                                                    fontWeight: FontWeight.w700,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  "예약확정",
-                                                  style: TextStyle(
-                                                    color: CatchmongColors
-                                                        .sub_gray,
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w400,
-                                                  ),
-                                                )
-                                              ],
-                                            ),
-                                          ),
-                                          Container(
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [
-                                                Text(
-                                                  "1",
-                                                  style: TextStyle(
-                                                    color: CatchmongColors
-                                                        .gray_800,
-                                                    fontSize: 32,
-                                                    fontWeight: FontWeight.w700,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  "이용완료",
-                                                  style: TextStyle(
-                                                    color: CatchmongColors
-                                                        .sub_gray,
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w400,
-                                                  ),
-                                                )
-                                              ],
-                                            ),
-                                          ),
-                                          Container(
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [
-                                                Text(
-                                                  "1",
-                                                  style: TextStyle(
-                                                    color: CatchmongColors
-                                                        .gray_800,
-                                                    fontSize: 32,
-                                                    fontWeight: FontWeight.w700,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  "예약취소",
-                                                  style: TextStyle(
-                                                    color: CatchmongColors
-                                                        .sub_gray,
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w400,
-                                                  ),
-                                                )
-                                              ],
-                                            ),
-                                          )
-                                        ],
-                                      ),
                                     ),
+                                    // 예약상태 카드
+                                    ReservationStatusCard(
+                                        width: width,
+                                        status: ReservationStatus
+                                            .confirmed), // 예약상태 카드
+                                    ReservationStatusCard(
+                                        width: width,
+                                        status: ReservationStatus.waiting)
                                   ],
                                 ),
                               ),
@@ -1742,9 +1561,10 @@ void showStoreInfo(BuildContext context) {
                           child: SingleChildScrollView(
                             child: Column(
                               children: [
+                                //가게 정보 수정
                                 InkWell(
                                   onTap: () {
-                                    Get.toNamed('/scrap');
+                                    showStoreEdit(context);
                                   },
                                   child: Container(
                                     padding: EdgeInsets.symmetric(
@@ -3736,6 +3556,1181 @@ void showShareConfirmDialog(BuildContext context) {
           ),
         ),
       );
+    },
+  );
+}
+
+void showStoreEdit(BuildContext context) {
+  double width = MediaQuery.of(context).size.width;
+  String selectedBusinessType = "선택"; // 업태 기본값
+  String selectedCategory = "선택"; // 카테고리 기본값
+  String selectedDay = "매 주"; // 정기 휴무일 기본값
+
+  showGeneralDialog(
+    context: context,
+    barrierDismissible: true, // true로 설정했으므로 barrierLabel 필요
+    barrierLabel: "닫기", // 접근성 레이블 설정
+    barrierColor: Colors.black54, // 배경 색상
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return Scaffold(
+          bottomNavigationBar: Container(
+            height: 68,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(
+                top: BorderSide(
+                  color: CatchmongColors.gray50,
+                ),
+              ),
+            ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20.0,
+              vertical: 8,
+            ),
+            child: YellowElevationBtn(
+              onPressed: () {},
+              title: Text("등록하기"),
+            ),
+          ),
+          backgroundColor: Colors.white,
+          appBar: PreviewAppbar(
+            title: "가게 정보 수정",
+            onTap: () {
+              showPreview(context);
+            },
+          ),
+          body: SafeArea(
+              child: SingleChildScrollView(
+                  child: Column(children: [
+            //가게명
+            Container(
+              padding: EdgeInsets.only(
+                left: 20,
+                top: 16,
+                right: 20,
+                bottom: 20,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "가게명",
+                    style: TextStyle(
+                      color: CatchmongColors.gray_800,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Container(
+                    height: 48, // TextField의 높이 명시적으로 설정
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: CatchmongColors.gray100,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: "가게명을 입력해주세요.",
+                        border: InputBorder.none, // 기본 border 제거
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ), // 여백 설정
+                      ),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        color: CatchmongColors.gray_800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            //업태 , 카테고리
+            Container(
+              padding: EdgeInsets.only(
+                left: 20,
+                top: 16,
+                right: 20,
+                bottom: 20,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // 업태
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "업태",
+                          style: TextStyle(
+                            color: CatchmongColors.gray_800,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          height: 48,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: CatchmongColors.gray100,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            underline: SizedBox(),
+                            value: selectedBusinessType,
+                            items: [
+                              "선택",
+                              "한식",
+                              "중식",
+                              "일식",
+                              "양식",
+                              "분식",
+                              "패스트푸드",
+                              "비건식당",
+                              "디저트카페",
+                              "뷔페"
+                            ]
+                                .map((String value) => DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(
+                                        value,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color: CatchmongColors.gray_800,
+                                        ),
+                                      ),
+                                    ))
+                                .toList(),
+                            onChanged: (String? newValue) {
+                              if (newValue != null) {
+                                selectedBusinessType = newValue;
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  // 카테고리
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "카테고리",
+                          style: TextStyle(
+                            color: CatchmongColors.gray_800,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          height: 48,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: CatchmongColors.gray100,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            underline: SizedBox(),
+                            value: selectedCategory,
+                            items: [
+                              "선택",
+                              "데이트 맛집",
+                              "화제의 예능",
+                              "가족 모임",
+                              "혼밥",
+                              "노포",
+                              "인스타 핫플",
+                              "룸이 있는",
+                              "가성비 맛집",
+                              "레스토랑",
+                              "미슐랭",
+                            ]
+                                .map((String value) => DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(
+                                        value,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color: CatchmongColors.gray_800,
+                                        ),
+                                      ),
+                                    ))
+                                .toList(),
+                            onChanged: (String? newValue) {
+                              if (newValue != null) {
+                                selectedCategory = newValue;
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            //사업자등록증 외 증빙서류
+            Container(
+              padding: EdgeInsets.only(
+                left: 20,
+                top: 16,
+                right: 20,
+                bottom: 20,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "사업자등록증 외 증빙서류",
+                    style: TextStyle(
+                      color: CatchmongColors.gray_800,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  SizedBox(
+                    height: 102,
+                    child: ListView.builder(
+                        itemCount: 4,
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (context, idx) {
+                          return idx == 0
+                              ? Container(
+                                  width: 100,
+                                  height: 100,
+                                  margin: EdgeInsets.only(right: 8),
+                                  child: Column(
+                                    children: [
+                                      SizedBox(
+                                        height: 16,
+                                      ),
+                                      SvgPicture.asset(
+                                          'assets/images/img-plus.svg'),
+                                      Text(
+                                        "사진등록\n(3 / 120)",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: CatchmongColors.sub_gray,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height: 16,
+                                      ),
+                                    ],
+                                  ),
+                                  decoration: BoxDecoration(
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(8)),
+                                      border: Border.all(
+                                        color: CatchmongColors.gray100,
+                                      )),
+                                )
+                              : Container(
+                                  width: 100,
+                                  height: 100,
+                                  margin: EdgeInsets.only(right: 8),
+                                  child: Column(
+                                    children: [
+                                      SizedBox(
+                                        height: 7,
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          Icon(
+                                            Icons.close,
+                                            color: CatchmongColors.gray400,
+                                            size: 18,
+                                          ),
+                                          SizedBox(
+                                            width: 6,
+                                          )
+                                        ],
+                                      ),
+                                      Text(
+                                        "첨부한\n가게사진",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: CatchmongColors.sub_gray,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height: 16,
+                                      ),
+                                    ],
+                                  ),
+                                  decoration: BoxDecoration(
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(8)),
+                                      border: Border.all(
+                                        color: CatchmongColors.gray100,
+                                      )),
+                                );
+                        }),
+                  ),
+                ],
+              ),
+            ),
+            //업체 사진 (최소 3장)
+            Container(
+              padding: EdgeInsets.only(
+                left: 20,
+                top: 16,
+                right: 20,
+                bottom: 20,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "업체 사진 (최소 3장)",
+                    style: TextStyle(
+                      color: CatchmongColors.gray_800,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  SizedBox(
+                    height: 102,
+                    child: ListView.builder(
+                        itemCount: 4,
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (context, idx) {
+                          return idx == 0
+                              ? Container(
+                                  width: 100,
+                                  height: 100,
+                                  margin: EdgeInsets.only(right: 8),
+                                  child: Column(
+                                    children: [
+                                      SizedBox(
+                                        height: 16,
+                                      ),
+                                      SvgPicture.asset(
+                                          'assets/images/img-plus.svg'),
+                                      Text(
+                                        "사진등록\n(3 / 120)",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: CatchmongColors.sub_gray,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height: 16,
+                                      ),
+                                    ],
+                                  ),
+                                  decoration: BoxDecoration(
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(8)),
+                                      border: Border.all(
+                                        color: CatchmongColors.gray100,
+                                      )),
+                                )
+                              : Container(
+                                  width: 100,
+                                  height: 100,
+                                  margin: EdgeInsets.only(right: 8),
+                                  child: Column(
+                                    children: [
+                                      SizedBox(
+                                        height: 7,
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          Icon(
+                                            Icons.close,
+                                            color: CatchmongColors.gray400,
+                                            size: 18,
+                                          ),
+                                          SizedBox(
+                                            width: 6,
+                                          )
+                                        ],
+                                      ),
+                                      Text(
+                                        "첨부한\n가게사진",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: CatchmongColors.sub_gray,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height: 16,
+                                      ),
+                                    ],
+                                  ),
+                                  decoration: BoxDecoration(
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(8)),
+                                      border: Border.all(
+                                        color: CatchmongColors.gray100,
+                                      )),
+                                );
+                        }),
+                  ),
+                ],
+              ),
+            ),
+            //주소
+            Container(
+              padding: EdgeInsets.only(
+                left: 20,
+                top: 16,
+                right: 20,
+                bottom: 20,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "주소",
+                    style: TextStyle(
+                      color: CatchmongColors.gray_800,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 48, // TextField의 높이 명시적으로 설정
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: CatchmongColors.gray100,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: "검색한 우편번호로 불러온 주소 value",
+                              border: InputBorder.none, // 기본 border 제거
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ), // 여백 설정
+                            ),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: CatchmongColors.gray_800,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 8,
+                      ),
+                      OutlinedBtn(
+                          height: 48, width: 120, title: "우편번호", onPress: () {})
+                    ],
+                  ),
+                  SizedBox(
+                    height: 8,
+                  ),
+                  Container(
+                    height: 48, // TextField의 높이 명시적으로 설정
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: CatchmongColors.gray100,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: "상세주소 입력",
+                        border: InputBorder.none, // 기본 border 제거
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ), // 여백 설정
+                      ),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        color: CatchmongColors.gray_800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            //가게 전화번호
+            Container(
+              padding: EdgeInsets.only(
+                left: 20,
+                top: 16,
+                right: 20,
+                bottom: 20,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "가게 전화번호",
+                    style: TextStyle(
+                      color: CatchmongColors.gray_800,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 48, // TextField의 높이 명시적으로 설정
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: CatchmongColors.gray100,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: "",
+                              border: InputBorder.none, // 기본 border 제거
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ), // 여백 설정
+                            ),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: CatchmongColors.gray_800,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Text(
+                        "-",
+                        style: TextStyle(
+                          fontSize: 20,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Expanded(
+                        child: Container(
+                          height: 48, // TextField의 높이 명시적으로 설정
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: CatchmongColors.gray100,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: "",
+                              border: InputBorder.none, // 기본 border 제거
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ), // 여백 설정
+                            ),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: CatchmongColors.gray_800,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Text(
+                        "-",
+                        style: TextStyle(
+                          fontSize: 20,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Expanded(
+                        child: Container(
+                          height: 48, // TextField의 높이 명시적으로 설정
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: CatchmongColors.gray100,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: "",
+                              border: InputBorder.none, // 기본 border 제거
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ), // 여백 설정
+                            ),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: CatchmongColors.gray_800,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            //가게 소개
+            Container(
+              padding: EdgeInsets.only(
+                left: 20,
+                top: 16,
+                right: 20,
+                bottom: 20,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "가게 소개",
+                    style: TextStyle(
+                      color: CatchmongColors.gray_800,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Container(
+                    height: 100, // TextField의 높이 명시적으로 설정
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: CatchmongColors.gray100,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: TextField(
+                      maxLines: null, // 여러 줄 허용
+                      expands: true, // TextField가 Container에 꽉 차도록 설정
+                      decoration: InputDecoration(
+                        hintText: "   소개문구를 작성해주세요.",
+                        border: InputBorder.none, // 기본 border 제거
+                      ),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        color: CatchmongColors.gray400,
+                      ), // 텍스트 스타일 설정
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            //편의시설
+            Container(
+              padding: EdgeInsets.only(
+                left: 20,
+                top: 16,
+                right: 20,
+                bottom: 20,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "편의시설",
+                    style: TextStyle(
+                      color: CatchmongColors.gray_800,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Container(
+                    width: double.infinity,
+                    child: Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.start,
+                      alignment: WrapAlignment.start,
+                      runSpacing: 4,
+                      spacing: 4,
+                      children: [
+                        ...[
+                          "주차",
+                          "쿠폰",
+                          "유아시설",
+                          "애견동반",
+                          "예약",
+                          "콜키지",
+                          "단체석",
+                          "배달",
+                          "발렛"
+                        ].map((data) {
+                          return YellowToggleBtn(
+                            width: MediaQuery.of(context).size.width / 3.6,
+                            title: data,
+                            isSelected: false,
+                            onTap: () {},
+                          );
+                        }).toList(),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            //휴무일
+            Container(
+              padding: EdgeInsets.only(
+                left: 20,
+                top: 16,
+                right: 20,
+                bottom: 20,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "휴무일",
+                    style: TextStyle(
+                      color: CatchmongColors.gray_800,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Container(
+                    width: double.infinity,
+                    child: Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.start,
+                      alignment: WrapAlignment.start,
+                      runSpacing: 4,
+                      spacing: 4,
+                      children: [
+                        ...[
+                          "있어요",
+                          "없어요",
+                        ].map((data) {
+                          return YellowToggleBtn(
+                            width: MediaQuery.of(context).size.width / 2.3,
+                            title: data,
+                            isSelected: data == "있어요" ? true : false,
+                            onTap: () {},
+                          );
+                        }).toList(),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            //정기 휴무일
+            Container(
+              padding: EdgeInsets.only(
+                left: 20,
+                top: 16,
+                right: 20,
+                bottom: 20,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 정기 휴무일 텍스트
+                  Text(
+                    "정기 휴무일",
+                    style: TextStyle(
+                      color: CatchmongColors.gray_800,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+
+                  // 드롭다운
+                  Container(
+                    width: 130,
+                    height: 48, // 드롭다운 높이
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: CatchmongColors.gray100,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 8),
+                    child: DropdownButton<String>(
+                      isExpanded: true,
+                      underline: SizedBox(),
+                      value: selectedDay,
+                      items: [
+                        "매 주",
+                        "첫째 주",
+                        "둘째 주",
+                        "셋째 주",
+                        "넷째 주",
+                      ]
+                          .map((String value) => DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(
+                                  value,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                    color: CatchmongColors.gray_800,
+                                  ),
+                                ),
+                              ))
+                          .toList(),
+                      onChanged: (String? newValue) {
+                        if (newValue != null) {
+                          selectedDay = newValue; // 값 업데이트
+                        }
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 16),
+
+                  // 요일 선택 버튼들
+                  Wrap(
+                    spacing: 4, // 버튼 사이 간격
+                    runSpacing: 4, // 줄바꿈 시 간격
+                    children: [
+                      ...["월", "화", "수", "목", "금", "토", "일"].map((data) {
+                        return YellowToggleBtn(
+                          width: 42, // 버튼 너비
+                          title: data,
+                          isSelected: data == "수", // 기본 선택값
+                          onTap: () {
+                            // 요일 선택 시 동작 추가
+                          },
+                        );
+                      }).toList(),
+                    ],
+                  ),
+                ],
+              ),
+            ), //휴무일
+            //영업 시간 설정
+            Container(
+              width: width,
+              padding: EdgeInsets.only(
+                left: 20,
+                top: 16,
+                right: 20,
+                bottom: 20,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // "영업 시간 설정" 텍스트
+                  Text(
+                    "영업 시간 설정",
+                    style: TextStyle(
+                      color: CatchmongColors.gray_800,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+
+                  // 버튼 그룹
+                  Container(
+                    width: width,
+                    child: Wrap(
+                      spacing: 4, // 버튼 사이 간격
+                      runSpacing: 4, // 줄바꿈 시 간격
+                      children: [
+                        ...["매일 같아요", "평일/주말 달라요", "요일별로 달라요"].map((data) {
+                          return YellowToggleBtn(
+                            width: width / 3.6, // 버튼 너비
+                            title: data,
+                            isSelected: data == "수", // 기본 선택값
+                            onTap: () {
+                              // 요일 선택 시 동작 추가
+                            },
+                          );
+                        }).toList(),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            //영업 시간
+            Container(
+              width: width,
+              padding: EdgeInsets.only(
+                left: 20,
+                top: 16,
+                right: 20,
+                bottom: 20,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // "영업 시간" 텍스트
+                  Text(
+                    "영업 시간",
+                    style: TextStyle(
+                      color: CatchmongColors.gray_800,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+
+                  // 버튼 그룹
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 48, // TextField의 높이 명시적으로 설정
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: CatchmongColors.gray100,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: "11:00",
+                              border: InputBorder.none, // 기본 border 제거
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ), // 여백 설정
+                            ),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: CatchmongColors.gray_800,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Text(
+                        "-",
+                        style: TextStyle(
+                          fontSize: 20,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Expanded(
+                        child: Container(
+                          height: 48, // TextField의 높이 명시적으로 설정
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: CatchmongColors.gray100,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: "20:00",
+                              border: InputBorder.none, // 기본 border 제거
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ), // 여백 설정
+                            ),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: CatchmongColors.gray_800,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Expanded(
+                        child: Container(
+                          height: 48, // TextField의 높이 명시적으로 설정
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: CatchmongColors.gray100,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: "24h 운영",
+                              border: InputBorder.none, // 기본 border 제거
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ), // 여백 설정
+                            ),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: CatchmongColors.gray_800,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            //휴게 시간
+            Container(
+              width: width,
+              padding: EdgeInsets.only(
+                left: 20,
+                top: 16,
+                right: 20,
+                bottom: 20,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // "휴게 시간" 텍스트
+                  Text(
+                    "휴게 시간",
+                    style: TextStyle(
+                      color: CatchmongColors.gray_800,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+
+                  // 버튼 그룹
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 48, // TextField의 높이 명시적으로 설정
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: CatchmongColors.gray100,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: "11:00",
+                              border: InputBorder.none, // 기본 border 제거
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ), // 여백 설정
+                            ),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: CatchmongColors.gray_800,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Text(
+                        "-",
+                        style: TextStyle(
+                          fontSize: 20,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Expanded(
+                        child: Container(
+                          height: 48, // TextField의 높이 명시적으로 설정
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: CatchmongColors.gray100,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: "20:00",
+                              border: InputBorder.none, // 기본 border 제거
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ), // 여백 설정
+                            ),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: CatchmongColors.gray_800,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Expanded(
+                        child: Container(
+                          height: 48, // TextField의 높이 명시적으로 설정
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: CatchmongColors.gray100,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: "휴게시간 없어요",
+                              border: InputBorder.none, // 기본 border 제거
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ), // 여백 설정
+                            ),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: CatchmongColors.gray_800,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ]))));
     },
   );
 }

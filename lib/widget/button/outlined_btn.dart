@@ -6,6 +6,7 @@ class OutlinedBtn extends StatelessWidget {
   final double height;
   final String title;
   final double fontSize;
+  final Color? fontColor;
   final void Function() onPress;
   const OutlinedBtn({
     super.key,
@@ -14,6 +15,7 @@ class OutlinedBtn extends StatelessWidget {
     required this.title,
     this.fontSize = 16,
     required this.onPress,
+    this.fontColor = CatchmongColors.black,
   });
 
   @override
@@ -39,7 +41,7 @@ class OutlinedBtn extends StatelessWidget {
           child: Text(
             title,
             style: TextStyle(
-                color: CatchmongColors.black,
+                color: fontColor,
                 fontSize: fontSize,
                 fontWeight: FontWeight.w700),
           )),
