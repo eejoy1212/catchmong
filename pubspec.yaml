@@ -49,6 +49,7 @@ dependencies:
   get_storage:
   flutter_svg:
   fl_chart:
+  mobile_scanner:
 
 dev_dependencies:
   flutter_test:

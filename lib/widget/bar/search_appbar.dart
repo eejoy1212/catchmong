@@ -11,12 +11,13 @@ class SearchAppbar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      leading: AppbarBackBtn(
-        onTap: () {
-          //임시
-          _controller.onItemTapped(0);
-        },
-      ),
+      // leading: AppbarBackBtn(
+      //   onTap: () {
+      //     //임시
+      //     // _controller.onItemTapped(0);
+      //     Get.back();
+      //   },
+      // ),
       centerTitle: true,
       title: const Text(
         "검색",

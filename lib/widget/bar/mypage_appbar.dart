@@ -11,7 +11,7 @@ class MypageAppbar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      leading: const AppbarBackBtn(),
+      // leading: const AppbarBackBtn(),
       centerTitle: true,
       actions: [
         InkWell(

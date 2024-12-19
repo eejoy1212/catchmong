@@ -216,6 +216,7 @@ import 'package:catchmong/modules/bottom_nav/bottom_nav_controller.dart';
 import 'package:catchmong/modules/location/controllers/location_controller.dart';
 import 'package:catchmong/widget/bar/map_searchbar.dart';
 import 'package:catchmong/widget/chip/map_chip.dart';
+import 'package:catchmong/widget/content/scrap_partner_content.dart';
 import 'package:catchmong/widget/map/custom_map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
@@ -256,9 +257,9 @@ class MapContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      showBottomSheet(context);
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   showBottomSheet(context);
+    // });
 
     return SafeArea(
       child: FutureBuilder<NLatLng>(
@@ -301,7 +302,15 @@ class MapContent extends StatelessWidget {
                   right: 16,
                   child: GestureDetector(
                     onTap: () {
-                      bottomNavController.isShowingPartner.value = true;
+                      // bottomNavController.isShowingPartner.value = true;
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //     builder: (context) =>
+                      //         ScrapPartnerContent(), // 새 페이지로 이동
+                      //   ),
+                      // );
+                      Get.toNamed("/scrap");
                     },
                     child: Container(
                       width: 100,

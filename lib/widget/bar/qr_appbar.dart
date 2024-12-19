@@ -9,7 +9,7 @@ class QrAppbar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      leading: const AppbarBackBtn(),
+      // leading: const AppbarBackBtn(),
       centerTitle: true,
       title: const Text(
         "페이백",

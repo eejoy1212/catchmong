@@ -21,6 +21,7 @@ Future<void> main() async {
   //   WebView.platform = AndroidWebView();
   // }
   await NaverMapSdk.instance.initialize(clientId: "9ue8t44jzd");
+
   Get.put(LoginController());
   Get.put(LoadingController());
   Get.put(LocationController());

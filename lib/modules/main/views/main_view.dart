@@ -105,17 +105,6 @@ class MainScreen extends StatelessWidget {
 
   // 선택된 페이지 반환
   Widget _getBody(int index) {
-    final BottomNavController bottomNavController =
-        Get.find<BottomNavController>();
-
-    if (index == 3) {
-      // 지도 탭 처리
-      return Obx(() {
-        return bottomNavController.isShowingPartner.value
-            ? ScrapPartnerContent() // PartnerShowView 화면
-            : MapContent(); // 기본 MapContent 화면
-      });
-    }
     switch (index) {
       case 0:
         return MainView();
@@ -123,8 +112,8 @@ class MainScreen extends StatelessWidget {
         return PartnerContent();
       case 2:
         return QrCameraContent();
-      // case 3:
-      //   return MapContent();
+      case 3:
+        return MapContent();
 
       case 4:
         return MyPageView();
