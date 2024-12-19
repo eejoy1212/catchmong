@@ -33,7 +33,7 @@ class MainScreen extends StatelessWidget {
         body: _getBody(currentIndex), // 선택된 인덱스에 따라 Body 변경
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
-          selectedItemColor: CatchmongColors.gray400,
+          selectedItemColor: CatchmongColors.black,
           currentIndex: currentIndex,
           onTap: bottomNavController.onItemTapped,
           items: [
