@@ -16,6 +16,7 @@ import 'package:catchmong/widget/chart/horizontal_stacked_bar_chart.dart';
 import 'package:catchmong/widget/chart/half_pie_chart.dart';
 import 'package:catchmong/widget/dialog/UseDialog.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -1657,7 +1658,7 @@ void showStoreInfo(BuildContext context) {
                                 ),
                                 InkWell(
                                   onTap: () {
-                                    Get.toNamed('/scrap');
+                                    showReservationSetting(context);
                                   },
                                   child: Container(
                                     padding: EdgeInsets.symmetric(
@@ -3837,6 +3838,86 @@ void showStoreVacationAndTime(BuildContext context) {
               ),
             ),
           ]))));
+    },
+  );
+}
+
+//메뉴 등록
+void showReservationSetting(BuildContext context) {
+  double width = MediaQuery.of(context).size.width;
+  String selectedBusinessType = "선택"; // 업태 기본값
+  String selectedCategory = "선택"; // 카테고리 기본값
+  String selectedDay = "매 주"; // 정기 휴무일 기본값
+
+  showGeneralDialog(
+    context: context,
+    barrierDismissible: true, // true로 설정했으므로 barrierLabel 필요
+    barrierLabel: "닫기", // 접근성 레이블 설정
+    barrierColor: Colors.black54, // 배경 색상
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return Scaffold(
+          backgroundColor: CatchmongColors.gray50,
+          appBar: DefaultAppbar(
+            title: "예약 설정",
+          ),
+          body: SafeArea(
+              child: SingleChildScrollView(
+                  child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.only(
+                    left: 20, right: 20, bottom: 16, top: 32),
+                decoration: const BoxDecoration(
+                    color: Colors.white,
+                    border: Border(
+                        bottom: BorderSide(
+                      color: CatchmongColors.gray50,
+                      width: 1,
+                    ))),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "예약 설정",
+                          style: TextStyle(
+                            color: CatchmongColors.sub_gray,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 4,
+                        ),
+                        Container(
+                          width: 220,
+                          child: Text(
+                            "가게 예약을 설정할 수 있습니다.",
+                            softWrap: true,
+                            style: TextStyle(
+                              color: CatchmongColors.gray400,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(), // 오른쪽에 스위치를 배치하기 위해 Spacer 사용
+                    CupertinoSwitch(
+                      value: false, // 현재 스위치 상태
+                      onChanged: (bool value) {},
+                      activeColor: CatchmongColors.blue1, // 스위치가 켜졌을 때 색상
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ))));
     },
   );
 }
