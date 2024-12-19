@@ -1595,7 +1595,7 @@ void showStoreInfo(BuildContext context) {
                                 ),
                                 InkWell(
                                   onTap: () {
-                                    Get.toNamed('/scrap');
+                                    showStoreVacationAndTime(context);
                                   },
                                   child: Container(
                                     padding: EdgeInsets.symmetric(
@@ -3556,6 +3556,287 @@ void showShareConfirmDialog(BuildContext context) {
           ),
         ),
       );
+    },
+  );
+}
+
+//임시 휴무 / 영업 시간
+void showStoreVacationAndTime(BuildContext context) {
+  double width = MediaQuery.of(context).size.width;
+  String selectedBusinessType = "선택"; // 업태 기본값
+  String selectedCategory = "선택"; // 카테고리 기본값
+  String selectedDay = "매 주"; // 정기 휴무일 기본값
+
+  showGeneralDialog(
+    context: context,
+    barrierDismissible: true, // true로 설정했으므로 barrierLabel 필요
+    barrierLabel: "닫기", // 접근성 레이블 설정
+    barrierColor: Colors.black54, // 배경 색상
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return Scaffold(
+          bottomNavigationBar: Container(
+            height: 68,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(
+                top: BorderSide(
+                  color: CatchmongColors.gray50,
+                ),
+              ),
+            ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20.0,
+              vertical: 8,
+            ),
+            child: YellowElevationBtn(
+              onPressed: () {},
+              title: Text("등록하기"),
+            ),
+          ),
+          backgroundColor: Colors.white,
+          appBar: DefaultAppbar(
+            title: "임시 휴무 / 영업 시간",
+          ),
+          body: SafeArea(
+              child: SingleChildScrollView(
+                  child: Column(children: [
+            //휴무 설정
+            Container(
+              padding: EdgeInsets.only(
+                left: 20,
+                top: 16,
+                right: 20,
+                bottom: 20,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "휴무 설정",
+                    style: TextStyle(
+                      color: CatchmongColors.gray_800,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  //휴무 설정
+                  Container(
+                    width: double.infinity,
+                    child: Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.start,
+                      alignment: WrapAlignment.start,
+                      runSpacing: 4,
+                      spacing: 4,
+                      children: [
+                        ...[
+                          "영업 시간 변경",
+                          "자리 비움",
+                          "임시 휴무",
+                        ].map((data) {
+                          return YellowToggleBtn(
+                            width: data == "영업 시간 변경"
+                                ? 121
+                                : MediaQuery.of(context).size.width / 3.8,
+                            title: data,
+                            isSelected: data == "영업 시간 변경" ? true : false,
+                            onTap: () {},
+                          );
+                        }).toList(),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            //날짜 설정
+            Container(
+              padding: EdgeInsets.only(
+                left: 20,
+                top: 16,
+                right: 20,
+                bottom: 20,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "날짜 설정",
+                    style: TextStyle(
+                      color: CatchmongColors.gray_800,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 48, // TextField의 높이 명시적으로 설정
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: CatchmongColors.gray100,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: "2024-11-19 (화)",
+                              border: InputBorder.none, // 기본 border 제거
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ), // 여백 설정
+                            ),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: CatchmongColors.gray_800,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Text(
+                        "-",
+                        style: TextStyle(
+                          fontSize: 20,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Expanded(
+                        child: Container(
+                          height: 48, // TextField의 높이 명시적으로 설정
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: CatchmongColors.gray100,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: "2024-11-20 (수)",
+                              border: InputBorder.none, // 기본 border 제거
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ), // 여백 설정
+                            ),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: CatchmongColors.gray_800,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            //영업 시간 설정
+            Container(
+              padding: EdgeInsets.only(
+                left: 20,
+                top: 16,
+                right: 20,
+                bottom: 20,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "영업 시간 설정",
+                    style: TextStyle(
+                      color: CatchmongColors.gray_800,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 48, // TextField의 높이 명시적으로 설정
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: CatchmongColors.gray100,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: "09:00",
+                              border: InputBorder.none, // 기본 border 제거
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ), // 여백 설정
+                            ),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: CatchmongColors.gray_800,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Text(
+                        "-",
+                        style: TextStyle(
+                          fontSize: 20,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Expanded(
+                        child: Container(
+                          height: 48, // TextField의 높이 명시적으로 설정
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: CatchmongColors.gray100,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: "11:00",
+                              border: InputBorder.none, // 기본 border 제거
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ), // 여백 설정
+                            ),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: CatchmongColors.gray_800,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      YellowToggleBtn(
+                          width: 121, title: "지금 영업 종료", isSelected: false)
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ]))));
     },
   );
 }
