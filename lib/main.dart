@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/controller/partner_controller.dart';
 import 'package:catchmong/modules/bottom_nav/bottom_nav_controller.dart';
 import 'package:catchmong/modules/loading/controllers/loading_controller.dart';
 import 'package:catchmong/modules/location/alarm/controllers/alarm_controller.dart';
@@ -28,8 +29,12 @@ Future<void> main() async {
   Get.put(BottomNavController());
   Get.put(AlarmController());
   Get.put(PaybackController());
+  //아래는 지워야 할 것
   Get.put(PartnerController());
+  //아래가 진짜
+  Get.put(Partner2Controller());
   Get.put(MypageController());
+
   runApp(MyApp());
 }
 

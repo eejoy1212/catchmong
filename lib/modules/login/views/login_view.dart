@@ -48,12 +48,12 @@ class LoginView extends StatelessWidget {
                       NaverBtn(),
                       GoogleBtn(
                         onTap: () async {
-                          Get.toNamed('/main');
-                          // final auth = await controller.handleGoogleSignIn();
-                          // if (auth != null) {
-                          //   print("토큰..?$auth");
-                          //   await controller.loginWithGoogle(auth); // 서버 요청
-                          // }
+                          // Get.toNamed('/main');
+                          final auth = await controller.handleGoogleSignIn();
+                          if (auth != null) {
+                            print("토큰..?$auth");
+                            await controller.loginWithGoogle(auth); // 서버 요청
+                          }
                         },
                       ),
                     ],

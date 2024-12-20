@@ -28,8 +28,8 @@ import 'package:catchmong/widget/content/qr_camera_content.dart';
 import 'package:get/get.dart';
 
 class AppPages {
-  // static const INITIAL = '/login';
-  static const INITIAL = '/main';
+  static const INITIAL = '/login';
+  // static const INITIAL = '/main';
 
   static final routes = [
     GetPage(

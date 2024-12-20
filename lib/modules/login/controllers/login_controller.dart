@@ -84,6 +84,7 @@ class LoginController extends GetxController {
   // void clearUser() {
   //   user.value = null;
   // }
+  //모든지역에 해당하는 파트너 가져오는 함수 알려줘
 
   String generateRandomEmail() {
     // 랜덤 ID 생성

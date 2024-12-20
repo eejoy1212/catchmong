@@ -16,7 +16,7 @@ class StoreContent extends StatelessWidget {
             // height: 600, // 테스트용 길이
             child: Column(
               children: [
-                const CatchmongSearchBar(),
+                // const CatchmongSearchBar(),
                 const SizedBox(
                   height: 16,
                 ),

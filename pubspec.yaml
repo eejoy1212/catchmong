@@ -50,6 +50,7 @@ dependencies:
   flutter_svg:
   fl_chart:
   mobile_scanner:
+  dio:
 
 dev_dependencies:
   flutter_test:

@@ -2,7 +2,10 @@ import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:flutter/material.dart';
 
 class CatchmongSearchBar extends StatelessWidget {
-  const CatchmongSearchBar({super.key});
+  final String searchKeyword;
+  final void Function(String) onSubmitted;
+  const CatchmongSearchBar(
+      {super.key, required this.searchKeyword, required this.onSubmitted});
 
   @override
   Widget build(BuildContext context) {
@@ -13,6 +16,13 @@ class CatchmongSearchBar extends StatelessWidget {
         borderRadius: BorderRadius.circular(8), // borderRadius 8px
       ),
       child: TextField(
+        controller:
+            TextEditingController(text: searchKeyword), // 텍스트 필드에 컨트롤러 연결
+        onChanged: (value) {
+          print("검색어 변경: $value");
+        },
+
+        onSubmitted: onSubmitted,
         decoration: InputDecoration(
           hintText: '상품을 검색해보세요', // 텍스트 필드에 힌트 넣기 (선택 사항)
           prefixIcon:

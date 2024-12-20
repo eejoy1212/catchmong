@@ -52,7 +52,9 @@ class ScrapView extends StatelessWidget {
             // ),
           ),
           body: // 파트너 탭
-              ScrapPartnerContent(),
+              ScrapPartnerContent(
+            partners: [],
+          ),
           // TabBarView(
           //   children: [
           //     // 파트너 탭
