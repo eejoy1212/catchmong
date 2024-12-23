@@ -1,12 +1,14 @@
+import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:flutter/material.dart';
 
 class NaverBtn extends StatelessWidget {
+  final void Function() onTap;
+
+  const NaverBtn({super.key, required this.onTap});
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {
-        print('네이버 버튼 클릭');
-      },
+      onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -19,7 +21,7 @@ class NaverBtn extends StatelessWidget {
           Text(
             '네이버로\n시작하기',
             style: TextStyle(
-              color: Colors.white,
+              color: CatchmongColors.gray_800,
             ),
           ),
         ],

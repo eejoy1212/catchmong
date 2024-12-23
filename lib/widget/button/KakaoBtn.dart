@@ -21,7 +21,7 @@ class KakaoBtn extends StatelessWidget {
           Text(
             '카카오로\n시작하기',
             style: TextStyle(
-              color: Colors.white,
+              color: CatchmongColors.gray_800,
             ),
           ),
         ],

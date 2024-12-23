@@ -2,6 +2,7 @@ import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:flutter/material.dart';
 
 class YellowElevationBtn extends StatelessWidget {
+  final Color? bgColor;
   final VoidCallback onPressed; // onPressed 콜백을 받는 인자
   final Widget title; // onPressed 콜백을 받는 인자
   final double width;
@@ -10,6 +11,7 @@ class YellowElevationBtn extends StatelessWidget {
     required this.onPressed, // 필수 인자로 설정
     required this.title, // 필수 인자로 설정
     this.width = 360,
+    this.bgColor = CatchmongColors.yellow_main,
   });
 
   @override
@@ -20,7 +22,7 @@ class YellowElevationBtn extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed, // 전달받은 onPressed 콜백을 사용
         style: ElevatedButton.styleFrom(
-          backgroundColor: CatchmongColors.yellow_main, // 버튼 배경색 노랑으로 설정
+          backgroundColor: bgColor, // 버튼 배경색 노랑으로 설정
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8), // 보더 반경 설정
           ),

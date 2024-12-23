@@ -15,7 +15,7 @@ class LoginView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: CatchmongColors.yellow_main,
+      backgroundColor: Colors.white,
       body: Center(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -36,24 +36,29 @@ class LoginView extends StatelessWidget {
                   // SvgPicture.asset(
                   //   "assets/images/three-second.svg", // 동적으로 아이콘 경로 선택
                   // ),
+                  Image.asset("assets/images/three-second.png"),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       KakaoBtn(
                         onTap: () {
-                          controller.loadUsers();
+                          Get.toNamed('/main');
                         },
                       ),
-                      NaverBtn(),
+                      NaverBtn(
+                        onTap: () {
+                          Get.toNamed('/main');
+                        },
+                      ),
                       GoogleBtn(
                         onTap: () async {
-                          // Get.toNamed('/main');
-                          final auth = await controller.handleGoogleSignIn();
-                          if (auth != null) {
-                            print("토큰..?$auth");
-                            await controller.loginWithGoogle(auth); // 서버 요청
-                          }
+                          Get.toNamed('/main');
+                          // final auth = await controller.handleGoogleSignIn();
+                          // if (auth != null) {
+                          //   print("토큰..?$auth");
+                          //   await controller.loginWithGoogle(auth); // 서버 요청
+                          // }
                         },
                       ),
                     ],
@@ -61,9 +66,12 @@ class LoginView extends StatelessWidget {
                   Obx(() {
                     return Opacity(
                       opacity: controller.showLatestLoginImage.value ? 1 : 0,
-                      child: SvgPicture.asset(
-                        "assets/images/latest-login.svg", // 동적으로 아이콘 경로 선택
-                      ),
+                      // child: SvgPicture.asset(
+                      //   "assets/images/latest-login.svg", // 동적으로 아이콘 경로 선택
+                      //   colorFilter: ColorFilter.mode(
+                      //       CatchmongColors.yellow_main, BlendMode.srcATop),
+                      // ),
+                      child: Image.asset("assets/images/latest-login.png"),
                     );
                   }),
                   // SizedBox(
@@ -75,7 +83,7 @@ class LoginView extends StatelessWidget {
                         TextSpan(
                           text: "회원가입 없이 소셜 계정을 통해 바로 이용 가능하며 첫 로그인 시 ",
                           style: TextStyle(
-                            color: Colors.white,
+                            color: Color(0xFF5e5e5e),
                           ),
                           children: [
                             TextSpan(

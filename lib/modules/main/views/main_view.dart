@@ -14,6 +14,7 @@ import 'package:catchmong/widget/card/restaurant-type-card.dart';
 import 'package:catchmong/widget/chip/page-indicator.dart';
 import 'package:catchmong/widget/content/map_content.dart';
 import 'package:catchmong/widget/content/partner_content.dart';
+import 'package:catchmong/widget/content/payback_content.dart';
 import 'package:catchmong/widget/content/qr_camera_content.dart';
 import 'package:catchmong/widget/content/scrap_partner_content.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +30,34 @@ class MainScreen extends StatelessWidget {
     return Obx(() {
       int currentIndex = bottomNavController.selectedIndex.value;
       return Scaffold(
+        floatingActionButtonAnimator: FloatingActionButtonAnimator.noAnimation,
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        bottomSheet: currentIndex == 2
+            ? InkWell(
+                onTap: () {
+                  print("object");
+                  showQrScanner(context);
+                },
+                child: Container(
+                    // padding: EdgeInsets.only(bottom: 20),
+                    width: MediaQuery.of(context).size.width,
+                    height: 48,
+                    decoration: BoxDecoration(
+                        color: CatchmongColors.yellow_main,
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(8),
+                            topRight: Radius.circular(8))),
+                    child: Center(
+                        child: Text(
+                      "결제하고 돌려받기",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ))),
+              )
+            : null,
         appBar: _getAppBar(currentIndex), // 선택된 인덱스에 따라 AppBar 변경
         body: _getBody(currentIndex), // 선택된 인덱스에 따라 Body 변경
         bottomNavigationBar: BottomNavigationBar(
@@ -111,7 +140,7 @@ class MainScreen extends StatelessWidget {
       case 1:
         return PartnerContent();
       case 2:
-        return QrCameraContent();
+        return PaybackContent(); //QrCameraContent();
       case 3:
         return MapContent();
 
@@ -441,4 +470,17 @@ class MainView extends StatelessWidget {
       ),
     );
   }
+}
+
+void showQrScanner(BuildContext context) {
+  double width = MediaQuery.of(context).size.width;
+  showGeneralDialog(
+    context: context,
+    barrierDismissible: true, // true로 설정했으므로 barrierLabel 필요
+    barrierLabel: "닫기", // 접근성 레이블 설정
+    barrierColor: Colors.black54, // 배경 색상
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return QrCameraContent();
+    },
+  );
 }

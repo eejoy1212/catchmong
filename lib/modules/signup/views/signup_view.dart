@@ -5,6 +5,7 @@ import 'package:catchmong/widget/button/outlined_btn.dart';
 import 'package:catchmong/widget/button/yellow-toggle-btn.dart';
 import 'package:catchmong/widget/txtfield/border-txtfield.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 class SignupView extends StatelessWidget {
@@ -346,6 +347,61 @@ class SignupView extends StatelessWidget {
                 ],
               ),
             ),
+            // 계좌번호
+            Container(
+              margin: EdgeInsets.only(
+                top: 16,
+                left: 20,
+                right: 20,
+                bottom: 8,
+              ),
+              width: double.infinity,
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        "페이백 계좌번호",
+                        style: TextStyle(
+                          color: CatchmongColors.gray_800,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 4,
+                  ),
+                  Container(
+                    width: double.infinity,
+                    child: Row(
+                      children: [
+                        OutlinedBtn(width: 100, title: "신한은행", onPress: () {}),
+                        SizedBox(
+                          width: 8,
+                        ),
+                        Expanded(
+                          child: BorderTxtField(
+                              controller: TextEditingController(),
+                              onChanged: (String value) {}),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 8,
+                  ),
+                  Container(
+                    width: double.infinity,
+                    child: OutlinedBtn(
+                        width: MediaQuery.of(context).size.width / 4.5,
+                        title: "재인증",
+                        onPress: () {}),
+                  ),
+                ],
+              ),
+            ),
 
             // 페이백
             Container(
@@ -415,6 +471,7 @@ class SignupView extends StatelessWidget {
               child: Column(
                 children: [
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         "추천인",
@@ -424,6 +481,7 @@ class SignupView extends StatelessWidget {
                           fontSize: 14,
                         ),
                       ),
+                      SvgPicture.asset("assets/images/question-circle.svg"),
                     ],
                   ),
                   SizedBox(
@@ -453,6 +511,10 @@ class SignupView extends StatelessWidget {
                   )
                 ],
               ),
+            ),
+
+            SizedBox(
+              height: 200,
             ),
           ],
         ),

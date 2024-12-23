@@ -5,6 +5,8 @@ import 'package:dio/dio.dart';
 class Partner2Controller extends GetxController {
   var partners = <Partner>[].obs; // RxList<Partner>
   var isLoading = false.obs; // 로딩 상태
+  RxInt currentResPage = 0.obs; // 현재 페이지
+  RxInt currentHotPage = 0.obs; // 현재 페이지
   RxString searchKeyword = ''.obs; // 검색어 상태 변수
 
   final Dio _dio = Dio(BaseOptions(

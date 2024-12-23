@@ -1,3 +1,4 @@
+import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -35,7 +36,7 @@ class GoogleBtn extends StatelessWidget {
             '구글로\n시작하기',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white,
+              color: CatchmongColors.gray_800,
             ),
           ),
         ],
