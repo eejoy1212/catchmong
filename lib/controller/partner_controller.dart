@@ -8,7 +8,7 @@ class Partner2Controller extends GetxController {
   RxInt currentResPage = 0.obs; // 현재 페이지
   RxInt currentHotPage = 0.obs; // 현재 페이지
   RxString searchKeyword = ''.obs; // 검색어 상태 변수
-
+  String baseUrl = 'http://192.168.200.102:3000'; // API 베이스 URL
   final Dio _dio = Dio(BaseOptions(
     baseUrl: 'http://192.168.200.102:3000', // API 베이스 URL
     connectTimeout: const Duration(milliseconds: 5000), // 연결 제한 시간

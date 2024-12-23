@@ -30,10 +30,13 @@ class ScrapPartnerCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Container(
                 margin: scrapIconMargin,
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     //글자들
@@ -44,7 +47,7 @@ class ScrapPartnerCard extends StatelessWidget {
                         //가게명
                         Row(
                           mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Text(
                               partner.name,
@@ -64,9 +67,10 @@ class ScrapPartnerCard extends StatelessWidget {
                         SizedBox(
                           height: 4,
                         ),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.start,
+                        Wrap(
+                          spacing: 4, // 각 항목 사이의 간격
+                          runSpacing: 4, // 줄 바꿈 시 간격
+                          crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
                             Text(
                               "영업중",
@@ -75,9 +79,6 @@ class ScrapPartnerCard extends StatelessWidget {
                                 fontWeight: FontWeight.w700,
                                 fontSize: 14,
                               ),
-                            ),
-                            SizedBox(
-                              width: 4,
                             ),
                             Text(
                               "•",
@@ -88,15 +89,14 @@ class ScrapPartnerCard extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              "한식",
+                              partner.category,
                               style: TextStyle(
                                 color: CatchmongColors.sub_gray,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 14,
                               ),
-                            ),
-                            SizedBox(
-                              width: 4,
+                              overflow:
+                                  TextOverflow.ellipsis, // 넘칠 경우 ellipsis 처리
                             ),
                             Text(
                               "•",
@@ -114,9 +114,6 @@ class ScrapPartnerCard extends StatelessWidget {
                                 fontSize: 14,
                               ),
                             ),
-                            SizedBox(
-                              width: 4,
-                            ),
                             Text(
                               "•",
                               style: TextStyle(
@@ -125,12 +122,17 @@ class ScrapPartnerCard extends StatelessWidget {
                                 fontSize: 14,
                               ),
                             ),
-                            Text(
-                              "서울 강남구 청담동",
-                              style: TextStyle(
-                                color: CatchmongColors.sub_gray,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14,
+                            SizedBox(
+                              width: 60, // 최대 폭 지정
+                              child: Text(
+                                partner.address,
+                                style: TextStyle(
+                                  color: CatchmongColors.sub_gray,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
+                                ),
+                                overflow:
+                                    TextOverflow.ellipsis, // 넘칠 경우 ellipsis 처리
                               ),
                             ),
                             Image.asset("assets/images/downward-arrow.png"),
@@ -150,7 +152,9 @@ class ScrapPartnerCard extends StatelessWidget {
                 height: 156,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  itemCount: 30,
+                  itemCount: partner.storePhotos == null
+                      ? 0
+                      : partner.storePhotos?.length,
                   itemBuilder: (context, index) {
                     return InkWell(
                       onTap: () {
@@ -173,8 +177,8 @@ class ScrapPartnerCard extends StatelessWidget {
                                   color: CatchmongColors.gray,
                                   width: 1), // 외부 테두리
                             ),
-                            child: Image.asset(
-                              'assets/images/review2.jpg', // 이미지 경로
+                            child: Image.network(
+                              'http://192.168.200.102:3000/${partner.storePhotos?[index]}', // 이미지 경로
                               fit: BoxFit.cover, // 이미지가 Container 크기에 맞게 자르기
                             ),
                           ),
