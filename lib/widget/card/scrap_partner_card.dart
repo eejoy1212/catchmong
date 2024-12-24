@@ -1,8 +1,12 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/controller/partner_controller.dart';
 import 'package:catchmong/model/partner.dart';
+import 'package:catchmong/modules/partner/views/partner-show-view.dart';
 import 'package:catchmong/widget/status/star_status.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class ScrapPartnerCard extends StatelessWidget {
   final Partner partner;
@@ -18,10 +22,139 @@ class ScrapPartnerCard extends StatelessWidget {
       this.scrapIconMargin = const EdgeInsets.only(right: 20),
       required this.partner});
 
+  String _getBusinessStatus(
+      String businessTime, String? breakTime, String? regularHoliday) {
+    try {
+      // 현재 시간 가져오기
+      final now = DateTime.now();
+      final currentTime = DateFormat("HH:mm").format(now);
+
+      // 시작 시간과 종료 시간 분리
+      final times = businessTime.split('~');
+      if (times.length != 2) return "마감";
+      final startTime = times[0].trim();
+      final endTime = times[1].trim();
+
+      // 정규 휴일 처리
+      if (regularHoliday != null) {
+        final holidays = regularHoliday.split(',');
+        for (var holiday in holidays) {
+          holiday = holiday.trim();
+          if (holiday.contains("매주")) {
+            final holidayDay =
+                _getDayOfWeek(holiday.replaceAll("매주", "").trim());
+            if (now.weekday == holidayDay) {
+              return "마감";
+            }
+          } else if (holiday.contains("첫째주") ||
+              holiday.contains("둘째주") ||
+              holiday.contains("셋째주") ||
+              holiday.contains("넷째주")) {
+            final weekOfMonth = (now.day - 1) ~/ 7 + 1;
+            final holidayWeek = _getWeekOfMonth(holiday);
+            final holidayDay = _getDayOfWeek(holiday.split(' ').last.trim());
+
+            if (weekOfMonth == holidayWeek && now.weekday == holidayDay) {
+              return "마감";
+            }
+          }
+        }
+      }
+
+      // 브레이크타임 처리
+      if (breakTime != null) {
+        final breakTimes = breakTime.split('~');
+        if (breakTimes.length == 2) {
+          final breakStart = breakTimes[0].trim();
+          final breakEnd = breakTimes[1].trim();
+
+          // 현재 시간이 브레이크타임 범위에 속하면 "브레이크타임" 반환
+          if (currentTime.compareTo(breakStart) >= 0 &&
+              currentTime.compareTo(breakEnd) <= 0) {
+            return "브레이크타임";
+          }
+        }
+      }
+
+      // 현재 시간이 영업 시간 내에 있으면 "영업중" 반환
+      if (currentTime.compareTo(startTime) >= 0 &&
+          currentTime.compareTo(endTime) <= 0) {
+        return "영업중";
+      }
+
+      // 위 조건에 해당하지 않으면 "마감" 반환
+      return "마감";
+    } catch (e) {
+      print("Error parsing businessTime: $e");
+      return "마감";
+    }
+  }
+
+// 요일을 숫자로 변환
+  int _getDayOfWeek(String day) {
+    switch (day) {
+      case "월":
+        return DateTime.monday;
+      case "화":
+        return DateTime.tuesday;
+      case "수":
+        return DateTime.wednesday;
+      case "목":
+        return DateTime.thursday;
+      case "금":
+        return DateTime.friday;
+      case "토":
+        return DateTime.saturday;
+      case "일":
+        return DateTime.sunday;
+      default:
+        return -1;
+    }
+  }
+
+// 특정 주차를 숫자로 변환
+  int _getWeekOfMonth(String week) {
+    if (week.contains("첫째주")) return 1;
+    if (week.contains("둘째주")) return 2;
+    if (week.contains("셋째주")) return 3;
+    if (week.contains("넷째주")) return 4;
+    return -1;
+  }
+
+  String _getReplyCount(int count) {
+    if (count < 1000) {
+      return "리뷰 $count";
+    } else {
+      return "리뷰 999+";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+    final businessStatus = _getBusinessStatus(
+      partner.businessTime ?? "",
+      partner.breakTime,
+      partner.regularHoliday,
+    );
+
+    print("현재 상태: $businessStatus");
+    double _getRating() {
+      double rating = 0;
+      if (partner.reviews != null && partner.reviews!.isNotEmpty) {
+        print('getReviews>>${partner.reviews}');
+        for (var review in partner.reviews!) {
+          rating += review.rating;
+        }
+        rating = rating / partner.reviews!.length;
+      }
+      return rating;
+    }
+
+    final Partner2Controller partnerController = Get.find<Partner2Controller>();
+
     return Container(
-      height: 328,
+      // height: 328,
       padding: padding,
       decoration: const BoxDecoration(
           color: Colors.white,
@@ -60,32 +193,44 @@ class ScrapPartnerCard extends StatelessWidget {
                             SizedBox(
                               width: 8,
                             ),
-                            StarStatus()
+                            StarStatus(
+                              rating: _getRating(),
+                            )
                           ],
                         ),
                         //영업중
                         SizedBox(
                           height: 4,
                         ),
-                        Wrap(
-                          spacing: 4, // 각 항목 사이의 간격
-                          runSpacing: 4, // 줄 바꿈 시 간격
-                          crossAxisAlignment: WrapCrossAlignment.center,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                              "영업중",
-                              style: TextStyle(
-                                color: CatchmongColors.sub_gray,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14,
+                            SizedBox(
+                              // width: 100,
+                              child: Text(
+                                businessStatus,
+                                style: TextStyle(
+                                  color: businessStatus == "영업중"
+                                      ? Colors.green
+                                      : businessStatus == "브레이크타임"
+                                          ? Colors.orange
+                                          : Colors.red,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
+                                ),
                               ),
                             ),
-                            Text(
-                              "•",
-                              style: TextStyle(
-                                color: CatchmongColors.sub_gray,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14,
+                            SizedBox(
+                              width: 8,
+                              child: Center(
+                                child: Text(
+                                  "•",
+                                  style: TextStyle(
+                                    color: CatchmongColors.sub_gray,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 14,
+                                  ),
+                                ),
                               ),
                             ),
                             Text(
@@ -98,32 +243,40 @@ class ScrapPartnerCard extends StatelessWidget {
                               overflow:
                                   TextOverflow.ellipsis, // 넘칠 경우 ellipsis 처리
                             ),
-                            Text(
-                              "•",
-                              style: TextStyle(
-                                color: CatchmongColors.sub_gray,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14,
-                              ),
-                            ),
-                            Text(
-                              "리뷰 999+",
-                              style: TextStyle(
-                                color: CatchmongColors.sub_gray,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14,
-                              ),
-                            ),
-                            Text(
-                              "•",
-                              style: TextStyle(
-                                color: CatchmongColors.sub_gray,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14,
+                            SizedBox(
+                              width: 8,
+                              child: Center(
+                                child: Text(
+                                  "•",
+                                  style: TextStyle(
+                                    color: CatchmongColors.sub_gray,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 14,
+                                  ),
+                                ),
                               ),
                             ),
                             SizedBox(
-                              width: 60, // 최대 폭 지정
+                              width: 60,
+                              child: Text(
+                                _getReplyCount(partner.reviews?.length ?? 0),
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: CatchmongColors.sub_gray,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            SizedBox(
+                              width: width * 0.7,
+                              // 최대 폭 지정
                               child: Text(
                                 partner.address,
                                 style: TextStyle(
@@ -131,17 +284,22 @@ class ScrapPartnerCard extends StatelessWidget {
                                   fontWeight: FontWeight.w700,
                                   fontSize: 14,
                                 ),
-                                overflow:
-                                    TextOverflow.ellipsis, // 넘칠 경우 ellipsis 처리
+                                // 넘칠 경우 ellipsis 처리
                               ),
                             ),
-                            Image.asset("assets/images/downward-arrow.png"),
+                            Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              size: 20,
+                              color: CatchmongColors.sub_gray,
+                            )
                           ],
-                        ),
+                        )
                       ],
                     ),
                     //pin 뱃지
-                    Image.asset('assets/images/pin.png')
+                    SvgPicture.asset(
+                      'assets/partners/inactive-pin.svg',
+                    )
                   ],
                 ),
               ),
@@ -158,7 +316,17 @@ class ScrapPartnerCard extends StatelessWidget {
                   itemBuilder: (context, index) {
                     return InkWell(
                       onTap: () {
-                        Get.toNamed('/partner-show');
+                        // Get.toNamed('/partner-show');
+
+                        partnerController.selectedPartner.value = partner;
+                        if (partnerController.selectedPartner.value != null) {
+                          showSelectedPartner(
+                              context,
+                              partner,
+                              businessStatus,
+                              _getRating(),
+                              _getReplyCount(partner.reviews?.length ?? 0));
+                        }
                       },
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -192,22 +360,36 @@ class ScrapPartnerCard extends StatelessWidget {
                 height: 10,
               ),
               Container(
-                height: 56,
+                height: partner.reviews == null
+                    ? 0
+                    : partner.reviews!.isEmpty
+                        ? 0
+                        : 56,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  itemCount: 30,
+                  itemCount:
+                      partner.reviews == null ? 0 : partner.reviews?.length,
                   itemBuilder: (context, index) {
                     return Container(
+                      decoration: BoxDecoration(
+                          color: Color(0xFFFAFAFD),
+                          borderRadius: BorderRadius.all(Radius.circular(8))),
                       margin: EdgeInsets.only(right: 12),
-                      width: 356, // 글자 너비 제한
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      constraints: BoxConstraints(
+                        maxWidth: 300, // 최대 너비를 356으로 제한
+                      ),
+                      // width: 356, // 글자 너비 제한
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                       child: Text(
-                        "고객리뷰를 적어주세요 2줄까지 노출 가능하며 더 길어지면고객리뷰를 적어주세요 2줄까지 노출 가능하며 더 길어지면고객리뷰를 적어주세요 2줄까지 노출 가능하며 더 길어지면고객리뷰를 적어주세요 2줄까지 노출 가능하며 더 길어지면고객리뷰를 적어주세요 2줄까지 노출 가능하며 더 길어지면고객리뷰를 적어주세요 2줄까지 노출 가능하며 더 길어지면고객리뷰를 적어주세요 2줄까지 노출 가능하며 더 길어지면고객리뷰를 적어주세요 2줄까지 노출 가능하며 더 길어지면",
+                        partner.reviews?[index].content ?? "",
                         maxLines: 2, // 최대 줄 수를 2줄로 제한
                         overflow: TextOverflow.ellipsis, // 글자가 넘칠 경우 '...' 표시
                         style: TextStyle(
                           fontSize: 14,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w400,
                           color: CatchmongColors.sub_gray,
                         ),
                       ),
@@ -221,4 +403,23 @@ class ScrapPartnerCard extends StatelessWidget {
       ),
     );
   }
+}
+
+void showSelectedPartner(BuildContext context, Partner partner,
+    String businessStatus, double rating, String replyCount) {
+  double width = MediaQuery.of(context).size.width;
+  showGeneralDialog(
+    context: context,
+    barrierDismissible: true, // true로 설정했으므로 barrierLabel 필요
+    barrierLabel: "닫기", // 접근성 레이블 설정
+    barrierColor: Colors.black54, // 배경 색상
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return PartnerShowView(
+        partner: partner,
+        businessStatus: businessStatus,
+        rating: rating,
+        replyCount: replyCount,
+      );
+    },
+  );
 }

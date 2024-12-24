@@ -1,4 +1,6 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/model/menu.dart';
+import 'package:catchmong/model/partner.dart';
 import 'package:catchmong/widget/bar/default_appbar.dart';
 import 'package:catchmong/widget/button/AppbarBackBtn.dart';
 import 'package:catchmong/widget/button/alert-btn.dart';
@@ -6,6 +8,7 @@ import 'package:catchmong/widget/button/location-copy-btn.dart';
 import 'package:catchmong/widget/button/more-btn.dart';
 import 'package:catchmong/widget/button/outlined_btn.dart';
 import 'package:catchmong/widget/button/phone-call-btn.dart';
+import 'package:catchmong/widget/card/img_card.dart';
 import 'package:catchmong/widget/card/partner-review-card.dart';
 import 'package:catchmong/widget/card/reservation_card.dart';
 import 'package:catchmong/widget/chip/menu_chip.dart';
@@ -14,12 +17,110 @@ import 'package:catchmong/widget/status/star_status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class PartnerShowView extends StatelessWidget {
-  const PartnerShowView({super.key});
+  final Partner partner;
+  final String businessStatus;
+  final double rating;
+  final String replyCount;
+  const PartnerShowView(
+      {super.key,
+      required this.partner,
+      required this.businessStatus,
+      required this.rating,
+      required this.replyCount});
 
   @override
   Widget build(BuildContext context) {
+    Map<String, String> _getCategoryPriceRange(List<Menu> menus) {
+      // NumberFormat for formatting prices with comma
+      final formatter = NumberFormat('#,###');
+
+      // Map to store the price range for each category
+      Map<String, List<double>> categoryPrices = {};
+
+      for (var menu in menus) {
+        // Ensure the category is valid
+        String category = menu.category;
+
+        // Add price to the corresponding category
+        if (!categoryPrices.containsKey(category)) {
+          categoryPrices[category] = [];
+        }
+        if (menu.price != null) {
+          categoryPrices[category]?.add(menu.price!);
+        }
+      }
+
+      // Compute the price range for each category
+      Map<String, String> priceRanges = categoryPrices.map((category, prices) {
+        double minPrice = prices.reduce((a, b) => a < b ? a : b);
+        double maxPrice = prices.reduce((a, b) => a > b ? a : b);
+        return MapEntry(
+          category,
+          "${formatter.format(minPrice)}원 - ${formatter.format(maxPrice)}원",
+        );
+      });
+
+      return priceRanges;
+    }
+
+    List<String> _getMenuCategories(List<Menu> menus) {
+      // `menus`에서 중복되지 않은 카테고리 리스트 추출
+      return menus
+          .map((menu) => menu.category) // 카테고리가 없으면 "미분류"로 설정
+          .toSet() // 중복 제거
+          .toList(); // 리스트로 변환
+    }
+
+    String _getBusiness(Partner partner) {
+      // 휴무일 정보
+      final holiday = partner.regularHoliday;
+      // 영업시간 정보
+      final businessTime = partner.businessTime ?? "영업 시간 정보 없음";
+
+      // 요일 목록
+      final days = ["월", "화", "수", "목", "금", "토", "일"];
+      // 휴무일이 있는 경우 해당 요일 제거
+      final openDays =
+          holiday != null ? days.where((day) => day != holiday).toList() : days;
+
+      // 요일과 영업시간 결합
+      final result = openDays.map((day) => "$day $businessTime").join("\n");
+
+      return result;
+    }
+
+    String _getAmenity(String amenity) {
+      switch (amenity) {
+        case "아기의자":
+          return "baby";
+        case "쿠폰":
+          return "coupon";
+        case "주차":
+          return "parking";
+        case "애견동반":
+          return "pet";
+        default:
+          return "";
+      }
+    }
+
+    String _formatPrice(String? price) {
+      print("price in format>>>${price}");
+      if (price == null) return "-";
+
+      // `tryParse`로 문자열을 정수로 변환
+      double parsedPrice = double.tryParse(price) ?? 0;
+      // int? parsedPrice = int.tryParse(price);
+      if (parsedPrice == null) return "-";
+
+      // 천단위 콤마 추가
+      final formatter = NumberFormat('#,###');
+      return formatter.format(parsedPrice) + "원";
+    }
+
     return Scaffold(
       appBar: AppBar(
         leading: AppbarBackBtn(),
@@ -121,17 +222,15 @@ class PartnerShowView extends StatelessWidget {
               children: [
                 Expanded(
                   child: Container(
-                    width: 220,
-                    height: 220,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                          color: CatchmongColors.gray, width: 1), // 외부 테두리
-                    ),
-                    child: Image.asset(
-                      'assets/images/review2.jpg', // 이미지 경로
-                      fit: BoxFit.cover, // 이미지가 Container 크기에 맞게 자르기
-                    ),
-                  ),
+                      width: 220,
+                      height: 220,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                            color: CatchmongColors.gray, width: 1), // 외부 테두리
+                      ),
+                      child: ImgCard(
+                          path: 'http://192.168.200.102:3000/' +
+                              partner.storePhotos![0])),
                 ),
                 SizedBox(
                   width: 2,
@@ -154,10 +253,9 @@ class PartnerShowView extends StatelessWidget {
                                     color: CatchmongColors.gray,
                                     width: 1), // 외부 테두리
                               ),
-                              child: Image.asset(
-                                'assets/images/review2.jpg', // 이미지 경로
-                                fit: BoxFit.cover, // 이미지가 Container 크기에 맞게 자르기
-                              ),
+                              child: ImgCard(
+                                  path: 'http://192.168.200.102:3000/' +
+                                      partner.storePhotos![1]),
                             ),
                           ),
                           SizedBox(
@@ -172,10 +270,9 @@ class PartnerShowView extends StatelessWidget {
                                     color: CatchmongColors.gray,
                                     width: 1), // 외부 테두리
                               ),
-                              child: Image.asset(
-                                'assets/images/review2.jpg', // 이미지 경로
-                                fit: BoxFit.cover, // 이미지가 Container 크기에 맞게 자르기
-                              ),
+                              child: ImgCard(
+                                  path: 'http://192.168.200.102:3000/' +
+                                      partner.storePhotos![1]),
                             ),
                           ),
                         ],
@@ -196,10 +293,9 @@ class PartnerShowView extends StatelessWidget {
                                     color: CatchmongColors.gray,
                                     width: 1), // 외부 테두리
                               ),
-                              child: Image.asset(
-                                'assets/images/review2.jpg', // 이미지 경로
-                                fit: BoxFit.cover, // 이미지가 Container 크기에 맞게 자르기
-                              ),
+                              child: ImgCard(
+                                  path: 'http://192.168.200.102:3000/' +
+                                      partner.storePhotos![1]),
                             ),
                           ),
                           SizedBox(
@@ -215,36 +311,42 @@ class PartnerShowView extends StatelessWidget {
                                       color: CatchmongColors.gray,
                                       width: 1), // 외부 테두리
                                 ),
-                                child: Image.asset(
-                                  'assets/images/review2.jpg', // 이미지 경로
-                                  fit:
-                                      BoxFit.cover, // 이미지가 Container 크기에 맞게 자르기
-                                ),
+                                child: ImgCard(
+                                    path: 'http://192.168.200.102:3000/' +
+                                        partner.storePhotos![1]),
                               ),
-                              Positioned.fill(
+                              if (partner.storePhotos != null &&
+                                  partner.storePhotos!.length > 5)
+                                Positioned.fill(
                                   child: Center(
-                                      child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Image.asset('assets/images/img-icon.png'),
-                                      Text(
-                                        "999+",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w600,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Image.asset(
+                                                'assets/images/img-icon.png'),
+                                            Text(
+                                              "999+",
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            )
+                                          ],
                                         ),
-                                      )
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ],
-                              )))
+                                ),
                             ]),
                           ),
                         ],
@@ -279,25 +381,34 @@ class PartnerShowView extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
-                        "가게명",
-                        style: TextStyle(
-                          color: CatchmongColors.black,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
+                      Container(
+                        constraints: BoxConstraints(
+                          maxWidth: 130,
+                        ),
+                        child: Text(
+                          partner.name,
+                          maxLines: 3,
+                          style: TextStyle(
+                            overflow: TextOverflow.ellipsis,
+                            color: CatchmongColors.black,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
                       SizedBox(
                         width: 8,
                       ),
-                      StarStatus(),
+                      StarStatus(
+                        rating: rating,
+                      ),
                       Spacer(),
                       //pin 뱃지
                       AlertBtn(),
                       SizedBox(
                         width: 8,
                       ),
-                      Image.asset('assets/images/pin.png')
+                      SvgPicture.asset('assets/partners/active-pin.svg'),
                     ],
                   ),
                   SizedBox(
@@ -308,7 +419,29 @@ class PartnerShowView extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Text(
-                        "영업중",
+                        businessStatus,
+                        style: TextStyle(
+                          color: businessStatus == "영업중"
+                              ? Colors.green
+                              : businessStatus == "브레이크타임"
+                                  ? Colors.orange
+                                  : Colors.red,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 4,
+                      ),
+                      Text(
+                        "•",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: CatchmongColors.sub_gray,
+                        ),
+                      ),
+                      Text(
+                        partner.category,
                         style: TextStyle(
                           fontSize: 14,
                           color: CatchmongColors.sub_gray,
@@ -325,24 +458,7 @@ class PartnerShowView extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        "한식",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: CatchmongColors.sub_gray,
-                        ),
-                      ),
-                      SizedBox(
-                        width: 4,
-                      ),
-                      Text(
-                        "•",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: CatchmongColors.sub_gray,
-                        ),
-                      ),
-                      Text(
-                        "리뷰 999+",
+                        replyCount,
                         style: TextStyle(
                           fontSize: 14,
                           color: CatchmongColors.sub_gray,
@@ -374,15 +490,15 @@ class PartnerShowView extends StatelessWidget {
                   //주소복사
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Image.asset('assets/images/marker-icon.png'),
+                      SvgPicture.asset('assets/icons/map-marker-icon.svg'),
                       SizedBox(
                         width: 8,
                       ),
                       Expanded(
                         child: Text(
-                          "서울 강남구 강남대로92길 19 트레바리 강남 아지트(여원빌딩) 2층 밍글몰트",
+                          partner.address,
                           softWrap: true, // 텍스트 줄바꿈 설정
                           overflow: TextOverflow.ellipsis, // 넘치는 텍스트를 잘라내기 설정
                           maxLines: 3, // 최대 줄 수 설정 (필요 시)
@@ -399,7 +515,9 @@ class PartnerShowView extends StatelessWidget {
                   SizedBox(
                     height: 12,
                   ),
-                  PhoneCallBtn(),
+                  PhoneCallBtn(
+                    phoneNumber: partner.phone,
+                  ),
                   SizedBox(
                     height: 12,
                   ),
@@ -408,7 +526,7 @@ class PartnerShowView extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Image.asset('assets/images/clock-icon.png'),
+                      SvgPicture.asset('assets/icons/clock-icon.svg'),
                       SizedBox(
                         width: 8,
                       ),
@@ -417,26 +535,21 @@ class PartnerShowView extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "월 휴무",
+                            partner.hasHoliday
+                                ? "${partner.regularHoliday} 휴무"
+                                : "매일 영업",
                             style: TextStyle(
                               color: CatchmongColors.sub_gray,
                               fontSize: 14,
                             ),
                           ),
                           Text(
-                            "화 - 토 오후 6:30 - 오전 1:00",
+                            _getBusiness(partner),
                             style: TextStyle(
                               color: CatchmongColors.sub_gray,
                               fontSize: 14,
                             ),
                           ),
-                          Text(
-                            "일 오후 6:30 - 오후 11:00",
-                            style: TextStyle(
-                              color: CatchmongColors.sub_gray,
-                              fontSize: 14,
-                            ),
-                          )
                         ],
                       )
                     ],
@@ -451,7 +564,7 @@ class PartnerShowView extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Image.asset('assets/images/heart-icon.png'),
+                      SvgPicture.asset('assets/icons/heart-icon.svg'),
                       SizedBox(
                         width: 8,
                       ),
@@ -461,7 +574,7 @@ class PartnerShowView extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "가게 소개 문구 작성해주세요.",
+                              partner.description ?? "-",
                               style: TextStyle(
                                 color: CatchmongColors.sub_gray,
                                 fontSize: 14,
@@ -475,31 +588,45 @@ class PartnerShowView extends StatelessWidget {
                               child: Row(
                                 mainAxisSize:
                                     MainAxisSize.min, // Row의 크기를 자식 크기에 맞게 설정
-                                children: [
-                                  PartnerContentChip(
-                                    title: "아기의자",
+                                children: List.generate(
+                                    partner.amenities == null
+                                        ? 0
+                                        : partner.amenities!.length,
+                                    (int index) {
+                                  String amenityFileName =
+                                      _getAmenity(partner.amenities![index]);
+                                  return PartnerContentChip(
+                                    title: partner.amenities![index],
                                     image: Image.asset(
-                                        'assets/images/baby-icon.png'),
-                                  ),
-                                  SizedBox(width: 8), // 간격 추가
-                                  PartnerContentChip(
-                                    title: "쿠폰",
-                                    image: Image.asset(
-                                        'assets/images/coupon-icon.png'),
-                                  ),
-                                  SizedBox(width: 8), // 간격 추가
-                                  PartnerContentChip(
-                                    title: "주차",
-                                    image: Image.asset(
-                                        'assets/images/parking-icon.png'),
-                                  ),
-                                  SizedBox(width: 8), // 간격 추가
-                                  PartnerContentChip(
-                                    title: "애견동반",
-                                    image: Image.asset(
-                                        'assets/images/pet-icon.png'),
-                                  ),
-                                ],
+                                        'assets/images/$amenityFileName-icon.png'),
+                                  );
+                                }),
+                                // [
+
+                                // PartnerContentChip(
+                                //   title: "아기의자",
+                                //   image: Image.asset(
+                                //       'assets/images/baby-icon.png'),
+                                // ),
+                                //   SizedBox(width: 8), // 간격 추가
+                                //   PartnerContentChip(
+                                //     title: "쿠폰",
+                                //     image: Image.asset(
+                                //         'assets/images/coupon-icon.png'),
+                                //   ),
+                                //   SizedBox(width: 8), // 간격 추가
+                                //   PartnerContentChip(
+                                //     title: "주차",
+                                //     image: Image.asset(
+                                //         'assets/images/parking-icon.png'),
+                                //   ),
+                                //   SizedBox(width: 8), // 간격 추가
+                                //   PartnerContentChip(
+                                //     title: "애견동반",
+                                //     image: Image.asset(
+                                //         'assets/images/pet-icon.png'),
+                                //   ),
+                                // ],
                               ),
                             )
                           ],
@@ -641,8 +768,7 @@ class PartnerShowView extends StatelessWidget {
                       child: TabBarView(
                         children: [
                           // 메뉴 탭 내용
-                          Container(
-                            //
+                          SingleChildScrollView(
                             child: Column(
                               children: [
                                 //칩
@@ -656,7 +782,10 @@ class PartnerShowView extends StatelessWidget {
                                     child: ListView.builder(
                                       scrollDirection:
                                           Axis.horizontal, // 가로 스크롤 설정
-                                      itemCount: 4, // 칩의 개수
+                                      itemCount: partner.menus == null
+                                          ? 0
+                                          : _getMenuCategories(partner.menus!)
+                                              .length, // 칩의 개수
                                       itemBuilder: (context, index) {
                                         String getTitle() {
                                           switch (index) {
@@ -673,111 +802,139 @@ class PartnerShowView extends StatelessWidget {
                                           }
                                         }
 
-                                        return Container(
-                                            margin: EdgeInsets.only(right: 8),
-                                            child: MenuChip(title: getTitle()));
+                                        return InkWell(
+                                          child: Container(
+                                              margin: EdgeInsets.only(right: 8),
+                                              child:
+                                                  MenuChip(title: getTitle())),
+                                        );
                                       },
                                     ),
                                   ),
                                 ),
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        "에피타이저",
-                                        style: TextStyle(
-                                          color: CatchmongColors.gray_800,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
+                                if (partner.menus != null)
+                                  ...List.generate(partner.menus!.length,
+                                      (int index) {
+                                    Map<String, String> priceRanges =
+                                        _getCategoryPriceRange(partner.menus!);
+
+                                    priceRanges.forEach((category, range) {
+                                      print(">>>!!$category: $range");
+                                    });
+                                    return Column(
+                                      children: [
+                                        Container(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 20,
+                                          ),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                partner.menus![index].category,
+                                                style: TextStyle(
+                                                  color:
+                                                      CatchmongColors.gray_800,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                              Text(
+                                                priceRanges[partner
+                                                        .menus![index]
+                                                        .category] ??
+                                                    "-",
+                                                style: TextStyle(
+                                                  color:
+                                                      CatchmongColors.gray400,
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              )
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                      Text(
-                                        "8,000 - 13,000원",
-                                        style: TextStyle(
-                                          color: CatchmongColors.gray400,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                                //메뉴 카드
-                                Container(
-                                  width: MediaQuery.of(context).size.width,
-                                  decoration: BoxDecoration(
-                                      border: Border(
-                                          bottom: BorderSide(
-                                    color: CatchmongColors.gray50,
-                                  ))),
-                                  padding: EdgeInsets.only(
-                                    left: 20,
-                                    top: 16,
-                                    right: 20,
-                                    bottom: 32,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      //이미지
-                                      Container(
-                                        width: 100,
-                                        height: 100,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(8)),
-                                          border: Border.all(
+                                        //메뉴 카드
+                                        Container(
+                                          width:
+                                              MediaQuery.of(context).size.width,
+                                          decoration: BoxDecoration(
+                                              border: Border(
+                                                  bottom: BorderSide(
                                             color: CatchmongColors.gray50,
-                                            width: 1,
-                                          ), // 외부 테두리
-                                        ),
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(
-                                              8), // 이미지를 둥글게 자르기
-                                          child: Image.asset(
-                                            'assets/images/review2.jpg', // 이미지 경로
-                                            fit: BoxFit
-                                                .cover, // 이미지가 Container 크기에 맞게 자르기
+                                          ))),
+                                          padding: EdgeInsets.only(
+                                            left: 20,
+                                            top: 16,
+                                            right: 20,
+                                            bottom: 32,
                                           ),
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        width: 8,
-                                      ),
-                                      Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            "메뉴 명",
-                                            style: TextStyle(
-                                              color: CatchmongColors.black,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w400,
-                                            ),
+                                          child: Row(
+                                            children: [
+                                              //이미지
+                                              Container(
+                                                width: 100,
+                                                height: 100,
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(8)),
+                                                  border: Border.all(
+                                                    color:
+                                                        CatchmongColors.gray50,
+                                                    width: 1,
+                                                  ), // 외부 테두리
+                                                ),
+                                                child: ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          8), // 이미지를 둥글게 자르기
+                                                  child: ImgCard(
+                                                      path:
+                                                          'http://192.168.200.102:3000/${partner.menus?[index].image}'),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: 8,
+                                              ),
+                                              Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    partner.menus![index].name,
+                                                    style: TextStyle(
+                                                      color:
+                                                          CatchmongColors.black,
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    height: 8,
+                                                  ),
+                                                  Text(
+                                                    "${_formatPrice(partner.menus?[index].price.toString())}",
+                                                    style: TextStyle(
+                                                      color:
+                                                          CatchmongColors.black,
+                                                      fontSize: 20,
+                                                      fontWeight:
+                                                          FontWeight.w700,
+                                                    ),
+                                                  )
+                                                ],
+                                              )
+                                            ],
                                           ),
-                                          SizedBox(
-                                            height: 8,
-                                          ),
-                                          Text(
-                                            "12,800원",
-                                            style: TextStyle(
-                                              color: CatchmongColors.black,
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                          )
-                                        ],
-                                      )
-                                    ],
-                                  ),
-                                )
+                                        )
+                                      ],
+                                    );
+                                  })
                               ],
                             ),
                           ),

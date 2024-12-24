@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PhoneCallBtn extends StatelessWidget {
-  final String phoneNumber = "010-2222-1212";
+  // final String phoneNumber = "010-2222-1212";
+  final String phoneNumber;
 
+  const PhoneCallBtn({super.key, required this.phoneNumber});
   Future<void> _makePhoneCall(String phoneNumber) async {
     final Uri phoneUri = Uri(
       scheme: 'tel',
@@ -23,7 +26,7 @@ class PhoneCallBtn extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Image.asset('assets/images/tel-icon.png'),
+        SvgPicture.asset('assets/icons/call-icon.svg'),
         SizedBox(
           width: 8,
         ),

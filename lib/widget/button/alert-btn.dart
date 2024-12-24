@@ -1,5 +1,6 @@
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class AlertBtn extends StatelessWidget {
   const AlertBtn({super.key});
@@ -21,7 +22,7 @@ class AlertBtn extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Image.asset('assets/images/alert-icon.png'),
+            SvgPicture.asset('assets/icons/noti-icon.svg'),
             SizedBox(
               width: 4,
             ),

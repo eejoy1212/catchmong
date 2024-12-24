@@ -2154,7 +2154,7 @@ void showPreview(BuildContext context) {
     barrierLabel: "닫기", // 접근성 레이블 설정
     barrierColor: Colors.black54, // 배경 색상
     pageBuilder: (context, animation, secondaryAnimation) {
-      return PartnerShowView();
+      return Container(); //PartnerShowView();
     },
   );
 }

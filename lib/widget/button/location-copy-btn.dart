@@ -1,5 +1,6 @@
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class LocationCopyBtn extends StatelessWidget {
   const LocationCopyBtn({super.key});
@@ -21,7 +22,7 @@ class LocationCopyBtn extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Image.asset('assets/images/copy-icon.png'),
+            SvgPicture.asset('assets/icons/copy-icon.svg'),
             SizedBox(
               width: 4,
             ),

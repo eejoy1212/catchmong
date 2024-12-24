@@ -122,10 +122,10 @@ class AppPages {
       name: '/profile-edit',
       page: () => const ProfileEditView(),
     ),
-    GetPage(
-      name: '/partner-show',
-      page: () => const PartnerShowView(),
-    ),
+    // GetPage(
+    //   name: '/partner-show',
+    //   page: () => const PartnerShowView(),
+    // ),
     GetPage(name: '/reservation', page: () => ReservationView()),
   ];
 }

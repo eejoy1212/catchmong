@@ -1,3 +1,6 @@
+import 'review.dart'; // Review 클래스가 정의된 파일 경로를 import
+import 'menu.dart'; // Menu 클래스가 정의된 파일 경로를 import
+
 class Partner {
   final int id;
   final String name;
@@ -20,6 +23,8 @@ class Partner {
   final String? breakTime; // 휴게시간
   final DateTime createdAt; // 생성 날짜
   final DateTime updatedAt; // 업데이트 날짜
+  final List<Review>? reviews; // 리뷰 리스트
+  final List<Menu>? menus; // 메뉴 리스트
 
   Partner({
     required this.id,
@@ -43,6 +48,8 @@ class Partner {
     this.breakTime,
     required this.createdAt,
     required this.updatedAt,
+    this.reviews, // 리뷰 리스트 초기화
+    this.menus, // 메뉴 리스트 초기화
   });
 
   // JSON 데이터를 Dart 객체로 변환
@@ -75,6 +82,12 @@ class Partner {
       breakTime: json['breakTime'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
+      reviews: (json['reviews'] as List<dynamic>?)
+          ?.map((e) => Review.fromJson(e as Map<String, dynamic>))
+          .toList(), // 리뷰 리스트 처리
+      menus: (json['menus'] as List<dynamic>?)
+          ?.map((e) => Menu.fromJson(e as Map<String, dynamic>))
+          .toList(), // 메뉴 리스트 처리
     );
   }
 
@@ -102,6 +115,8 @@ class Partner {
       'breakTime': breakTime,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+      'reviews': reviews?.map((e) => e.toJson()).toList(), // 리뷰 리스트 처리
+      'menus': menus?.map((e) => e.toJson()).toList(), // 메뉴 리스트 처리
     };
   }
 }

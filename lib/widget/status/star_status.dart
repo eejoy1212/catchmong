@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class StarStatus extends StatelessWidget {
-  const StarStatus({super.key});
+  final double rating;
+  const StarStatus({super.key, required this.rating});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +17,7 @@ class StarStatus extends StatelessWidget {
         Container(
           margin: EdgeInsets.only(top: 4),
           child: Text(
-            '5.0',
+            rating.toString(),
             style: TextStyle(
                 color: CatchmongColors.gray_800,
                 fontSize: 12,

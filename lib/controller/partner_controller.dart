@@ -9,6 +9,7 @@ class Partner2Controller extends GetxController {
   RxInt currentHotPage = 0.obs; // 현재 페이지
   RxString searchKeyword = ''.obs; // 검색어 상태 변수
   String baseUrl = 'http://192.168.200.102:3000'; // API 베이스 URL
+  Rxn<Partner> selectedPartner = Rxn<Partner>(); // 선택된 파트너
   final Dio _dio = Dio(BaseOptions(
     baseUrl: 'http://192.168.200.102:3000', // API 베이스 URL
     connectTimeout: const Duration(milliseconds: 5000), // 연결 제한 시간
@@ -26,7 +27,7 @@ class Partner2Controller extends GetxController {
       if (response.statusCode == 200) {
         // 응답 데이터가 JSON 배열인지 확인 후 처리
         final List<dynamic> data = response.data;
-        print("파트너 dynamic 데이터 조회: $data");
+        print("파트너 dynamic 데이터 조회: ${data}");
 
         // JSON 배열을 Partner 객체 리스트로 변환
         partners.value = data
