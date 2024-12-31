@@ -114,7 +114,21 @@ class CertiView extends StatelessWidget {
                       await loginController.verifyCode(); // 인증번호 검증
                       if (loginController.isVerified.value) {
                         bool res = isLogin
-                            ? await loginController.updateUser()
+                            ? await loginController.updateUserInfo(
+                                userId: loginController
+                                    .user.value!.id, // 수정할 사용자 ID
+                                newNickname:
+                                    loginController.nicknameController.text,
+                                newPhone: loginController.phoneController.text,
+                                newGender: loginController.gender.value,
+                                newAgeGroup: loginController.ageGroup.value,
+                                newPaybackMethod:
+                                    loginController.paybackMethod.value,
+                                newReferrerNickname: loginController
+                                    .referrerNicknameController.text,
+                                pictureFile: loginController
+                                    .selectedImage.value, // 선택적으로 이미지 파일
+                              )
                             : await loginController
                                 .postAdditionalInfo(); // 인증 성공 시 추가 정보 전송
                         res
@@ -162,7 +176,7 @@ void showConfirmDialog(BuildContext context, bool isLogin) {
                   )),
               InkWell(
                 onTap: () {
-                  isLogin ? Get.back() : Get.toNamed("/loading");
+                  isLogin ? Get.toNamed('/main') : Get.toNamed("/loading");
                 },
                 child: Container(
                   alignment: Alignment.center,

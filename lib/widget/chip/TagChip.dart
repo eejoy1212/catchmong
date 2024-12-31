@@ -9,7 +9,9 @@ class TagChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12), // 좌우 패딩 12px
+      margin: const EdgeInsets.only(right: 8), // 오른쪽 마진 8px
+      padding:
+          const EdgeInsets.symmetric(horizontal: 12, vertical: 3), // 좌우 패딩 12px
       decoration: BoxDecoration(
         border: Border.all(
           color: CatchmongColors.yellow_main, // --yellow (#F5C626) 색상

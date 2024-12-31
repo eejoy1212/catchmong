@@ -81,5 +81,15 @@
 	<array>
 		<string>location</string>
 	</array>
+	<!-- 카카오 로그인 -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>kakao${YOUR_NATIVE_APP_KEY}</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

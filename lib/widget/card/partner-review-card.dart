@@ -1,16 +1,57 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/controller/partner_controller.dart';
+import 'package:catchmong/model/review.dart';
 import 'package:catchmong/widget/bar/default_appbar.dart';
 import 'package:catchmong/widget/button/more-btn.dart';
+import 'package:catchmong/widget/card/img_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class PartnerReviewCard extends StatelessWidget {
   final void Function()? onReplyTap;
-  PartnerReviewCard({super.key, this.onReplyTap});
-
+  final Review review;
+  PartnerReviewCard({super.key, this.onReplyTap, required this.review});
+  String baseUrl = 'http://192.168.200.102:3000/';
   @override
   Widget build(BuildContext context) {
+    print("baseUrl + review.images![0]>>>${baseUrl + review.images![0]}");
+    final Partner2Controller partnerController = Get.find<Partner2Controller>();
+    String formatDate(DateTime date) {
+      return DateFormat('yyyy-MM-dd').format(date); // 원하는 형식 지정
+    }
+
+    List<Widget> buildStarRating(double rating) {
+      List<Widget> stars = [];
+
+      for (int i = 1; i <= 5; i++) {
+        if (rating >= i) {
+          stars.add(
+              //   SvgPicture.asset(
+              //   'assets/images/review-star.svg',
+              //   width: 20,
+              // )
+              Image.asset(
+            'assets/images/review-star.png',
+          ));
+        } else if (rating > i - 1 && rating < i) {
+          stars.add(
+              //   SvgPicture.asset(
+              //   'assets/images/review-star-half.svg',
+              //   width: 20,
+              // )
+              Image.asset(
+            'assets/images/review-star-half.png',
+          ));
+        } else {
+          break; // 더 이상 별 추가하지 않음
+        }
+      }
+
+      return stars;
+    }
+
     return Container(
       margin: EdgeInsets.only(
         left: 20,
@@ -29,10 +70,8 @@ class PartnerReviewCard extends StatelessWidget {
                 child: Container(
                   width: 36, // 아바타 너비 36px
                   height: 36, // 아바타 높이 36px
-                  child: Image.asset(
-                    'assets/images/profile3.png',
-                    fit: BoxFit.cover, // 이미지가 원형 안에 잘 맞도록 설정
-                  ),
+                  //리뷰 쓴 유저의 프로필사진도 가져오는걸로 백앤드 수정
+                  child: ImgCard(path: baseUrl + review.images![0]),
                 ),
               ),
               SizedBox(
@@ -44,7 +83,7 @@ class PartnerReviewCard extends StatelessWidget {
                 children: [
                   //리뷰
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
@@ -90,17 +129,13 @@ class PartnerReviewCard extends StatelessWidget {
                   ),
                   //별점
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: List.generate(5, (index) {
-                          return SvgPicture.asset(
-                            'assets/images/review-star.svg',
-                          );
-                        }),
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: buildStarRating(review.rating),
                       ),
                       SizedBox(
                         width: 4,
@@ -116,7 +151,7 @@ class PartnerReviewCard extends StatelessWidget {
                         width: 4,
                       ),
                       Text(
-                        "24.10.11",
+                        formatDate(review.createdAt),
                         style: TextStyle(
                           color: CatchmongColors.gray_300,
                           fontSize: 12,
@@ -137,7 +172,7 @@ class PartnerReviewCard extends StatelessWidget {
             height: 240,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: 30,
+              itemCount: review.images!.length,
               itemBuilder: (context, index) {
                 return InkWell(
                   onTap: () {
@@ -159,10 +194,7 @@ class PartnerReviewCard extends StatelessWidget {
                           border: Border.all(
                               color: CatchmongColors.gray, width: 1), // 외부 테두리
                         ),
-                        child: Image.asset(
-                          'assets/images/profile3.png', // 이미지 경로
-                          fit: BoxFit.cover, // 이미지가 Container 크기에 맞게 자르기
-                        ),
+                        child: ImgCard(path: baseUrl + review.images![index]),
                       ),
                     ),
                   ),
@@ -173,19 +205,28 @@ class PartnerReviewCard extends StatelessWidget {
           SizedBox(
             height: 16,
           ),
-          Text(
-            "리뷰 내용을 작성해주세요.3줄까지 노출가능하며 4줄부터 말줄임표 설정 해주세요.더보기 버튼 클릭 시 전체 리뷰와 사장님 댓글까지 확인 가능합니다.",
-            maxLines: 3, // 최대 3줄로 설정
-            overflow: TextOverflow.ellipsis, // 4줄부터는 말줄임표로 표시
-            style: TextStyle(
-              color: CatchmongColors.sub_gray,
-              fontSize: 14,
-            ),
-          ),
+          Obx(() => Text(
+                review.content ?? "",
+                maxLines:
+                    partnerController.isExpanded.isTrue ? null : 3, // 최대 3줄로 설정
+                overflow: partnerController.isExpanded.isTrue
+                    ? TextOverflow.visible
+                    : TextOverflow.ellipsis, // 4줄부터는 말줄임표로 표시
+                style: TextStyle(
+                  color: CatchmongColors.sub_gray,
+                  fontSize: 14,
+                ),
+              )),
           SizedBox(
             height: 8,
           ),
-          MoreBtn(),
+          Obx(() => MoreBtn(
+                onTap: () {
+                  partnerController.isExpanded.value =
+                      !partnerController.isExpanded.value;
+                },
+                isExpanded: partnerController.isExpanded.value,
+              )),
           SizedBox(
             height: 32,
           ),

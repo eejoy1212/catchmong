@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'review.dart'; // Review 클래스가 정의된 파일 경로를 import
 import 'menu.dart'; // Menu 클래스가 정의된 파일 경로를 import
 
@@ -51,9 +53,8 @@ class Partner {
     this.reviews, // 리뷰 리스트 초기화
     this.menus, // 메뉴 리스트 초기화
   });
-
-  // JSON 데이터를 Dart 객체로 변환
   factory Partner.fromJson(Map<String, dynamic> json) {
+    print("storePhotos type>>> ${json["storePhotos"].runtimeType}");
     return Partner(
       id: json['id'] as int,
       name: json['name'] as String,
@@ -64,17 +65,11 @@ class Partner {
       regionId: json['regionId'] as int?,
       foodType: json['foodType'] as String,
       category: json['category'] as String,
-      businessProofs: (json['businessProofs'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
-      storePhotos: (json['storePhotos'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
+      businessProofs: _autoConvertToListOfString(json['businessProofs']),
+      storePhotos: _autoConvertToListOfString(json['storePhotos']), // 자동 변환 추가
       address: json['address'] as String,
       phone: json['phone'] as String,
-      amenities: (json['amenities'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
+      amenities: _autoConvertToListOfString(json['amenities']),
       hasHoliday: json['hasHoliday'] as bool,
       regularHoliday: json['regularHoliday'] as String?,
       businessTimeConfig: json['businessTimeConfig'] as String,
@@ -84,11 +79,48 @@ class Partner {
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       reviews: (json['reviews'] as List<dynamic>?)
           ?.map((e) => Review.fromJson(e as Map<String, dynamic>))
-          .toList(), // 리뷰 리스트 처리
+          .toList(),
       menus: (json['menus'] as List<dynamic>?)
           ?.map((e) => Menu.fromJson(e as Map<String, dynamic>))
-          .toList(), // 메뉴 리스트 처리
+          .toList(),
     );
+  }
+  static List<String>? _autoConvertToListOfString(dynamic field) {
+    if (field == null) {
+      return null; // null 처리
+    } else if (field is String) {
+      // JSON 형식으로 인코딩된 리스트인지 확인
+      if (field.startsWith('[') && field.endsWith(']')) {
+        try {
+          List<dynamic> decoded = jsonDecode(field); // JSON 디코딩
+          return decoded.map((e) => e.toString()).toList(); // String 리스트로 변환
+        } catch (e) {
+          throw Exception('Invalid JSON format for List<String>: $field');
+        }
+      }
+      return [field]; // 단일 문자열을 리스트로 변환
+    } else if (field is List<String>) {
+      return field; // 이미 List<String>인 경우 그대로 반환
+    } else if (field is List) {
+      return field.map((e) => e.toString()).toList(); // 리스트의 요소를 문자열로 변환
+    } else {
+      throw Exception('Invalid format for List<String>: $field');
+    }
+  }
+
+// 헬퍼 함수 _toListOfString
+  static List<String>? _toListOfString(dynamic field) {
+    if (field == null) {
+      return null; // null 처리
+    } else if (field is String) {
+      return [field]; // 단일 문자열을 리스트로 변환
+    } else if (field is List<String>) {
+      return field; // 이미 List<String>인 경우 그대로 반환
+    } else if (field is List) {
+      return field.map((e) => e.toString()).toList(); // 리스트의 요소를 문자열로 변환
+    } else {
+      throw Exception('Invalid format for List<String>: $field');
+    }
   }
 
   // Dart 객체를 JSON 데이터로 변환

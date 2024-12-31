@@ -6,6 +6,7 @@ import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/model/catchmong_user.dart';
 import 'package:catchmong/model/referrer.dart';
 import 'package:catchmong/services/user_service.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
@@ -13,6 +14,8 @@ import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart' as kakao;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginController extends GetxController {
   // 이미지 표시 여부를 관리하는 반응형 변수
@@ -41,15 +44,24 @@ class LoginController extends GetxController {
   final TextEditingController paybackMethodController = TextEditingController();
   final TextEditingController referrerNicknameController =
       TextEditingController();
+
   // 타이머 관련 변수
   RxInt remainingSeconds = 600.obs; // 10분 (600초)
   Timer? countdownTimer;
   RxBool isVerified = false.obs; // 인증 성공 여부
   RxInt generatedCode = RxInt(0); // 서버에서 생성된 인증번호 저장
+  final Dio _dio = Dio(BaseOptions(
+    baseUrl: 'http://192.168.200.102:3000', // API 베이스 URL
+    connectTimeout: const Duration(milliseconds: 5000), // 연결 제한 시간
+    receiveTimeout: const Duration(milliseconds: 3000), // 응답 제한 시간
+  ));
+
   @override
   void onInit() {
     super.onInit();
-    loadUsers();
+    loadBackEndCheck();
+    checkAutoLogin();
+
     print("now user>>> ${user.value?.email}");
 
     // 5초 후에 이미지 표시를 중단합니다.
@@ -140,6 +152,48 @@ class LoginController extends GetxController {
     }
   }
 
+  String getAgeType(String value) {
+    switch (value) {
+      case "10대":
+        return "TEN";
+      case "20대":
+        return "TWENTY";
+      case "30대":
+        return "THIRTY";
+      case "40대":
+        return "FORTY";
+      case "50대":
+        return "FIFTY";
+      case "60대":
+        return "SIXTY";
+      case "70대+":
+        return "SEVENTY_PLUS";
+      default:
+        return "TEN";
+    }
+  }
+
+  String getAgeTypeByBe(String value) {
+    switch (value) {
+      case "TEN":
+        return "10대";
+      case "TWENTY":
+        return "20대";
+      case "THIRTY":
+        return "30대";
+      case "FORTY":
+        return "40대";
+      case "FIFTY":
+        return "50대";
+      case "SIXTY":
+        return "60대";
+      case "SEVENTY_PLUS":
+        return "70대+";
+      default:
+        return "10대";
+    }
+  }
+
   Future<bool> postAdditionalInfo() async {
     if (!isVerified.value) {
       print("회원가입 실패: 인증이 완료되지 않았습니다.");
@@ -161,7 +215,7 @@ class LoginController extends GetxController {
       request.fields['gender'] = gender.value;
       request.fields['paybackMethod'] = paybackMethod.value;
       request.fields['referrerNickname'] = referrerNicknameController.text;
-      request.fields['ageGroup'] = ageGroup.value;
+      request.fields['ageGroup'] = getAgeType(ageGroup.value);
 
       // 이미지 파일 추가 (선택적)
       if (selectedImage.value != null) {
@@ -201,7 +255,7 @@ class LoginController extends GetxController {
             nicknameController.text = user.value!.nickname;
             phoneController.text = user.value!.phone;
             gender.value = user.value!.gender;
-            ageGroup.value = user.value!.ageGroup;
+            ageGroup.value = getAgeTypeByBe(user.value!.ageGroup);
             paybackMethod.value = user.value!.paybackMethod;
             referrerNicknameController.text = referrerNicknameController.text;
             // if (user.value!.picture != null) {
@@ -406,18 +460,27 @@ class LoginController extends GetxController {
   // }
 
   Future<void> checkReferrer(String referrerNickname) async {
-    var url = '$baseUrl/api/user/check-referrer';
+    var url = '$baseUrl/api/check-referrer';
     try {
+      print("000res>>>${referrerNickname}");
       if (referrerNickname.isEmpty) return;
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'referrerNickname': referrerNickname}),
+
+      final response = await _dio.post(
+        url,
+        data: {
+          'referrerNickname': referrerNickname,
+        },
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        ),
       );
-
-      final responseData = jsonDecode(response.body);
-
+      print("res>>>${response.data}");
+      // 응답 데이터 처리
       if (response.statusCode == 200) {
+        final responseData = response.data;
+
         if (responseData['exists'] == true) {
           print("추천인 유효: ${responseData['message']}");
           referrerNicknameErrTxt.value = "";
@@ -426,7 +489,7 @@ class LoginController extends GetxController {
         }
       } else {
         referrerNicknameErrTxt.value = "추천인 확인 실패";
-        print("추천인 확인 실패: ${response.body}");
+        print("추천인 확인 실패: ${response.data}");
       }
     } catch (e) {
       referrerNicknameErrTxt.value = "추천인 확인 중 오류 발생";
@@ -476,57 +539,85 @@ class LoginController extends GetxController {
   }
 
   Future<void> postSendVerti() async {
-    var url = '$baseUrl/api/user/send-verification';
-    final phone = phoneController.text;
+    final String url = '$baseUrl/api/send-verification';
+    final String phone = phoneController.text;
+
     print("phone send code>>> $phone");
+
     if (phone.isEmpty) {
       print('전화번호가 입력되지 않았습니다.');
       return;
     }
 
     try {
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
+      // Dio 요청
+      final response = await _dio.post(
+        url,
+        data: {
+          'phone': phone, // 요청에 전달할 데이터
         },
-        body: jsonEncode({
-          'phone': phone,
-        }),
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json', // 헤더 설정
+          },
+        ),
       );
 
+      // 상태 코드 확인
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
+        final responseData = response.data;
         final code = responseData["data"];
         print("인증번호 전송 성공: ${responseData['message']}");
-        vertiCodeController.text =
-            code.toString(); //문자로 전송된 인증번호 자동으로 입력되게 하는걸로 수정하자 twillio 달고
-        generatedCode.value = code; // 서버에서 받은 인증번호 저장
+        vertiCodeController.text = code.toString(); // 인증번호 자동 입력
+        generatedCode.value = code; // 인증번호 저장
         startTimer(); // 타이머 시작
       } else {
-        final errorData = jsonDecode(response.body);
-        print("인증번호 전송 실패: ${errorData['error'] ?? response.body}");
+        print("인증번호 전송 실패: ${response.data['error'] ?? response.data}");
       }
     } catch (e) {
-      print("서버 요청 중 오류 발생: $e");
+      if (e is DioError) {
+        print(
+            "서버 요청 중 Dio 오류 발생: ${e.response?.data ?? e.message}"); // Dio 오류 처리
+      } else {
+        print("서버 요청 중 오류 발생: $e");
+      }
     }
   }
 
   Future<void> verifyCode() async {
-    final url = '$baseUrl/api/user/verify-code';
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(
-          {'phone': phoneController.text, 'code': vertiCodeController.text}),
-    );
+    final String url = '$baseUrl/api/verify-code';
 
-    if (response.statusCode == 200) {
-      isVerified.value = true;
-      print('인증 성공');
-    } else {
+    try {
+      // POST 요청을 보냄
+      final response = await _dio.post(
+        url,
+        data: {
+          'phone': phoneController.text,
+          'code': vertiCodeController.text,
+        },
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      // 상태 코드 확인
+      if (response.statusCode == 200) {
+        isVerified.value = true;
+        print('인증 성공');
+      } else {
+        isVerified.value = false;
+        print('인증 실패: ${response.data}');
+      }
+    } catch (e) {
+      if (e is DioError) {
+        // DioError의 에러 메시지 출력
+        print('인증 중 오류 발생: ${e.response?.data ?? e.message}');
+      } else {
+        print('인증 중 알 수 없는 오류 발생: $e');
+      }
       isVerified.value = false;
-      print('인증 실패');
     }
   }
 
@@ -562,7 +653,7 @@ class LoginController extends GetxController {
     String? newReferrerNickname, // 추천인 닉네임
     File? pictureFile,
   }) async {
-    final String url = '$baseUrl/api/user/$userId';
+    final String url = '$baseUrl/api/user-update/$userId';
 
     try {
       // MultipartRequest 생성
@@ -574,7 +665,8 @@ class LoginController extends GetxController {
       if (newGender != null) request.fields['gender'] = newGender;
       if (newPaybackMethod != null)
         request.fields['paybackMethod'] = newPaybackMethod;
-      if (newAgeGroup != null) request.fields['ageGroup'] = newAgeGroup;
+      if (newAgeGroup != null)
+        request.fields['ageGroup'] = getAgeType(newAgeGroup);
       if (newReferrerNickname != null)
         request.fields['referrerNickname'] = newReferrerNickname;
 
@@ -590,13 +682,14 @@ class LoginController extends GetxController {
         );
         request.files.add(multipartFile);
       }
-
+      print(
+          "req send before>>>>>>>>>>>>>>>>>>>${getAgeType(newAgeGroup ?? "10대")}");
       // 요청 보내기
       var streamedResponse = await request.send();
 
       // 응답 처리
       var response = await http.Response.fromStream(streamedResponse);
-
+      print("회원정보 수정 res>>>${jsonDecode(response.body)}");
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         user.value = User.fromJson(responseData['data']);
@@ -604,16 +697,18 @@ class LoginController extends GetxController {
           nicknameController.text = user.value!.nickname;
           phoneController.text = user.value!.phone;
           gender.value = user.value!.gender;
-          ageGroup.value = user.value!.ageGroup;
+          ageGroup.value = getAgeType(user.value!.ageGroup);
           paybackMethod.value = user.value!.paybackMethod;
           referrerNicknameController.text = user.value!.referrerId.toString();
           // if (user.value!.picture != null) {
           //   selectedImage.value = File("${baseUrl}${user.value!.picture!}");
           // }
-          await getReferrerInfo(user.value!.referrerId);
-          await getReferredInfos(user.value!.id);
+          //임시로 주석처리
+          // await getReferrerInfo(user.value!.referrerId);
+          // await getReferredInfos(user.value!.id);
         }
         print("회원정보 수정 성공: ${response.body}");
+        user.value = User.fromJson(responseData["data"]);
         return true;
       } else {
         print("회원정보 수정 실패: ${response.body}");
@@ -625,68 +720,225 @@ class LoginController extends GetxController {
     }
   }
 
-  Future<void> loginWithGoogle(List? auth) async {
-    print("auth $auth");
-    if (auth == null || auth.length < 5) {
-      print("Google 인증 데이터가 올바르지 않습니다.");
-      return;
-    }
-
+//////////////
+  Future<void> loginWithKakao() async {
     try {
-      var url = '$baseUrl/auth/google'; // 서버의 구글 로그인 엔드포인트
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'idToken': auth[0], // Google ID Token
-          'email': auth[1], // Google Email
-          'sub': "1234567890", // auth[2], // Google User ID (sub)
-          'picture': auth[3] ?? "", // Profile Picture
-          'name': auth[4], // Name
-        }),
-      );
+      // 1. 카카오톡 설치 여부 확인 후 로그인
+      if (await kakao.isKakaoTalkInstalled()) {
+        await kakao.UserApi.instance.loginWithKakaoTalk();
+      } else {
+        await kakao.UserApi.instance.loginWithKakaoAccount();
+      }
 
-      if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
+      // 2. 로그인 성공 시 사용자 정보 가져오기
+      final nowKakaoUser = await kakao.UserApi.instance.me();
+      print('카카오 로그인 성공, 사용자 정보: ${user}');
 
-        if (responseData['requiresAdditionalInfo'] == true) {
-          // 신규 회원: 추가 정보 입력 페이지로 이동
-          final googleUser = responseData['googleUser'];
-          print("추가 정보 필요: $googleUser");
-          Get.toNamed("/signup", arguments: googleUser); // 추가 정보 페이지로 이동
-        } else {
-          // 기존 회원: 로그인 성공 처리
-          final originUser = responseData['user'];
+      // 3. 액세스 토큰 및 리프레시 토큰 가져오기
+      final token = await kakao.AuthApi.instance.refreshToken();
+      final kakaoUser = await kakao.UserApi.instance.me();
+      final accessToken = token.accessToken; // null 가능성 처리
+      final refreshToken = token.refreshToken;
+      final sub = kakaoUser.id.toString();
+      final bySubResponse = await fetchUserBySub(sub);
+      if (refreshToken != null) {
+        print('액세스 토큰: $accessToken');
+        print('리프레시 토큰: $refreshToken');
 
-          user.value = User.fromJson(originUser);
+        // 갱신된 토큰을 로컬에 저장
+        await _saveUpdatedToken(accessToken, refreshToken);
+
+        // 서버에 사용자 정보 전달
+        final response =
+            await postLogin(nowKakaoUser.id.toString(), "kakao", accessToken);
+
+        if (response['path'] == '/main') {
+          // 기존 회원: 사용자 정보 로컬 저장 및 메인 이동
+          user.value = User.fromJson(bySubResponse?['data']);
           if (user.value != null) {
             nicknameController.text = user.value!.nickname;
             phoneController.text = user.value!.phone;
             gender.value = user.value!.gender;
-            ageGroup.value = user.value!.ageGroup;
+            ageGroup.value = getAgeTypeByBe(user.value!.ageGroup);
             paybackMethod.value = user.value!.paybackMethod;
             referrerNicknameController.text = user.value!.referrerId.toString();
-            // if (user.value!.picture != null) {
-            //   selectedImage.value = File("${baseUrl}${user.value!.picture!}");
-            // }
-
-            await getReferrerInfo(user.value!.referrerId);
-            await getReferredInfos(user.value!.id);
-            update();
-            print("구글 로그인 성공 추천인 목록: ${referreds} ");
-            Get.toNamed("/loading"); // 로딩후 메인 페이지로 이동
           }
+
+          await _saveLoginInfo(
+              nowKakaoUser.id.toString(), 'kakao', accessToken, refreshToken);
+
+          print('카카오 로그인 성공, 사용자 ID: $sub');
+
+          // 3. 서버에 사용자 정보 전달
+
+          Get.toNamed('/main');
+        } else if (response['path'] == '/signup') {
+          // 신규 회원: 추가 정보 입력 페이지 이동
+          Get.toNamed('/signup', arguments: {
+            'sub': nowKakaoUser.id.toString(),
+            'loginType': 'kakao',
+          });
         }
       } else {
-        print("구글 로그인 실패: ${response.body}");
+        print('토큰을 가져오는 데 실패했습니다.');
+        throw Exception('토큰 가져오기 실패');
       }
     } catch (e) {
-      print("서버 요청 중 오류 발생: $e");
+      print('카카오 로그인 실패: $e');
     }
   }
 
+  Future<Map<String, dynamic>?> fetchUserBySub(String sub) async {
+    try {
+      final response = await _dio.post(
+        '/api/get-user-by-sub',
+        data: {
+          'sub': sub,
+        },
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        return response.data['data']; // 유저 정보 반환
+      } else if (response.statusCode == 404) {
+        print("유저 정보 없음: ${response.data['error']}");
+        return null;
+      } else {
+        print("서버 오류: ${response.data}");
+        return null;
+      }
+    } catch (e) {
+      print("서버 요청 중 오류 발생: $e");
+      return null;
+    }
+  }
+
+// 토큰 갱신 로직
+  Future<void> refreshToken() async {
+    try {
+      // 토큰 유효성 검사
+      final isTokenValid = await kakao.AuthApi.instance.hasToken();
+
+      if (!isTokenValid) {
+        // 토큰 갱신
+        final token = await kakao.AuthApi.instance.refreshToken();
+        print("토큰 갱신 성공: ${token.accessToken}");
+
+        // 갱신된 토큰 저장
+        await _saveUpdatedToken(token.accessToken, token.refreshToken ?? '');
+      } else {
+        // SharedPreferences 인스턴스 생성
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+        // 'sub' 값 가져오기
+        final String? sub = prefs.getString('sub');
+        print("토큰이 여전히 유효합니다. ${sub} // ${user.value?.id}");
+      }
+    } catch (e) {
+      print("토큰 갱신 실패: $e");
+      // 갱신 실패 시 재로그인 요구
+      await loginWithKakao();
+    }
+  }
+
+// 토큰 저장 함수
+  Future<void> _saveLoginInfo(String sub, String loginType, String accessToken,
+      String refreshToken) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('sub', sub);
+    await prefs.setString('loginType', loginType);
+    await prefs.setString('accessToken', accessToken);
+    await prefs.setString('refreshToken', refreshToken);
+    print(
+      "로그인 정보 저장 완료$sub",
+    );
+  }
+
+// 갱신된 토큰 저장
+  Future<void> _saveUpdatedToken(
+      String accessToken, String refreshToken) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('accessToken', accessToken);
+    if (refreshToken != null) {
+      await prefs.setString('refreshToken', refreshToken);
+    }
+  }
+
+// 자동 로그인 처리
+  Future<void> checkAutoLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    final sub = prefs.getString('sub');
+    final loginType = prefs.getString('loginType');
+    final accessToken = prefs.getString('accessToken');
+
+    if (sub != null && loginType != null && accessToken != null) {
+      try {
+        print("자동 로그인 중... 사용자 ID: $sub, 로그인 타입: $loginType");
+        final bySubResponse = await fetchUserBySub(sub);
+        print("자동로그인 by sub>>>>>>>>>>>>>>>>>>>>>>${bySubResponse}");
+        // 토큰 유효성 검사 및 갱신
+        await refreshToken();
+
+        // 서버에서 사용자 정보 확인
+        final response = await postLogin(sub, loginType, accessToken);
+        if (response['path'] == '/main') {
+          // 자동 로그인 성공: 메인 화면으로 이동
+          if (bySubResponse != null) {
+            user.value = User.fromJson(bySubResponse);
+            nicknameController.text = user.value!.nickname;
+            phoneController.text = user.value!.phone;
+            gender.value = user.value!.gender;
+            ageGroup.value = getAgeTypeByBe(user.value!.ageGroup);
+            paybackMethod.value = user.value!.paybackMethod;
+            referrerNicknameController.text = user.value!.referrerId.toString();
+            Get.toNamed('/main');
+          }
+        } else {
+          print("자동 로그인 실패: 사용자 정보가 일치하지 않습니다.");
+          Get.toNamed('/login');
+        }
+      } catch (e) {
+        print("자동 로그인 실패: $e");
+        Get.toNamed('/login');
+      }
+    } else {
+      print("저장된 로그인 정보가 없습니다.");
+      Get.toNamed('/login');
+    }
+  }
+
+  Future<Map<String, dynamic>> postLogin(
+      String sub, String loginType, String accessToken) async {
+    try {
+      final response = await _dio.post(
+        '/auth/login',
+        data: {
+          'sub': sub,
+          'loginType': loginType,
+          'accessToken': accessToken, // 서버에 토큰 전달
+        },
+        options: Options(headers: {
+          'Content-Type': 'application/json',
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        print("로그인 실패: ${response.data}");
+        return {'path': '/login'};
+      }
+    } catch (e) {
+      print("서버 요청 중 오류 발생: $e");
+      return {'path': '/login'};
+    }
+  }
+
+//////////////
 //내가 회원가입 시 추천한 추천인
   Future<void> getReferrerInfo(int? userId) async {
     final String url = '$baseUrl/api/user/referrer/$userId'; // API 엔드포인트
@@ -746,9 +998,9 @@ class LoginController extends GetxController {
   }
 
 // 사용자 목록 가져오기
-  Future<void> loadUsers() async {
+  Future<void> loadBackEndCheck() async {
     try {
-      print("load user");
+      print("load BackEnd Check");
       isLoading.value = true;
       var aaa = await userService.fetchUsers();
       print("[GET] backend test success>>> ${aaa}");

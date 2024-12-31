@@ -3,9 +3,13 @@ import 'package:flutter/material.dart';
 
 class CatchmongSearchBar extends StatelessWidget {
   final String searchKeyword;
-  final void Function(String) onSubmitted;
+  final void Function(String value) onChanged;
+  final void Function(String value) onSubmitted;
   const CatchmongSearchBar(
-      {super.key, required this.searchKeyword, required this.onSubmitted});
+      {super.key,
+      required this.searchKeyword,
+      required this.onSubmitted,
+      required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -18,13 +22,11 @@ class CatchmongSearchBar extends StatelessWidget {
       child: TextField(
         controller:
             TextEditingController(text: searchKeyword), // 텍스트 필드에 컨트롤러 연결
-        onChanged: (value) {
-          print("검색어 변경: $value");
-        },
+        onChanged: onChanged,
 
         onSubmitted: onSubmitted,
         decoration: InputDecoration(
-          hintText: '상품을 검색해보세요', // 텍스트 필드에 힌트 넣기 (선택 사항)
+          hintText: '가게이름을 검색해보세요', // 텍스트 필드에 힌트 넣기 (선택 사항)
           prefixIcon:
               Image.asset('assets/images/searchbar-icon.png'), // 돋보기 아이콘 추가
           border: InputBorder.none, // 기본 보더 제거

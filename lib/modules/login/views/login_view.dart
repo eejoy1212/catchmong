@@ -43,21 +43,22 @@ class LoginView extends StatelessWidget {
                     children: [
                       KakaoBtn(
                         onTap: () {
-                          Get.toNamed('/main');
+                          // Get.offAndToNamed('/main');
+                          controller.loginWithKakao();
                         },
                       ),
                       NaverBtn(
                         onTap: () {
-                          Get.toNamed('/main');
+                          Get.offAndToNamed('/main');
                         },
                       ),
                       GoogleBtn(
                         onTap: () async {
-                          Get.toNamed('/main');
+                          Get.offAndToNamed('/main');
                           // final auth = await controller.handleGoogleSignIn();
                           // if (auth != null) {
                           //   print("토큰..?$auth");
-                          //   await controller.loginWithGoogle(auth); // 서버 요청
+                          // await controller.loginWithGoogle(auth); // 서버 요청
                           // }
                         },
                       ),

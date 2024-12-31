@@ -31,6 +31,9 @@ android {
     ndkVersion flutter.ndkVersion
 
     defaultConfig {
+        manifestPlaceholders = [
+            KAKAO_APP_KEY: "1d3ac880a902ba57caa1d9009392e972" // 카카오 앱 키 추가
+        ]
         applicationId "com.example.catchmong"
         // Google Maps 플러그인에서 요구하는 최소 SDK 버전을 21로 설정
         minSdkVersion 23

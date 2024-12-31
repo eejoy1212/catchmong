@@ -3,6 +3,7 @@ import 'package:catchmong/modules/login/controllers/login_controller.dart';
 import 'package:catchmong/widget/button/AppbarBackBtn.dart';
 import 'package:catchmong/widget/button/outlined_btn.dart';
 import 'package:catchmong/widget/button/yellow-toggle-btn.dart';
+import 'package:catchmong/widget/card/img_card.dart';
 import 'package:catchmong/widget/txtfield/border-txtfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -14,6 +15,7 @@ class SignupView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isLogin = loginController.user.value != null;
+    print("현재 유저 in 프로필 설정>>> ${loginController.nicknameController.text}");
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -78,10 +80,9 @@ class SignupView extends StatelessWidget {
                               return imageFile == null || imageFile.path == ""
                                   //기존에 이미지가 있는 상태에서 수정 하는 거
                                   ? hasPicture
-                                      ? Image.network(
-                                          "${loginController.baseUrl}${loginController.user.value!.picture}", // 로컬 기본 이미지
-                                          fit: BoxFit.cover,
-                                        )
+                                      ? ImgCard(
+                                          path:
+                                              "${loginController.baseUrl}${loginController.user.value!.picture}")
                                       : Image.asset(
                                           'assets/images/default-profile.png', // 로컬 기본 이미지
                                           fit: BoxFit.cover,

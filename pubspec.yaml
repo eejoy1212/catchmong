@@ -52,6 +52,8 @@ dependencies:
   mobile_scanner:
   dio:
   intl:
+  shared_preferences:
+  kakao_flutter_sdk:
 
 dev_dependencies:
   flutter_test:

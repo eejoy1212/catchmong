@@ -326,6 +326,7 @@ class ScrapPartnerCard extends StatelessWidget {
                               businessStatus,
                               _getRating(),
                               _getReplyCount(partner.reviews?.length ?? 0));
+                          partnerController.addLatestPartners(partner.id);
                         }
                       },
                       child: Padding(

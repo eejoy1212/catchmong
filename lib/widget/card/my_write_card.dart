@@ -209,7 +209,10 @@ class MyWriteCard extends StatelessWidget {
           SizedBox(
             height: 8,
           ),
-          MoreBtn(),
+          MoreBtn(
+            onTap: () {},
+            isExpanded: true,
+          ),
           SizedBox(
             height: 32,
           ),

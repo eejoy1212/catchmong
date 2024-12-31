@@ -764,7 +764,7 @@ class PartnerShowView extends StatelessWidget {
                     ),
                     // 탭바 뷰
                     SizedBox(
-                      height: 400, // 탭 뷰 높이 설정
+                      height: 700, // 탭 뷰 높이 설정
                       child: TabBarView(
                         children: [
                           // 메뉴 탭 내용
@@ -939,12 +939,20 @@ class PartnerShowView extends StatelessWidget {
                             ),
                           ),
                           // 리뷰 탭 내용
-                          ListView.builder(
-                            itemCount: 5,
-                            itemBuilder: (context, index) {
-                              return PartnerReviewCard();
-                            },
-                          ),
+                          partner.reviews == null
+                              ? Container(
+                                  child: Center(
+                                    child: Text("리뷰가 없습니다."),
+                                  ),
+                                )
+                              : ListView.builder(
+                                  itemCount: partner.reviews!.length,
+                                  itemBuilder: (context, index) {
+                                    return PartnerReviewCard(
+                                      review: partner.reviews![index],
+                                    );
+                                  },
+                                ),
                         ],
                       ),
                     ),

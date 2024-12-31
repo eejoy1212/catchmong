@@ -1,7 +1,9 @@
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/controller/partner_controller.dart';
+import 'package:catchmong/model/review.dart';
 import 'package:catchmong/modules/login/controllers/login_controller.dart';
 import 'package:catchmong/widget/bar/CatchmongSearchBar.dart';
+import 'package:catchmong/widget/card/img_card.dart';
 import 'package:catchmong/widget/card/scrap_partner_card.dart';
 import 'package:catchmong/widget/chip/TagChip.dart';
 import 'package:catchmong/widget/content/scrap_partner_content.dart';
@@ -20,7 +22,9 @@ class PartnerContent extends StatelessWidget {
     final Partner2Controller partnerController = Get.find<Partner2Controller>();
     print(
         "유저의 현재 위치: ${loginController.user.value?.regionId}"); //이게 null이면 모든지역 인거임.
-    bool isAllRegion = loginController.user.value?.regionId == null;
+    // bool isAllRegion = loginController.user.value?.regionId == null;
+    partnerController.fetchPartnersByIds();
+    partnerController.fetchFavoritePartners();
     return SafeArea(
       child: SingleChildScrollView(
         child: Column(
@@ -39,7 +43,10 @@ class PartnerContent extends StatelessWidget {
                       onSubmitted: (String value) {
                         partnerController.searchKeyword.value = value;
                         partnerController.fetchPartnersByKeyword();
+                        partnerController.addSearchTerm(value);
+                        partnerController.fetchPartnersByIds();
                       },
+                      onChanged: (String value) {},
                     ),
                   ),
                   SizedBox(
@@ -68,7 +75,10 @@ class PartnerContent extends StatelessWidget {
                                             fontWeight: FontWeight.w600),
                                       ),
                                       InkWell(
-                                        onTap: () {},
+                                        onTap: () {
+                                          partnerController
+                                              .removeAllSearchTerm();
+                                        },
                                         child: Text(
                                           "전체삭제",
                                           style: TextStyle(
@@ -86,37 +96,60 @@ class PartnerContent extends StatelessWidget {
                                     height: 16,
                                   ),
                                   Container(
-                                    height:
-                                        100, // 리스트 높이: 48px * 3 (한 번에 3개 보이도록 설정)
+                                    height: (30 *
+                                            partnerController
+                                                .recentSearches.length)
+                                        .toDouble(), // 리스트 높이: 48px * 3 (한 번에 3개 보이도록 설정)
                                     child: ListView.builder(
-                                      itemCount: 10, // 예시로 10개의 항목 생성
+                                      itemCount: partnerController
+                                          .recentSearches
+                                          .length, // 예시로 10개의 항목 생성
 
                                       itemBuilder: (context, index) {
-                                        return Container(
-                                          margin: EdgeInsets.only(bottom: 8),
-                                          height: 28,
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                '검색어 $index',
-                                                style: TextStyle(
-                                                    color: CatchmongColors
-                                                        .gray_800,
-                                                    fontSize: 14,
-                                                    fontWeight:
-                                                        FontWeight.w400),
-                                              ),
-                                              IconButton(
-                                                  onPressed: () {},
-                                                  icon: Icon(
-                                                    Icons.close,
-                                                    size: 18,
-                                                  ))
-                                            ],
+                                        return InkWell(
+                                          onTap: () {
+                                            partnerController
+                                                    .searchKeyword.value =
+                                                partnerController
+                                                    .recentSearches[index];
+                                            partnerController
+                                                .fetchPartnersByKeyword();
+                                          },
+                                          child: Container(
+                                            margin: const EdgeInsets.only(
+                                                bottom: 8),
+                                            height: 28,
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  partnerController
+                                                      .recentSearches[index],
+                                                  style: const TextStyle(
+                                                      color: CatchmongColors
+                                                          .gray_800,
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w400),
+                                                ),
+                                                IconButton(
+                                                    onPressed: () {
+                                                      partnerController
+                                                          .removeSearchTerm(
+                                                              partnerController
+                                                                      .recentSearches[
+                                                                  index]);
+                                                    },
+                                                    icon: Icon(
+                                                      Icons.close,
+                                                      size: 18,
+                                                    ))
+                                              ],
+                                            ),
                                           ),
                                         );
                                       },
@@ -172,61 +205,82 @@ class PartnerContent extends StatelessWidget {
                                   Container(
                                     height:
                                         203, // 리스트 높이: 48px * 3 (한 번에 3개 보이도록 설정)
-                                    child: ListView.builder(
-                                      itemCount: 10, // 예시로 10개의 항목 생성
-                                      scrollDirection: Axis.horizontal,
-                                      itemBuilder: (context, index) {
-                                        return Container(
-                                            margin: EdgeInsets.only(right: 16),
-                                            height: 192,
-                                            child: Column(
-                                              children: [
-                                                // 이미지
-                                                ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          8), // 둥근 모서리로 잘라줌
-                                                  child: Container(
-                                                    width: 108,
-                                                    height: 132,
-                                                    decoration: BoxDecoration(
-                                                      border: Border.all(
-                                                          color: CatchmongColors
-                                                              .gray,
-                                                          width: 1), // 외부 테두리
-                                                    ),
-                                                    child: Image.asset(
-                                                      'assets/images/review2.jpg', // 이미지 경로
-                                                      fit: BoxFit
-                                                          .cover, // 이미지가 Container 크기에 맞게 자르기
-                                                    ),
-                                                  ),
-                                                ),
-                                                //가게명
-                                                SizedBox(
-                                                    height:
-                                                        8), // 이미지와 텍스트 사이 간격
-                                                // 가게명
-                                                Container(
-                                                  width: 108, // 부모 컨테이너의 너비를 지정
-                                                  child: Text(
-                                                    "가게명을 입력해주세요 3줄 이상 작성 시 aaaaaaaaaaaaaaaa",
-                                                    maxLines: 3, // 최대 3줄까지 표시
-                                                    overflow: TextOverflow
-                                                        .ellipsis, // 글자가 넘치면 ... 처리
-                                                    style: TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.w400,
-                                                      color: CatchmongColors
-                                                          .gray_800,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ));
-                                      },
-                                    ),
+                                    child: partnerController
+                                            .recentPartners.isEmpty
+                                        ? Center(
+                                            child: Text("최근 본 매장이 없습니다."),
+                                          )
+                                        : ListView.builder(
+                                            itemCount: partnerController
+                                                .recentPartners
+                                                .length, // 예시로 10개의 항목 생성
+                                            scrollDirection: Axis.horizontal,
+                                            itemBuilder: (context, index) {
+                                              print(
+                                                  "이미지 path???${'http://192.168.200.102:3000/' + partnerController.recentPartners[index].storePhotos![0]}");
+                                              return Container(
+                                                  margin: const EdgeInsets.only(
+                                                      right: 16),
+                                                  height: 192,
+                                                  child: Column(
+                                                    children: [
+                                                      // 이미지
+                                                      ClipRRect(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                                8), // 둥근 모서리로 잘라줌
+                                                        child: Container(
+                                                          width: 108,
+                                                          height: 132,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            border: Border.all(
+                                                                color:
+                                                                    CatchmongColors
+                                                                        .gray,
+                                                                width:
+                                                                    1), // 외부 테두리
+                                                          ),
+                                                          child: ImgCard(
+                                                            path: 'http://192.168.200.102:3000/' +
+                                                                partnerController
+                                                                    .recentPartners[
+                                                                        index]
+                                                                    .storePhotos![0],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      //가게명
+                                                      SizedBox(
+                                                          height:
+                                                              8), // 이미지와 텍스트 사이 간격
+                                                      // 가게명
+                                                      Container(
+                                                        width:
+                                                            108, // 부모 컨테이너의 너비를 지정
+                                                        child: Text(
+                                                          partnerController
+                                                              .recentPartners[
+                                                                  index]
+                                                              .name,
+                                                          maxLines:
+                                                              3, // 최대 3줄까지 표시
+                                                          overflow: TextOverflow
+                                                              .ellipsis, // 글자가 넘치면 ... 처리
+                                                          style: TextStyle(
+                                                            fontSize: 14,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            color:
+                                                                CatchmongColors
+                                                                    .gray_800,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ));
+                                            },
+                                          ),
                                   ),
                                   SizedBox(
                                     height: 16,
@@ -273,9 +327,11 @@ class PartnerContent extends StatelessWidget {
                                   ),
                                   Container(
                                     height:
-                                        263, // 리스트 높이: 48px * 3 (한 번에 3개 보이도록 설정)
+                                        270, // 리스트 높이: 48px * 3 (한 번에 3개 보이도록 설정)
                                     child: ListView.builder(
-                                      itemCount: 10, // 예시로 10개의 항목 생성
+                                      itemCount: partnerController
+                                          .favoritePartners
+                                          .length, // 예시로 10개의 항목 생성
 
                                       scrollDirection: Axis.horizontal,
                                       itemBuilder: (context, index) {
@@ -291,17 +347,19 @@ class PartnerContent extends StatelessWidget {
                                                         8), // 둥근 모서리로 잘라줌
                                                 child: Container(
                                                   width: 150,
-                                                  height: 181,
+                                                  height: 180,
                                                   decoration: BoxDecoration(
                                                     border: Border.all(
                                                         color: CatchmongColors
                                                             .gray,
                                                         width: 1), // 외부 테두리
                                                   ),
-                                                  child: Image.asset(
-                                                    'assets/images/review2.jpg', // 이미지 경로
-                                                    fit: BoxFit
-                                                        .cover, // 이미지가 Container 크기에 맞게 자르기
+                                                  child: ImgCard(
+                                                    path: 'http://192.168.200.102:3000/' +
+                                                        partnerController
+                                                            .favoritePartners[
+                                                                index]
+                                                            .storePhotos![0],
                                                   ),
                                                 ),
                                               ),
@@ -327,7 +385,10 @@ class PartnerContent extends StatelessWidget {
                                                               .start,
                                                       children: [
                                                         Text(
-                                                          "가게명",
+                                                          partnerController
+                                                              .favoritePartners[
+                                                                  index]
+                                                              .name,
                                                           style: TextStyle(
                                                               color:
                                                                   CatchmongColors
@@ -348,7 +409,12 @@ class PartnerContent extends StatelessWidget {
                                                               width: 4,
                                                             ),
                                                             Text(
-                                                              '5.0',
+                                                              partnerController
+                                                                  .getAverageRating(partnerController
+                                                                      .favoritePartners[
+                                                                          index]
+                                                                      .reviews)
+                                                                  .toString(),
                                                               style: TextStyle(
                                                                   color: CatchmongColors
                                                                       .gray_800,
@@ -361,7 +427,7 @@ class PartnerContent extends StatelessWidget {
                                                               width: 4,
                                                             ),
                                                             Text(
-                                                              '(1,000)',
+                                                              "리뷰${partnerController.favoritePartners[index].reviews == null ? "0" : partnerController.favoritePartners[index].reviews!.isEmpty ? "0" : partnerController.favoritePartners[index].reviews!.length.toString()}",
                                                               style: TextStyle(
                                                                   color: CatchmongColors
                                                                       .gray_300,
@@ -382,14 +448,45 @@ class PartnerContent extends StatelessWidget {
                                               SizedBox(
                                                 height: 12,
                                               ),
-                                              Row(
-                                                children: [
-                                                  TagChip(label: "#다이닝바"),
-                                                  SizedBox(
-                                                    width: 4,
-                                                  ),
-                                                  TagChip(label: "#논현"),
-                                                ],
+                                              SizedBox(
+                                                width: 150,
+                                                height: 30, // 필요한 높이로 설정
+                                                child: ListView.builder(
+                                                  scrollDirection: Axis
+                                                      .horizontal, // 가로 스크롤 설정
+                                                  itemCount: partnerController
+                                                              .favoritePartners[
+                                                                  index]
+                                                              .amenities ==
+                                                          null
+                                                      ? 0
+                                                      : partnerController
+                                                          .favoritePartners[
+                                                              index]
+                                                          .amenities!
+                                                          .length,
+                                                  itemBuilder:
+                                                      (BuildContext context,
+                                                          int amenityIdx) {
+                                                    if (partnerController
+                                                        .favoritePartners[index]
+                                                        .amenities!
+                                                        .isEmpty) {
+                                                      return Container(); // 빈 리스트 처리
+                                                    } else {
+                                                      return Padding(
+                                                        padding: const EdgeInsets
+                                                            .only(
+                                                            right:
+                                                                4.0), // 태그 간 간격 추가
+                                                        child: TagChip(
+                                                          label:
+                                                              "# ${partnerController.favoritePartners[index].amenities![amenityIdx]}",
+                                                        ),
+                                                      );
+                                                    }
+                                                  },
+                                                ),
                                               )
                                             ],
                                           ),
@@ -414,6 +511,8 @@ class PartnerContent extends StatelessWidget {
                           child: ListView.builder(
                               itemCount: partnerController.partners.length,
                               itemBuilder: (context, index) {
+                                print(
+                                    "${index}번째 파트너: ${partnerController.partners[index].id}");
                                 return ScrapPartnerCard(
                                   partner: partnerController.partners[index],
                                 );

@@ -11,37 +11,40 @@ class LoadingView extends StatelessWidget {
     loadingController.goLocation();
     return Scaffold(
       backgroundColor: CatchmongColors.yellow_main,
-      body: Center(
-        child: Container(
-          margin: EdgeInsets.symmetric(vertical: 160),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 40),
-                child: SvgPicture.asset(
-                  "assets/images/login-logo.svg", // 동적으로 아이콘 경로 선택
-                ),
-              ),
-              Container(
-                  clipBehavior: Clip.hardEdge,
-                  width: MediaQuery.of(context).size.width,
-                  height: 220, // 카드의 높이와 동일하게 설정
-                  margin: EdgeInsets.symmetric(
-                    horizontal: 40,
+      body: SingleChildScrollView(
+        child: Center(
+          child: Container(
+            height: MediaQuery.of(context).size.height,
+            // margin: EdgeInsets.symmetric(vertical: 160),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  margin: EdgeInsets.symmetric(horizontal: 40),
+                  child: SvgPicture.asset(
+                    "assets/images/login-logo.svg", // 동적으로 아이콘 경로 선택
                   ),
-                  decoration: BoxDecoration(
-                      color: CatchmongColors.gray,
-                      borderRadius: BorderRadius.all(Radius.circular(
-                        24,
-                      ))),
-                  child: Image.asset(
-                    "assets/images/temp-banner.jpg",
+                ),
+                Container(
+                    clipBehavior: Clip.hardEdge,
                     width: MediaQuery.of(context).size.width,
-                    fit: BoxFit.cover,
-                  )),
-            ],
+                    height: 220, // 카드의 높이와 동일하게 설정
+                    margin: EdgeInsets.symmetric(
+                      horizontal: 40,
+                    ),
+                    decoration: BoxDecoration(
+                        color: CatchmongColors.gray,
+                        borderRadius: BorderRadius.all(Radius.circular(
+                          24,
+                        ))),
+                    child: Image.asset(
+                      "assets/images/temp-banner.jpg",
+                      width: MediaQuery.of(context).size.width,
+                      fit: BoxFit.cover,
+                    )),
+              ],
+            ),
           ),
         ),
       ),

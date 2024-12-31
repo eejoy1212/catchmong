@@ -16,7 +16,6 @@
 
     <application
         android:label="catchmong"
-        android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true"> <!-- HTTP 트래픽 허용 설정 -->
 
@@ -28,7 +27,13 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
-
+            <!-- 카카오 로그인 -->
+            <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="kakao{1d3ac880a902ba57caa1d9009392e972}" android:host="oauth" />
+            </intent-filter>
             <!-- 네이버 맵 추가 -->
             <meta-data
                 android:name="com.naver.maps.map.CLIENT_ID"
