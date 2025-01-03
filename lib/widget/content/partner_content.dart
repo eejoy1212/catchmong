@@ -1,5 +1,6 @@
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/controller/partner_controller.dart';
+import 'package:catchmong/model/partner.dart';
 import 'package:catchmong/model/review.dart';
 import 'package:catchmong/modules/login/controllers/login_controller.dart';
 import 'package:catchmong/widget/bar/CatchmongSearchBar.dart';
@@ -25,6 +26,13 @@ class PartnerContent extends StatelessWidget {
     // bool isAllRegion = loginController.user.value?.regionId == null;
     partnerController.fetchPartnersByIds();
     partnerController.fetchFavoritePartners();
+    List<Partner> displayedRecent = partnerController.recentPartners.length > 5
+        ? partnerController.recentPartners.sublist(0, 5)
+        : partnerController.recentPartners;
+    List<Partner> displayedFav = partnerController.favoritePartners.length > 5
+        ? partnerController.favoritePartners.sublist(0, 5)
+        : partnerController.favoritePartners;
+
     return SafeArea(
       child: SingleChildScrollView(
         child: Column(
@@ -38,15 +46,37 @@ class PartnerContent extends StatelessWidget {
                   //검색창
                   Container(
                     margin: EdgeInsets.only(left: 20, right: 20, top: 16),
-                    child: CatchmongSearchBar(
-                      searchKeyword: partnerController.searchKeyword.value,
-                      onSubmitted: (String value) {
-                        partnerController.searchKeyword.value = value;
-                        partnerController.fetchPartnersByKeyword();
-                        partnerController.addSearchTerm(value);
-                        partnerController.fetchPartnersByIds();
-                      },
-                      onChanged: (String value) {},
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Obx(() => CatchmongSearchBar(
+                                isResult: partnerController.partners.isNotEmpty,
+                                searchKeyword:
+                                    partnerController.searchKeyword.value,
+                                onSubmitted: (String value) {
+                                  partnerController.searchKeyword.value = value;
+                                  partnerController.fetchPartnersByKeyword();
+                                  partnerController.addSearchTerm(value);
+                                  partnerController.fetchPartnersByIds();
+                                },
+                                onClear: () {
+                                  partnerController.searchKeyword.value = "";
+                                  partnerController.partners.clear();
+                                },
+                                onChanged: (String value) {},
+                              )),
+                        ),
+                        SizedBox(
+                          width: 12,
+                        ),
+                        InkWell(
+                            onTap: () {
+                              partnerController.searchKeyword.value = "";
+                              partnerController.partners.clear();
+                            },
+                            child:
+                                SvgPicture.asset('assets/icons/home-icon.svg')),
+                      ],
                     ),
                   ),
                   SizedBox(
@@ -170,7 +200,8 @@ class PartnerContent extends StatelessWidget {
                             ),
                             //최근 본 매장
                             Container(
-                              margin: EdgeInsets.only(left: 20, right: 20),
+                              margin:
+                                  const EdgeInsets.only(left: 20, right: 20),
                               child: Column(
                                 children: [
                                   Row(
@@ -185,7 +216,11 @@ class PartnerContent extends StatelessWidget {
                                             fontWeight: FontWeight.w600),
                                       ),
                                       InkWell(
-                                        onTap: () {},
+                                        onTap: () {
+                                          partnerController.partners.clear();
+                                          partnerController.partners.addAll(
+                                              partnerController.recentPartners);
+                                        },
                                         child: Text(
                                           "더보기",
                                           style: TextStyle(
@@ -211,74 +246,101 @@ class PartnerContent extends StatelessWidget {
                                             child: Text("최근 본 매장이 없습니다."),
                                           )
                                         : ListView.builder(
-                                            itemCount: partnerController
-                                                .recentPartners
+                                            itemCount: displayedRecent
                                                 .length, // 예시로 10개의 항목 생성
                                             scrollDirection: Axis.horizontal,
                                             itemBuilder: (context, index) {
-                                              print(
-                                                  "이미지 path???${'http://192.168.200.102:3000/' + partnerController.recentPartners[index].storePhotos![0]}");
-                                              return Container(
-                                                  margin: const EdgeInsets.only(
-                                                      right: 16),
-                                                  height: 192,
-                                                  child: Column(
-                                                    children: [
-                                                      // 이미지
-                                                      ClipRRect(
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                                8), // 둥근 모서리로 잘라줌
-                                                        child: Container(
-                                                          width: 108,
-                                                          height: 132,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            border: Border.all(
-                                                                color:
-                                                                    CatchmongColors
-                                                                        .gray,
-                                                                width:
-                                                                    1), // 외부 테두리
-                                                          ),
-                                                          child: ImgCard(
-                                                            path: 'http://192.168.200.102:3000/' +
-                                                                partnerController
-                                                                    .recentPartners[
-                                                                        index]
-                                                                    .storePhotos![0],
+                                              Partner partner =
+                                                  displayedRecent[index];
+                                              final businessStatus =
+                                                  partnerController
+                                                      .getBusinessStatus(
+                                                partner.businessTime ?? "",
+                                                partner.breakTime,
+                                                partner.regularHoliday,
+                                              );
+                                              final rating = partnerController
+                                                  .getRating(partner);
+                                              final replyCount =
+                                                  partnerController
+                                                      .getReplyCount(partner
+                                                              .reviews
+                                                              ?.length ??
+                                                          0);
+                                              return InkWell(
+                                                onTap: () {
+                                                  partnerController
+                                                      .showSelectedPartner(
+                                                          context,
+                                                          partner,
+                                                          businessStatus,
+                                                          rating,
+                                                          replyCount);
+                                                },
+                                                child: Container(
+                                                    margin:
+                                                        const EdgeInsets.only(
+                                                            right: 16),
+                                                    height: 192,
+                                                    child: Column(
+                                                      children: [
+                                                        // 이미지
+                                                        ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                  8), // 둥근 모서리로 잘라줌
+                                                          child: Container(
+                                                            width: 108,
+                                                            height: 132,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              border: Border.all(
+                                                                  color:
+                                                                      CatchmongColors
+                                                                          .gray,
+                                                                  width:
+                                                                      1), // 외부 테두리
+                                                            ),
+                                                            child: ImgCard(
+                                                              path: 'http://192.168.200.102:3000/' +
+                                                                  partnerController
+                                                                      .recentPartners[
+                                                                          index]
+                                                                      .storePhotos![0],
+                                                            ),
                                                           ),
                                                         ),
-                                                      ),
-                                                      //가게명
-                                                      SizedBox(
-                                                          height:
-                                                              8), // 이미지와 텍스트 사이 간격
-                                                      // 가게명
-                                                      Container(
-                                                        width:
-                                                            108, // 부모 컨테이너의 너비를 지정
-                                                        child: Text(
-                                                          partnerController
-                                                              .recentPartners[
-                                                                  index]
-                                                              .name,
-                                                          maxLines:
-                                                              3, // 최대 3줄까지 표시
-                                                          overflow: TextOverflow
-                                                              .ellipsis, // 글자가 넘치면 ... 처리
-                                                          style: TextStyle(
-                                                            fontSize: 14,
-                                                            fontWeight:
-                                                                FontWeight.w400,
-                                                            color:
-                                                                CatchmongColors
-                                                                    .gray_800,
+                                                        //가게명
+                                                        SizedBox(
+                                                            height:
+                                                                8), // 이미지와 텍스트 사이 간격
+                                                        // 가게명
+                                                        Container(
+                                                          width:
+                                                              108, // 부모 컨테이너의 너비를 지정
+                                                          child: Text(
+                                                            partnerController
+                                                                .recentPartners[
+                                                                    index]
+                                                                .name,
+                                                            maxLines:
+                                                                3, // 최대 3줄까지 표시
+                                                            overflow: TextOverflow
+                                                                .ellipsis, // 글자가 넘치면 ... 처리
+                                                            style: TextStyle(
+                                                              fontSize: 14,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w400,
+                                                              color:
+                                                                  CatchmongColors
+                                                                      .gray_800,
+                                                            ),
                                                           ),
                                                         ),
-                                                      ),
-                                                    ],
-                                                  ));
+                                                      ],
+                                                    )),
+                                              );
                                             },
                                           ),
                                   ),
@@ -308,7 +370,12 @@ class PartnerContent extends StatelessWidget {
                                             fontWeight: FontWeight.w600),
                                       ),
                                       InkWell(
-                                        onTap: () {},
+                                        onTap: () {
+                                          partnerController.partners.clear();
+                                          partnerController.partners.addAll(
+                                              partnerController
+                                                  .favoritePartners);
+                                        },
                                         child: Text(
                                           "더보기",
                                           style: TextStyle(
@@ -329,166 +396,192 @@ class PartnerContent extends StatelessWidget {
                                     height:
                                         270, // 리스트 높이: 48px * 3 (한 번에 3개 보이도록 설정)
                                     child: ListView.builder(
-                                      itemCount: partnerController
-                                          .favoritePartners
-                                          .length, // 예시로 10개의 항목 생성
+                                      itemCount:
+                                          displayedFav.length, // 예시로 10개의 항목 생성
 
                                       scrollDirection: Axis.horizontal,
                                       itemBuilder: (context, index) {
-                                        return Container(
-                                          margin:
-                                              const EdgeInsets.only(right: 16),
-                                          child: Column(
-                                            children: [
-                                              // 이미지
-                                              ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                        8), // 둥근 모서리로 잘라줌
-                                                child: Container(
-                                                  width: 150,
-                                                  height: 180,
-                                                  decoration: BoxDecoration(
-                                                    border: Border.all(
-                                                        color: CatchmongColors
-                                                            .gray,
-                                                        width: 1), // 외부 테두리
-                                                  ),
-                                                  child: ImgCard(
-                                                    path: 'http://192.168.200.102:3000/' +
-                                                        partnerController
-                                                            .favoritePartners[
-                                                                index]
-                                                            .storePhotos![0],
-                                                  ),
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                height: 8,
-                                              ),
-                                              // 가게명
-                                              SizedBox(
-                                                width: 150,
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Column(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .start,
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text(
+                                        Partner partner = displayedFav[index];
+                                        final businessStatus =
+                                            partnerController.getBusinessStatus(
+                                          partner.businessTime ?? "",
+                                          partner.breakTime,
+                                          partner.regularHoliday,
+                                        );
+                                        final rating = partnerController
+                                            .getRating(partner);
+                                        final replyCount =
+                                            partnerController.getReplyCount(
+                                                partner.reviews?.length ?? 0);
+                                        return InkWell(
+                                          onTap: () {
+                                            partnerController
+                                                .showSelectedPartner(
+                                                    context,
+                                                    partner,
+                                                    businessStatus,
+                                                    rating,
+                                                    replyCount);
+                                          },
+                                          child: Container(
+                                            margin: const EdgeInsets.only(
+                                                right: 16),
+                                            child: Column(
+                                              children: [
+                                                // 이미지
+                                                ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          8), // 둥근 모서리로 잘라줌
+                                                  child: Container(
+                                                    width: 150,
+                                                    height: 180,
+                                                    decoration: BoxDecoration(
+                                                      border: Border.all(
+                                                          color: CatchmongColors
+                                                              .gray,
+                                                          width: 1), // 외부 테두리
+                                                    ),
+                                                    child: ImgCard(
+                                                      path: 'http://192.168.200.102:3000/' +
                                                           partnerController
                                                               .favoritePartners[
                                                                   index]
-                                                              .name,
-                                                          style: TextStyle(
-                                                              color:
-                                                                  CatchmongColors
-                                                                      .black,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w700,
-                                                              fontSize: 14),
-                                                        ),
-                                                        SizedBox(
-                                                          height: 1,
-                                                        ),
-                                                        Row(
-                                                          children: [
-                                                            SvgPicture.asset(
-                                                                'assets/images/review-star.svg'),
-                                                            SizedBox(
-                                                              width: 4,
-                                                            ),
-                                                            Text(
-                                                              partnerController
-                                                                  .getAverageRating(partnerController
-                                                                      .favoritePartners[
-                                                                          index]
-                                                                      .reviews)
-                                                                  .toString(),
-                                                              style: TextStyle(
-                                                                  color: CatchmongColors
-                                                                      .gray_800,
-                                                                  fontSize: 12,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w400),
-                                                            ),
-                                                            SizedBox(
-                                                              width: 4,
-                                                            ),
-                                                            Text(
-                                                              "리뷰${partnerController.favoritePartners[index].reviews == null ? "0" : partnerController.favoritePartners[index].reviews!.isEmpty ? "0" : partnerController.favoritePartners[index].reviews!.length.toString()}",
-                                                              style: TextStyle(
-                                                                  color: CatchmongColors
-                                                                      .gray_300,
-                                                                  fontSize: 12,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w400),
-                                                            ),
-                                                          ],
-                                                        )
-                                                      ],
+                                                              .storePhotos![0],
                                                     ),
-                                                    SvgPicture.asset(
-                                                        'assets/images/pin.svg'),
-                                                  ],
+                                                  ),
                                                 ),
-                                              ),
-                                              SizedBox(
-                                                height: 12,
-                                              ),
-                                              SizedBox(
-                                                width: 150,
-                                                height: 30, // 필요한 높이로 설정
-                                                child: ListView.builder(
-                                                  scrollDirection: Axis
-                                                      .horizontal, // 가로 스크롤 설정
-                                                  itemCount: partnerController
-                                                              .favoritePartners[
-                                                                  index]
-                                                              .amenities ==
-                                                          null
-                                                      ? 0
-                                                      : partnerController
+                                                SizedBox(
+                                                  height: 8,
+                                                ),
+                                                // 가게명
+                                                SizedBox(
+                                                  width: 150,
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Column(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .start,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                            partnerController
+                                                                .favoritePartners[
+                                                                    index]
+                                                                .name,
+                                                            style: TextStyle(
+                                                                color:
+                                                                    CatchmongColors
+                                                                        .black,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w700,
+                                                                fontSize: 14),
+                                                          ),
+                                                          SizedBox(
+                                                            height: 1,
+                                                          ),
+                                                          Row(
+                                                            children: [
+                                                              SvgPicture.asset(
+                                                                  'assets/images/review-star.svg'),
+                                                              SizedBox(
+                                                                width: 4,
+                                                              ),
+                                                              Text(
+                                                                partnerController
+                                                                    .getAverageRating(partnerController
+                                                                        .favoritePartners[
+                                                                            index]
+                                                                        .reviews)
+                                                                    .toString(),
+                                                                style: TextStyle(
+                                                                    color: CatchmongColors
+                                                                        .gray_800,
+                                                                    fontSize:
+                                                                        12,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w400),
+                                                              ),
+                                                              SizedBox(
+                                                                width: 4,
+                                                              ),
+                                                              Text(
+                                                                "리뷰${partnerController.favoritePartners[index].reviews == null ? "0" : partnerController.favoritePartners[index].reviews!.isEmpty ? "0" : partnerController.favoritePartners[index].reviews!.length.toString()}",
+                                                                style: TextStyle(
+                                                                    color: CatchmongColors
+                                                                        .gray_300,
+                                                                    fontSize:
+                                                                        12,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w400),
+                                                              ),
+                                                            ],
+                                                          )
+                                                        ],
+                                                      ),
+                                                      SvgPicture.asset(
+                                                          'assets/images/pin.svg'),
+                                                    ],
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  height: 12,
+                                                ),
+                                                SizedBox(
+                                                  width: 150,
+                                                  height: 30, // 필요한 높이로 설정
+                                                  child: ListView.builder(
+                                                    scrollDirection: Axis
+                                                        .horizontal, // 가로 스크롤 설정
+                                                    itemCount: partnerController
+                                                                .favoritePartners[
+                                                                    index]
+                                                                .amenities ==
+                                                            null
+                                                        ? 0
+                                                        : partnerController
+                                                            .favoritePartners[
+                                                                index]
+                                                            .amenities!
+                                                            .length,
+                                                    itemBuilder:
+                                                        (BuildContext context,
+                                                            int amenityIdx) {
+                                                      if (partnerController
                                                           .favoritePartners[
                                                               index]
                                                           .amenities!
-                                                          .length,
-                                                  itemBuilder:
-                                                      (BuildContext context,
-                                                          int amenityIdx) {
-                                                    if (partnerController
-                                                        .favoritePartners[index]
-                                                        .amenities!
-                                                        .isEmpty) {
-                                                      return Container(); // 빈 리스트 처리
-                                                    } else {
-                                                      return Padding(
-                                                        padding: const EdgeInsets
-                                                            .only(
-                                                            right:
-                                                                4.0), // 태그 간 간격 추가
-                                                        child: TagChip(
-                                                          label:
-                                                              "# ${partnerController.favoritePartners[index].amenities![amenityIdx]}",
-                                                        ),
-                                                      );
-                                                    }
-                                                  },
-                                                ),
-                                              )
-                                            ],
+                                                          .isEmpty) {
+                                                        return Container(); // 빈 리스트 처리
+                                                      } else {
+                                                        return Padding(
+                                                          padding: const EdgeInsets
+                                                              .only(
+                                                              right:
+                                                                  4.0), // 태그 간 간격 추가
+                                                          child: TagChip(
+                                                            label:
+                                                                "# ${partnerController.favoritePartners[index].amenities![amenityIdx]}",
+                                                          ),
+                                                        );
+                                                      }
+                                                    },
+                                                  ),
+                                                )
+                                              ],
+                                            ),
                                           ),
                                         );
                                       },

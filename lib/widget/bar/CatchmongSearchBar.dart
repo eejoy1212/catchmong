@@ -1,15 +1,20 @@
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class CatchmongSearchBar extends StatelessWidget {
+  final bool isResult;
   final String searchKeyword;
+  final void Function()? onClear;
   final void Function(String value) onChanged;
   final void Function(String value) onSubmitted;
   const CatchmongSearchBar(
       {super.key,
       required this.searchKeyword,
       required this.onSubmitted,
-      required this.onChanged});
+      required this.onChanged,
+      this.isResult = false,
+      this.onClear});
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +31,21 @@ class CatchmongSearchBar extends StatelessWidget {
 
         onSubmitted: onSubmitted,
         decoration: InputDecoration(
+          suffixIconConstraints: BoxConstraints(
+            minWidth: isResult ? 40 : 0,
+            maxWidth: isResult ? 40 : 0,
+          ), // 닫기 아이콘 너비 최소 24px
+          suffixIcon: isResult
+              ? InkWell(
+                  onTap: onClear,
+                  child: Container(
+                    margin: EdgeInsets.only(right: 16), // 오른쪽 마진 16px
+                    child: SvgPicture.asset(
+                      'assets/icons/close-circle-icon.svg',
+                    ),
+                  ),
+                )
+              : null, // 닫기 아이콘 추가
           hintText: '가게이름을 검색해보세요', // 텍스트 필드에 힌트 넣기 (선택 사항)
           prefixIcon:
               Image.asset('assets/images/searchbar-icon.png'), // 돋보기 아이콘 추가

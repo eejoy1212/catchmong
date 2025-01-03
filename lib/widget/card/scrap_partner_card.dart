@@ -22,136 +22,17 @@ class ScrapPartnerCard extends StatelessWidget {
       this.scrapIconMargin = const EdgeInsets.only(right: 20),
       required this.partner});
 
-  String _getBusinessStatus(
-      String businessTime, String? breakTime, String? regularHoliday) {
-    try {
-      // 현재 시간 가져오기
-      final now = DateTime.now();
-      final currentTime = DateFormat("HH:mm").format(now);
-
-      // 시작 시간과 종료 시간 분리
-      final times = businessTime.split('~');
-      if (times.length != 2) return "마감";
-      final startTime = times[0].trim();
-      final endTime = times[1].trim();
-
-      // 정규 휴일 처리
-      if (regularHoliday != null) {
-        final holidays = regularHoliday.split(',');
-        for (var holiday in holidays) {
-          holiday = holiday.trim();
-          if (holiday.contains("매주")) {
-            final holidayDay =
-                _getDayOfWeek(holiday.replaceAll("매주", "").trim());
-            if (now.weekday == holidayDay) {
-              return "마감";
-            }
-          } else if (holiday.contains("첫째주") ||
-              holiday.contains("둘째주") ||
-              holiday.contains("셋째주") ||
-              holiday.contains("넷째주")) {
-            final weekOfMonth = (now.day - 1) ~/ 7 + 1;
-            final holidayWeek = _getWeekOfMonth(holiday);
-            final holidayDay = _getDayOfWeek(holiday.split(' ').last.trim());
-
-            if (weekOfMonth == holidayWeek && now.weekday == holidayDay) {
-              return "마감";
-            }
-          }
-        }
-      }
-
-      // 브레이크타임 처리
-      if (breakTime != null) {
-        final breakTimes = breakTime.split('~');
-        if (breakTimes.length == 2) {
-          final breakStart = breakTimes[0].trim();
-          final breakEnd = breakTimes[1].trim();
-
-          // 현재 시간이 브레이크타임 범위에 속하면 "브레이크타임" 반환
-          if (currentTime.compareTo(breakStart) >= 0 &&
-              currentTime.compareTo(breakEnd) <= 0) {
-            return "브레이크타임";
-          }
-        }
-      }
-
-      // 현재 시간이 영업 시간 내에 있으면 "영업중" 반환
-      if (currentTime.compareTo(startTime) >= 0 &&
-          currentTime.compareTo(endTime) <= 0) {
-        return "영업중";
-      }
-
-      // 위 조건에 해당하지 않으면 "마감" 반환
-      return "마감";
-    } catch (e) {
-      print("Error parsing businessTime: $e");
-      return "마감";
-    }
-  }
-
-// 요일을 숫자로 변환
-  int _getDayOfWeek(String day) {
-    switch (day) {
-      case "월":
-        return DateTime.monday;
-      case "화":
-        return DateTime.tuesday;
-      case "수":
-        return DateTime.wednesday;
-      case "목":
-        return DateTime.thursday;
-      case "금":
-        return DateTime.friday;
-      case "토":
-        return DateTime.saturday;
-      case "일":
-        return DateTime.sunday;
-      default:
-        return -1;
-    }
-  }
-
-// 특정 주차를 숫자로 변환
-  int _getWeekOfMonth(String week) {
-    if (week.contains("첫째주")) return 1;
-    if (week.contains("둘째주")) return 2;
-    if (week.contains("셋째주")) return 3;
-    if (week.contains("넷째주")) return 4;
-    return -1;
-  }
-
-  String _getReplyCount(int count) {
-    if (count < 1000) {
-      return "리뷰 $count";
-    } else {
-      return "리뷰 999+";
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final Partner2Controller partnerController = Get.find<Partner2Controller>();
     double width = MediaQuery.of(context).size.width;
-    final businessStatus = _getBusinessStatus(
+    final businessStatus = partnerController.getBusinessStatus(
       partner.businessTime ?? "",
       partner.breakTime,
       partner.regularHoliday,
     );
 
     print("현재 상태: $businessStatus");
-    double _getRating() {
-      double rating = 0;
-      if (partner.reviews != null && partner.reviews!.isNotEmpty) {
-        print('getReviews>>${partner.reviews}');
-        for (var review in partner.reviews!) {
-          rating += review.rating;
-        }
-        rating = rating / partner.reviews!.length;
-      }
-      return rating;
-    }
-
-    final Partner2Controller partnerController = Get.find<Partner2Controller>();
 
     return Container(
       // height: 328,
@@ -194,7 +75,7 @@ class ScrapPartnerCard extends StatelessWidget {
                               width: 8,
                             ),
                             StarStatus(
-                              rating: _getRating(),
+                              rating: partnerController.getRating(partner),
                             )
                           ],
                         ),
@@ -259,7 +140,8 @@ class ScrapPartnerCard extends StatelessWidget {
                             SizedBox(
                               width: 60,
                               child: Text(
-                                _getReplyCount(partner.reviews?.length ?? 0),
+                                partnerController.getReplyCount(
+                                    partner.reviews?.length ?? 0),
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   color: CatchmongColors.sub_gray,
@@ -320,12 +202,13 @@ class ScrapPartnerCard extends StatelessWidget {
 
                         partnerController.selectedPartner.value = partner;
                         if (partnerController.selectedPartner.value != null) {
-                          showSelectedPartner(
+                          partnerController.showSelectedPartner(
                               context,
                               partner,
                               businessStatus,
-                              _getRating(),
-                              _getReplyCount(partner.reviews?.length ?? 0));
+                              partnerController.getRating(partner),
+                              partnerController
+                                  .getReplyCount(partner.reviews?.length ?? 0));
                           partnerController.addLatestPartners(partner.id);
                         }
                       },
@@ -404,23 +287,4 @@ class ScrapPartnerCard extends StatelessWidget {
       ),
     );
   }
-}
-
-void showSelectedPartner(BuildContext context, Partner partner,
-    String businessStatus, double rating, String replyCount) {
-  double width = MediaQuery.of(context).size.width;
-  showGeneralDialog(
-    context: context,
-    barrierDismissible: true, // true로 설정했으므로 barrierLabel 필요
-    barrierLabel: "닫기", // 접근성 레이블 설정
-    barrierColor: Colors.black54, // 배경 색상
-    pageBuilder: (context, animation, secondaryAnimation) {
-      return PartnerShowView(
-        partner: partner,
-        businessStatus: businessStatus,
-        rating: rating,
-        replyCount: replyCount,
-      );
-    },
-  );
 }
