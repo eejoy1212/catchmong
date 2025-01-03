@@ -1,3 +1,5 @@
+import 'package:catchmong/model/catchmong_user.dart';
+
 class Review {
   final int id;
   final int userId;
@@ -8,6 +10,7 @@ class Review {
   final double rating;
   final DateTime createdAt;
   final DateTime? updatedAt;
+  final User? user; // User 객체 추가
 
   Review({
     required this.id,
@@ -19,6 +22,7 @@ class Review {
     required this.rating,
     required this.createdAt,
     this.updatedAt,
+    this.user,
   });
 
   // JSON 데이터를 Review 객체로 변환하는 팩토리 생성자
@@ -37,10 +41,13 @@ class Review {
       updatedAt: json['updatedAt'] != null
           ? DateTime.parse(json['updatedAt'] as String)
           : null,
+      user: json['user'] != null
+          ? User.fromJson(json['user'] as Map<String, dynamic>)
+          : null, // User 데이터 처리
     );
   }
 
-  //Review 객체를 JSON으로 변환
+  // Review 객체를 JSON으로 변환
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -52,6 +59,7 @@ class Review {
       'rating': rating,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
+      'user': user?.toJson(), // User 데이터 추가
     };
   }
 }

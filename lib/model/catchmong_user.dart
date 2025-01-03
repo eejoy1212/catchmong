@@ -14,6 +14,8 @@ class User {
   final String? picture; // SQL: varchar(255)
   final DateTime? createdAt; // SQL: datetime
   final DateTime? updatedAt; // SQL: datetime
+  final int totalReviews; // 사용자가 작성한 총 리뷰 수
+  final int totalImages; // 사용자가 작성한 총 리뷰 수
 
   User({
     required this.id,
@@ -30,6 +32,8 @@ class User {
     this.picture,
     this.createdAt,
     this.updatedAt,
+    required this.totalReviews, // 리뷰 수를 필수로 설정
+    required this.totalImages, // 리뷰 수를 필수로 설정
   });
 
   // JSON 데이터를 Dart 객체로 변환
@@ -54,6 +58,8 @@ class User {
       updatedAt: json['updatedAt'] != null
           ? DateTime.parse(json['updatedAt'] as String)
           : null,
+      totalReviews: json['totalReviews'] ?? 0, // 리뷰 수 기본값 0
+      totalImages: json['totalImages'] ?? 0, // 리뷰 수 기본값 0
     );
   }
 
@@ -74,6 +80,8 @@ class User {
       'picture': picture,
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
+      'totalReviews': totalReviews, // 리뷰 수 포함
+      'totalImages': totalImages, // 리뷰 수 포함
     }}");
     return {
       'id': id,
@@ -90,6 +98,8 @@ class User {
       'picture': picture,
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
+      'totalReviews': totalReviews, // 리뷰 수 포함
+      'totalImages': totalImages, // 리뷰 수 포함
     };
   }
 }

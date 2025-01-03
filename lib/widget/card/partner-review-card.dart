@@ -14,12 +14,13 @@ class PartnerReviewCard extends StatelessWidget {
   final Review review;
   PartnerReviewCard({super.key, this.onReplyTap, required this.review});
   String baseUrl = 'http://192.168.200.102:3000/';
+  String profileBaseUrl = 'http://192.168.200.102:3000';
   @override
   Widget build(BuildContext context) {
     print("baseUrl + review.images![0]>>>${baseUrl + review.images![0]}");
     final Partner2Controller partnerController = Get.find<Partner2Controller>();
     String formatDate(DateTime date) {
-      return DateFormat('yyyy-MM-dd').format(date); // 원하는 형식 지정
+      return DateFormat('yyyy.MM.dd').format(date); // 원하는 형식 지정
     }
 
     List<Widget> buildStarRating(double rating) {
@@ -71,7 +72,8 @@ class PartnerReviewCard extends StatelessWidget {
                   width: 36, // 아바타 너비 36px
                   height: 36, // 아바타 높이 36px
                   //리뷰 쓴 유저의 프로필사진도 가져오는걸로 백앤드 수정
-                  child: ImgCard(path: baseUrl + review.images![0]),
+                  child: ImgCard(
+                      path: profileBaseUrl + (review.user?.picture ?? '')),
                 ),
               ),
               SizedBox(
@@ -87,7 +89,7 @@ class PartnerReviewCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        "이원희",
+                        review.user == null ? "" : review.user!.name,
                         style: TextStyle(
                           color: CatchmongColors.black,
                           fontSize: 14,
@@ -108,7 +110,32 @@ class PartnerReviewCard extends StatelessWidget {
                               fontWeight: FontWeight.w400),
                         ),
                         TextSpan(
-                          text: "261",
+                          text: review.user == null
+                              ? ""
+                              : review.user!.totalReviews.toString(),
+                          style: TextStyle(
+                              color: CatchmongColors.gray400,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700),
+                        ),
+                        TextSpan(
+                          text: "•",
+                          style: TextStyle(
+                              color: CatchmongColors.gray400,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700),
+                        ),
+                        TextSpan(
+                          text: "사진",
+                          style: TextStyle(
+                              color: CatchmongColors.gray400,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400),
+                        ),
+                        TextSpan(
+                          text: review.user == null
+                              ? ""
+                              : review.user!.totalImages.toString(),
                           style: TextStyle(
                               color: CatchmongColors.gray400,
                               fontSize: 12,
@@ -118,13 +145,6 @@ class PartnerReviewCard extends StatelessWidget {
                       SizedBox(
                         width: 2,
                       ),
-                      Text(
-                        "•",
-                        style: TextStyle(
-                            color: CatchmongColors.gray400,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700),
-                      )
                     ],
                   ),
                   //별점
