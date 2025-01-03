@@ -1,4 +1,6 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/controller/partner_controller.dart';
+import 'package:catchmong/controller/review_controller.dart';
 import 'package:catchmong/modules/bottom_nav/bottom_nav_controller.dart';
 import 'package:catchmong/modules/mypage/views/mypage_view.dart';
 import 'package:catchmong/modules/partner/views/partner-show-view.dart';
@@ -186,6 +188,7 @@ class MainScreen extends StatelessWidget {
 class MainView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final ReviewController controller = Get.find<ReviewController>();
     return SafeArea(
       child: SingleChildScrollView(
         child: Column(
@@ -334,9 +337,12 @@ class MainView extends StatelessWidget {
                       height: 436, // 카드의 높이와 동일하게 설정
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal, // 가로로 스크롤되도록 설정
-                        itemCount: 5, // 카드의 개수
+                        itemCount: controller.favoriteReviews.length, // 카드의 개수
                         itemBuilder: (context, index) {
-                          return ReviewCard(); // ReviewCard를 리스트에 삽입
+                          final review = controller.favoriteReviews[index];
+                          return ReviewCard(
+                            review: review,
+                          ); // ReviewCard를 리스트에 삽입
                         },
                       ),
                     ),

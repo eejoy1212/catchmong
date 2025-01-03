@@ -1,11 +1,28 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/model/review.dart';
+import 'package:catchmong/widget/card/img_card.dart';
 import 'package:catchmong/widget/chip/TagChip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
+import 'package:intl/intl.dart';
 
 class ReviewCard extends StatelessWidget {
+  final Review review;
+  const ReviewCard({Key? key, required this.review}) : super(key: key);
   @override
   Widget build(BuildContext context) {
+    String profileBaseUrl = 'http://192.168.200.102:3000';
+    String baseUrl = 'http://192.168.200.102:3000/';
+    String formatDate(DateTime date) {
+      return DateFormat('yyyy.MM.dd').format(date); // 원하는 형식 지정
+    }
+
+    String formatThousands(num number) {
+      String formattedNumber = NumberFormat('#,###').format(number);
+      return formattedNumber;
+    }
+
     return Container(
       width: 240, // 카드의 너비
       // height: 412, // 카드의 높이
@@ -35,10 +52,8 @@ class ReviewCard extends StatelessWidget {
                   child: Container(
                     width: 36, // 아바타 너비 36px
                     height: 36, // 아바타 높이 36px
-                    child: Image.asset(
-                      'assets/images/profile1.jpg',
-                      fit: BoxFit.cover, // 이미지가 원형 안에 잘 맞도록 설정
-                    ),
+                    child: ImgCard(
+                        path: profileBaseUrl + (review.user?.picture ?? '')),
                   ),
                 ),
                 SizedBox(width: 8), // 아바타와 텍스트 사이의 간격
@@ -47,7 +62,7 @@ class ReviewCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "사용자 이름",
+                      review.user?.name ?? '', // 사용자 이름
                       style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -66,7 +81,7 @@ class ReviewCard extends StatelessWidget {
                           width: 4,
                         ),
                         Text(
-                          "24.10.11",
+                          formatDate(review.createdAt),
                           style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w400,
@@ -84,10 +99,7 @@ class ReviewCard extends StatelessWidget {
             Container(
               height: 240,
               width: double.infinity,
-              child: Image.asset(
-                'assets/images/review1.jpg', // 이미지 경로
-                fit: BoxFit.cover, // 이미지가 영역에 맞게 출력되도록 설정
-              ),
+              child: ImgCard(path: baseUrl + (review.images?[0] ?? '')),
             ),
             Positioned(
               left: 20,
@@ -101,7 +113,7 @@ class ReviewCard extends StatelessWidget {
                     height: 4,
                   ),
                   Text(
-                    "타이틀을 작성해주세요",
+                    review.title ?? '',
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 14,
@@ -110,12 +122,16 @@ class ReviewCard extends StatelessWidget {
                   SizedBox(
                     height: 4,
                   ),
-                  Text(
-                    "리뷰 내용을 작성해주세요",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700),
+                  SizedBox(
+                    width: 200,
+                    child: Text(
+                      overflow: TextOverflow.ellipsis,
+                      review.content ?? '',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700),
+                    ),
                   )
                 ],
               ),
@@ -132,7 +148,7 @@ class ReviewCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "가게명",
+                      review.partner?.name ?? '',
                       style: TextStyle(
                           color: CatchmongColors.black,
                           fontWeight: FontWeight.w700,
@@ -148,7 +164,7 @@ class ReviewCard extends StatelessWidget {
                           width: 4,
                         ),
                         Text(
-                          '5.0',
+                          review.rating.toString(),
                           style: TextStyle(
                               color: CatchmongColors.gray_800,
                               fontSize: 12,
@@ -158,7 +174,7 @@ class ReviewCard extends StatelessWidget {
                           width: 4,
                         ),
                         Text(
-                          '(1,000)',
+                          '(${formatThousands(review.partner!.reviewCount ?? 0)})',
                           style: TextStyle(
                               color: CatchmongColors.gray_300,
                               fontSize: 12,

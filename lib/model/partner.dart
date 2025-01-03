@@ -27,7 +27,7 @@ class Partner {
   final DateTime updatedAt; // 업데이트 날짜
   final List<Review>? reviews; // 리뷰 리스트
   final List<Menu>? menus; // 메뉴 리스트
-
+  final int? reviewCount; // 리뷰 개수
   Partner({
     required this.id,
     required this.name,
@@ -52,6 +52,7 @@ class Partner {
     required this.updatedAt,
     this.reviews, // 리뷰 리스트 초기화
     this.menus, // 메뉴 리스트 초기화
+    this.reviewCount, // 리뷰 개수 초기화
   });
   factory Partner.fromJson(Map<String, dynamic> json) {
     print("storePhotos type>>> ${json["storePhotos"].runtimeType}");
@@ -83,6 +84,7 @@ class Partner {
       menus: (json['menus'] as List<dynamic>?)
           ?.map((e) => Menu.fromJson(e as Map<String, dynamic>))
           .toList(),
+      reviewCount: json['reviewCount'] as int?,
     );
   }
   static List<String>? _autoConvertToListOfString(dynamic field) {
@@ -149,6 +151,7 @@ class Partner {
       'updatedAt': updatedAt.toIso8601String(),
       'reviews': reviews?.map((e) => e.toJson()).toList(), // 리뷰 리스트 처리
       'menus': menus?.map((e) => e.toJson()).toList(), // 메뉴 리스트 처리
+      'reviewCount': reviewCount, // 리뷰 개수 처리
     };
   }
 }
