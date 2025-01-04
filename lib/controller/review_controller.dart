@@ -10,6 +10,7 @@ class ReviewController extends GetxController {
   RxList<Review> myReviews = <Review>[].obs;
   RxBool isLoading = false.obs;
   List<RxBool> isExpanded = <RxBool>[].obs;
+  Rxn<Review> editing = Rxn<Review>(null);
   final String baseUrl = 'http://192.168.200.102:3000';
   final Dio _dio = Dio(BaseOptions(
     baseUrl: 'http://192.168.200.102:3000', // API 베이스 URL
@@ -107,6 +108,45 @@ class ReviewController extends GetxController {
     } catch (e) {
       print("[DELETE ERROR]내 리뷰 삭제 에러: $e");
       return false; // 예기치 못한 에러
+    }
+  }
+
+  Future<void> updateReview({
+    required int reviewId,
+    required int userId,
+    double? rating,
+    String? content,
+    List<String>? images,
+  }) async {
+    try {
+      // 요청 데이터 생성
+      final Map<String, dynamic> data = {
+        if (rating != null) 'rating': rating,
+        if (content != null) 'content': content,
+        if (images != null) 'images': images,
+      };
+
+      // API 호출
+      final response = await _dio.put(
+        '/reviews/update',
+        queryParameters: {
+          'reviewId': reviewId,
+          'userId': userId,
+        },
+        data: data,
+      );
+
+      if (response.statusCode == 200) {
+        print('Review updated successfully: ${response.data}');
+      } else {
+        print('Failed to update review: ${response.data}');
+      }
+    } on DioError catch (e) {
+      if (e.response != null) {
+        print('Error response: ${e.response?.data}');
+      } else {
+        print('Error sending request: $e');
+      }
     }
   }
 }
