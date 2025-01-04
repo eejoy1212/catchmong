@@ -37,7 +37,6 @@ class MainScreen extends StatelessWidget {
         bottomSheet: currentIndex == 2
             ? InkWell(
                 onTap: () {
-                  print("object");
                   showQrScanner(context);
                 },
                 child: Container(
@@ -145,10 +144,8 @@ class MainScreen extends StatelessWidget {
         return PaybackContent(); //QrCameraContent();
       case 3:
         return MapContent();
-
       case 4:
         return MyPageView();
-
       default:
         return MainView();
     }

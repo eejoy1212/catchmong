@@ -30,8 +30,7 @@ class MyPageView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isLogin = loginController.user.value != null;
-    print("in mypage user>>>${loginController.user} // $isLogin ");
-    final String baseUrl = 'http://192.168.200.102:3000';
+
     return SafeArea(
         child: SingleChildScrollView(
       child: Column(
@@ -57,14 +56,9 @@ class MyPageView extends StatelessWidget {
                       child: Container(
                           width: 36, // 아바타 너비 36px
                           height: 36, // 아바타 높이 36px
-                          child: loginController.user.value?.picture == null
-                              ? Image.asset(
-                                  'assets/images/default-profile.png',
-                                  fit: BoxFit.cover,
-                                )
-                              : ImgCard(
-                                  path:
-                                      '${loginController.baseUrl}${loginController.user.value?.picture}')),
+                          child: ImgCard(
+                              path:
+                                  '${loginController.baseUrl}${loginController.user.value?.picture}')),
                     ),
                     SizedBox(
                       width: 8,

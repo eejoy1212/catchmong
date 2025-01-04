@@ -1,29 +1,28 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/controller/partner_controller.dart';
+import 'package:catchmong/controller/review_controller.dart';
+import 'package:catchmong/modules/login/controllers/login_controller.dart';
+import 'package:catchmong/widget/bar/default_appbar.dart';
 import 'package:catchmong/widget/button/AppbarBackBtn.dart';
 import 'package:catchmong/widget/card/my_write_card.dart';
 import 'package:catchmong/widget/chip/map_chip.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class MyWriteView extends StatelessWidget {
   const MyWriteView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final ReviewController controller = Get.find<ReviewController>();
+    final LoginController loginController = Get.find<LoginController>();
+    if (loginController.user.value != null) {
+      controller.fetchMyReviews(loginController.user.value!.id);
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: const AppbarBackBtn(),
-        centerTitle: true,
-        title: const Text(
-          "내가 쓴 글",
-          style: TextStyle(
-              color: CatchmongColors.black,
-              fontSize: 18,
-              fontWeight: FontWeight.w600),
-        ),
-      ),
+      appBar: DefaultAppbar(title: "내가 쓴 글"),
       body: Column(
         children: [
           Container(
@@ -45,14 +44,14 @@ class MyWriteView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
-                  "내가 쓴 리뷰 27개",
-                  style: TextStyle(
-                    color: CatchmongColors.gray_800,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                Obx(() => Text(
+                      "내가 쓴 리뷰 ${controller.myReviews.length}개",
+                      style: TextStyle(
+                        color: CatchmongColors.gray_800,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    )),
                 Text(
                   "리뷰 수정 안내",
                   style: TextStyle(
@@ -72,18 +71,43 @@ class MyWriteView extends StatelessWidget {
           //   useLeadingIcon: false,
           // ),
 
-          Expanded(
-            child: ListView(children: [
-              ListView.builder(
-                itemCount: 10,
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemBuilder: (context, index) {
-                  return MyWriteCard();
-                },
-              ),
-            ]),
-          ),
+          // Obx(() =>
+          //  controller.isLoading.value
+          //     ? Expanded(
+          //         child: Center(
+          //           child: SizedBox(
+          //             width: 40,
+          //             child: CircularProgressIndicator(
+          //               valueColor: AlwaysStoppedAnimation<Color>(
+          //                 CatchmongColors.yellow_main,
+          //               ),
+          //             ),
+          //           ),
+          //         ),
+          //       )
+          //     :
+          Obx(() => Expanded(
+                child: ListView(children: [
+                  ListView.builder(
+                    itemCount: controller.myReviews.length,
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      final review = controller.myReviews[index];
+                      return MyWriteCard(
+                        baseUrl: controller.baseUrl + "/",
+                        review: review,
+                        isExpanded: review.isExpanded.value,
+                        onExpand: () {
+                          controller.myReviews[index] = review.copyWith(
+                              isExpanded: !review.isExpanded.value);
+                        },
+                      );
+                    },
+                  ),
+                ]),
+                // )
+              )),
           // 최상단에 위치하도록 Positioned로 MapChip 추가
           //지우지 마시오
           // Positioned(

@@ -69,13 +69,15 @@ class PartnerContent extends StatelessWidget {
                         SizedBox(
                           width: 12,
                         ),
-                        InkWell(
-                            onTap: () {
-                              partnerController.searchKeyword.value = "";
-                              partnerController.partners.clear();
-                            },
-                            child:
-                                SvgPicture.asset('assets/icons/home-icon.svg')),
+                        Obx(() => partnerController.partners.isNotEmpty
+                            ? InkWell(
+                                onTap: () {
+                                  partnerController.searchKeyword.value = "";
+                                  partnerController.partners.clear();
+                                },
+                                child: SvgPicture.asset(
+                                    'assets/icons/home-icon.svg'))
+                            : Container()),
                       ],
                     ),
                   ),

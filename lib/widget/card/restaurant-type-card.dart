@@ -1,6 +1,7 @@
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/controller/partner_controller.dart';
 import 'package:catchmong/model/partner.dart';
+import 'package:catchmong/modules/bottom_nav/bottom_nav_controller.dart';
 import 'package:catchmong/widget/card/MainCard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -19,6 +20,8 @@ class RestaurantTypeCard extends StatelessWidget {
     final totalPages = (totalItems / itemsPerPage).ceil(); // 총 페이지 수 계산
     final Partner2Controller partner2Controller =
         Get.find<Partner2Controller>();
+    final BottomNavController bottomNavController =
+        Get.find<BottomNavController>();
     return MainCard(
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 20, vertical: 24),
@@ -82,25 +85,35 @@ class RestaurantTypeCard extends StatelessWidget {
                     itemCount: endIndex - startIndex,
                     itemBuilder: (context, index) {
                       final actualIndex = startIndex + index;
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SvgPicture.asset(
-                            'assets/images/${getImageForIndex(actualIndex)}',
-                            width: 40, // 아이콘 크기
-                            height: 40,
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            getTitleForIndex(actualIndex),
-                            style: TextStyle(
-                              color: CatchmongColors.sub_gray,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
+                      return InkWell(
+                        onTap: () async {
+                          final foodType = getTitleForIndex(actualIndex);
+                          print('foodType>>>$foodType');
+                          partner2Controller.searchKeyword.value = foodType;
+                          await partner2Controller
+                              .fetchPartnersByFoodCategory(foodType);
+                          bottomNavController.selectedIndex.value = 1;
+                        },
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SvgPicture.asset(
+                              'assets/images/${getImageForIndex(actualIndex)}',
+                              width: 40, // 아이콘 크기
+                              height: 40,
                             ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
+                            SizedBox(height: 4),
+                            Text(
+                              getTitleForIndex(actualIndex),
+                              style: TextStyle(
+                                color: CatchmongColors.sub_gray,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
                       );
                     },
                   );

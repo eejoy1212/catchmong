@@ -1,16 +1,58 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/controller/review_controller.dart';
+import 'package:catchmong/model/review.dart';
+import 'package:catchmong/modules/login/controllers/login_controller.dart';
 import 'package:catchmong/widget/bar/close_appbar.dart';
 import 'package:catchmong/widget/button/YellowElevationBtn.dart';
 import 'package:catchmong/widget/button/more-btn.dart';
+import 'package:catchmong/widget/card/img_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class MyWriteCard extends StatelessWidget {
-  const MyWriteCard({super.key});
+  final Review review;
+  final String baseUrl;
+  final bool isExpanded;
+  final void Function() onExpand;
+  const MyWriteCard(
+      {super.key,
+      required this.review,
+      required this.baseUrl,
+      required this.isExpanded,
+      required this.onExpand});
 
   @override
   Widget build(BuildContext context) {
+    String formatDate(DateTime date) {
+      return DateFormat('yyyy.MM.dd').format(date); // 원하는 형식 지정
+    }
+
+    List<String> getStars(double rating) {
+      // 결과를 담을 리스트
+      List<String> stars = [];
+
+      // 정수 부분과 소수 부분 분리
+      int fullStars = rating.floor(); // 정수 부분 (1단위 별 개수)
+      bool hasHalfStar = (rating - fullStars) >= 0.5; // .5 단위인지 확인
+
+      // 정수 부분에 해당하는 별 추가
+      for (int i = 0; i < fullStars; i++) {
+        stars.add('assets/images/review-star.png');
+      }
+
+      // 소수 부분이 .5일 경우 반 별 추가
+      if (hasHalfStar) {
+        stars.add('assets/images/review-star-half.png');
+      }
+
+      return stars;
+    }
+
+    final stars = getStars(review.rating);
+    print('stars>>>$stars');
+    final LoginController loginController = Get.find<LoginController>();
     return Container(
       margin: EdgeInsets.only(
         left: 20,
@@ -40,7 +82,7 @@ class MyWriteCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
-                          "가게명",
+                          review.partner!.name,
                           style: TextStyle(
                             color: CatchmongColors.black,
                             fontSize: 14,
@@ -61,9 +103,10 @@ class MyWriteCard extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.center,
-                          children: List.generate(5, (index) {
+                          children: List.generate(stars.length, (index) {
+                            final path = stars[index];
                             return Image.asset(
-                              'assets/images/review-star.png',
+                              path,
                             );
                           }),
                         ),
@@ -81,7 +124,7 @@ class MyWriteCard extends StatelessWidget {
                           width: 4,
                         ),
                         Text(
-                          "24.10.11",
+                          formatDate(review.createdAt),
                           style: TextStyle(
                             color: CatchmongColors.gray_300,
                             fontSize: 12,
@@ -126,7 +169,11 @@ class MyWriteCard extends StatelessWidget {
                 ),
                 InkWell(
                   onTap: () {
-                    showConfirmDialog(context);
+                    showConfirmDialog(
+                      context,
+                      review.id,
+                      loginController.user.value!.id,
+                    );
                   },
                   child: Container(
                     padding: EdgeInsets.symmetric(
@@ -161,11 +208,12 @@ class MyWriteCard extends StatelessWidget {
             height: 240,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: 30,
+              itemCount: review.images == null ? 0 : review.images!.length,
               itemBuilder: (context, index) {
+                final image = review.images![index];
                 return InkWell(
                   onTap: () {
-                    Get.toNamed('/partner-show');
+                    // Get.toNamed('/partner-show');
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -183,9 +231,8 @@ class MyWriteCard extends StatelessWidget {
                           border: Border.all(
                               color: CatchmongColors.gray, width: 1), // 외부 테두리
                         ),
-                        child: Image.asset(
-                          'assets/images/profile3.png', // 이미지 경로
-                          fit: BoxFit.cover, // 이미지가 Container 크기에 맞게 자르기
+                        child: ImgCard(
+                          path: "$baseUrl$image", // 이미지 경로
                         ),
                       ),
                     ),
@@ -198,9 +245,11 @@ class MyWriteCard extends StatelessWidget {
             height: 16,
           ),
           Text(
-            "리뷰 내용을 작성해주세요.3줄까지 노출가능하며 4줄부터 말줄임표 설정 해주세요.더보기 버튼 클릭 시 전체 리뷰와 사장님 댓글까지 확인 가능합니다.",
-            maxLines: 3, // 최대 3줄로 설정
-            overflow: TextOverflow.ellipsis, // 4줄부터는 말줄임표로 표시
+            review.content ?? "",
+            maxLines: isExpanded ? null : 3, // 최대 3줄로 설정
+            overflow: isExpanded
+                ? TextOverflow.visible
+                : TextOverflow.ellipsis, // 4줄부터는 말줄임표로 표시
             style: TextStyle(
               color: CatchmongColors.sub_gray,
               fontSize: 14,
@@ -210,8 +259,8 @@ class MyWriteCard extends StatelessWidget {
             height: 8,
           ),
           MoreBtn(
-            onTap: () {},
-            isExpanded: true,
+            onTap: onExpand,
+            isExpanded: isExpanded,
           ),
           SizedBox(
             height: 32,
@@ -321,7 +370,8 @@ class MyWriteCard extends StatelessWidget {
   }
 }
 
-void showConfirmDialog(BuildContext context) {
+void showConfirmDialog(BuildContext context, int reviewId, int userId) {
+  final ReviewController controller = Get.find<ReviewController>();
   showDialog(
     context: context,
     barrierDismissible: false,
@@ -385,6 +435,8 @@ void showConfirmDialog(BuildContext context) {
                       child: InkWell(
                         onTap: () {
                           // 확인 버튼의 동작 추가
+                          controller.deleteMyReviews(
+                              reviewId: reviewId, userId: userId);
                           Get.back();
                         },
                         child: Container(

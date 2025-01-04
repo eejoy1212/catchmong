@@ -1,5 +1,6 @@
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/controller/partner_controller.dart';
+import 'package:catchmong/modules/bottom_nav/bottom_nav_controller.dart';
 import 'package:catchmong/widget/card/MainCard.dart';
 import 'package:catchmong/widget/card/ReviewCard.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,8 @@ class HotTypeCard extends StatelessWidget {
     final totalPages = (totalItems / itemsPerPage).ceil(); // 총 페이지 수 계산
     final Partner2Controller partner2Controller =
         Get.find<Partner2Controller>();
+    final BottomNavController bottomNavController =
+        Get.find<BottomNavController>();
     return MainCard(
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 20, vertical: 24),
@@ -83,25 +86,35 @@ class HotTypeCard extends StatelessWidget {
                     itemCount: endIndex - startIndex,
                     itemBuilder: (context, index) {
                       final actualIndex = startIndex + index;
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SvgPicture.asset(
-                            'assets/images/${getImageForIndex(actualIndex)}',
-                            width: 40, // 아이콘 크기
-                            height: 40,
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            getTitleForIndex(actualIndex),
-                            style: TextStyle(
-                              color: CatchmongColors.sub_gray,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
+                      return InkWell(
+                        onTap: () async {
+                          final category = getTitleForIndex(actualIndex);
+                          print('category>>>$category');
+                          partner2Controller.searchKeyword.value = category;
+                          await partner2Controller
+                              .fetchPartnersByCategory(category);
+                          bottomNavController.selectedIndex.value = 1;
+                        },
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SvgPicture.asset(
+                              'assets/images/${getImageForIndex(actualIndex)}',
+                              width: 40, // 아이콘 크기
+                              height: 40,
                             ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
+                            SizedBox(height: 4),
+                            Text(
+                              getTitleForIndex(actualIndex),
+                              style: TextStyle(
+                                color: CatchmongColors.sub_gray,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
                       );
                     },
                   );

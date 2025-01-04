@@ -28,21 +28,11 @@ class PartnerReviewCard extends StatelessWidget {
 
       for (int i = 1; i <= 5; i++) {
         if (rating >= i) {
-          stars.add(
-              //   SvgPicture.asset(
-              //   'assets/images/review-star.svg',
-              //   width: 20,
-              // )
-              Image.asset(
+          stars.add(Image.asset(
             'assets/images/review-star.png',
           ));
         } else if (rating > i - 1 && rating < i) {
-          stars.add(
-              //   SvgPicture.asset(
-              //   'assets/images/review-star-half.svg',
-              //   width: 20,
-              // )
-              Image.asset(
+          stars.add(Image.asset(
             'assets/images/review-star-half.png',
           ));
         } else {

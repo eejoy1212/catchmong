@@ -234,6 +234,66 @@ class Partner2Controller extends GetxController {
     await prefs.setStringList('recentSearches', recentSearches);
   }
 
+//어떤식당을 찾으시나요
+  Future<void> fetchPartnersByFoodCategory(String foodType) async {
+    try {
+      isLoading.value = true;
+      final response = await _dio.get(
+        '/partners/foodType',
+        queryParameters: {'foodType': foodType},
+      );
+
+      if (response.statusCode == 200) {
+        // 응답 데이터가 JSON 배열인지 확인 후 처리
+        final List<dynamic> data = response.data;
+
+        // JSON 배열을 Partner 객체 리스트로 변환
+        partners.value = data
+            .map((json) => Partner.fromJson(json as Map<String, dynamic>))
+            .toList();
+        print("[GET SUCCESS] 어떤식당을 찾으시나요 데이터 조회 성공: ${partners.value}");
+      } else {
+        partners.value = <Partner>[]; // 에러 발생 시 빈 리스트로 초기화
+        print("[GET ERROR] 어떤식당을 찾으시나요 데이터 조회 실패: ${response.statusMessage}");
+      }
+    } catch (e) {
+      partners.value = <Partner>[]; // 에러 발생 시 빈 리스트로 초기화
+      print("[GET ERROR] 어떤식당을 찾으시나요 데이터 조회 실패: $e");
+    } finally {
+      isLoading.value = false; // 로딩 종료
+    }
+  }
+
+//요즘이런식당이 HOT해
+  Future<void> fetchPartnersByCategory(String category) async {
+    try {
+      isLoading.value = true;
+      final response = await _dio.get(
+        '/partners/category',
+        queryParameters: {'category': category},
+      );
+
+      if (response.statusCode == 200) {
+        // 응답 데이터가 JSON 배열인지 확인 후 처리
+        final List<dynamic> data = response.data;
+
+        // JSON 배열을 Partner 객체 리스트로 변환
+        partners.value = data
+            .map((json) => Partner.fromJson(json as Map<String, dynamic>))
+            .toList();
+        print("[GET SUCCESS] 요즘이런식당이 HOT해 데이터 조회 성공: ${partners.value}");
+      } else {
+        partners.value = <Partner>[]; // 에러 발생 시 빈 리스트로 초기화
+        print("[GET ERROR] 요즘이런식당이 HOT해 데이터 조회 실패: ${response.statusMessage}");
+      }
+    } catch (e) {
+      partners.value = <Partner>[]; // 에러 발생 시 빈 리스트로 초기화
+      print("[GET ERROR] 요즘이런식당이 HOT해 데이터 조회 실패: $e");
+    } finally {
+      isLoading.value = false; // 로딩 종료
+    }
+  }
+
   Future<void> fetchPartnersByKeyword() async {
     try {
       isLoading.value = true; // 로딩 시작

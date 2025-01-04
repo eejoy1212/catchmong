@@ -1,5 +1,8 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/controller/partner_controller.dart';
+import 'package:catchmong/modules/login/controllers/login_controller.dart';
 import 'package:catchmong/widget/button/YellowElevationBtn.dart';
+import 'package:catchmong/widget/card/img_card.dart';
 import 'package:catchmong/widget/content/payback_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -7,10 +10,12 @@ import 'package:get/get.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 class PaybackContent extends StatelessWidget {
-  final PaybackController controller = Get.find<PaybackController>();
+  const PaybackContent({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final LoginController loginController = Get.find<LoginController>();
+    final Partner2Controller partnerController = Get.put(Partner2Controller());
     return SafeArea(
       child: SingleChildScrollView(
         child: Container(
@@ -28,72 +33,85 @@ class PaybackContent extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 36, // 동그라미의 너비
-                    height: 36, // 동그라미의 높이
-                    margin: const EdgeInsets.only(right: 8),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.white),
-                      color: CatchmongColors.gray, // 동그라미 색상
-                      shape: BoxShape.circle, // 동그라미 모양
+                  ClipOval(
+                    child: Container(
+                      width: 36, // 동그라미의 너비
+                      height: 36, // 동그라미의 높이
+
+                      decoration: BoxDecoration(
+                        color: CatchmongColors.gray, // 동그라미 색상
+                        shape: BoxShape.circle, // 동그라미 모양
+                      ),
+                      child: ImgCard(
+                          path:
+                              '${loginController.baseUrl}${loginController.user.value?.picture}'),
                     ),
+                  ),
+                  SizedBox(
+                    width: 8,
                   ),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "이원희님",
+                        "${loginController.user.value?.name}님",
                         style: TextStyle(
                           color: CatchmongColors.black,
                           fontWeight: FontWeight.w500,
                           fontSize: 14,
                         ),
                       ),
+                      SizedBox(
+                        height: 4,
+                      ),
                       Text(
-                        "계정 아이디",
+                        loginController.user.value?.email ?? "",
                         style: TextStyle(
                           color: CatchmongColors.gray_300,
                           fontWeight: FontWeight.w400,
                           fontSize: 12,
                         ),
                       ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Container(
-                        width: 46,
-                        height: 20,
-                        decoration: BoxDecoration(
-                          color: CatchmongColors.yellow_main,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Center(
-                          child: Text(
-                            "내 계좌",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 10,
+                      SizedBox(
+                        height: 4,
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            width: 46,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              color: CatchmongColors.yellow_main,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Center(
+                              child: Text(
+                                "내 계좌",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 10,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 4,
-                      ),
-                      Text(
-                        "신한 110-123-456789 예금주명",
-                        style: TextStyle(
+                          SizedBox(
+                            width: 4,
+                          ),
+                          Text(
+                            "신한 110-123-456789 예금주명",
+                            style: TextStyle(
+                                color: CatchmongColors.gray_300,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400),
+                          ),
+                          Icon(
+                            Icons.edit_outlined,
                             color: CatchmongColors.gray_300,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w400),
-                      ),
-                      Icon(
-                        Icons.edit_outlined,
-                        color: CatchmongColors.gray_300,
-                        size: 14,
+                            size: 14,
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -367,7 +385,7 @@ class PaybackContent extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "내 페이백",
+                          "내 페이백 내역",
                           style: TextStyle(
                             color: CatchmongColors.black,
                             fontWeight: FontWeight.w600,
