@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'dart:math';
 
+import 'package:animated_rating_stars/animated_rating_stars.dart';
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/controller/partner_controller.dart';
 import 'package:catchmong/controller/review_controller.dart';
@@ -194,8 +196,28 @@ void showEdit(
             vertical: 8,
           ),
           child: YellowElevationBtn(
-            onPressed: () {},
-            title: Text("등록하기"),
+            onPressed: () async {
+              if (controller.editing.value == null) {
+                //등록하기
+              } else {
+                //수정하기
+                final editing = controller.editing.value!;
+                await controller.updateReview(
+                  reviewId: editing.id,
+                  userId: editing.userId,
+                  rating: editing.rating,
+                  content: editing.content,
+                  // images: editing.images == null
+                  //     ? []
+                  //     : editing.images!
+                  //         .map((path) => File(!path.contains('uploads')
+                  //             ? path
+                  //             : "${controller.baseUrl}/$path"))
+                  //         .toList()
+                );
+              }
+            },
+            title: Text(controller.editing.value == null ? "등록하기" : "수정하기"),
           ),
         ),
         backgroundColor: CatchmongColors.gray50,
@@ -377,10 +399,38 @@ void showEdit(
                         height: 16,
                       ),
                       //별 슬라이드 할 수 있는 라이브러리로 넣기
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: getStars(controller.editing.value!.rating),
-                      ),
+                      // Row(
+                      //   mainAxisAlignment: MainAxisAlignment.center,
+                      //   children: getStars(controller.editing.value!.rating),
+                      // ),
+                      Obx(() => AnimatedRatingStars(
+                            initialRating: controller.editing.value == null
+                                ? 0
+                                : controller.editing.value!.rating,
+                            onChanged: (double rating) {
+                              // setState(() {
+                              //   _rating = rating;
+                              // });
+                              if (controller.editing.value != null) {
+                                controller.editing.value = controller
+                                    .editing.value!
+                                    .copyWith(rating: rating);
+                              }
+                            },
+                            maxRating: 5,
+                            minRating: 0,
+                            displayRatingValue:
+                                true, // Display the rating value
+                            interactiveTooltips:
+                                true, // Allow toggling half-star state
+                            customFilledIcon: Icons.star,
+                            customHalfFilledIcon: Icons.star_half,
+                            customEmptyIcon: Icons.star_border,
+                            starSize: 40.0,
+                            animationDuration:
+                                const Duration(milliseconds: 500),
+                            animationCurve: Curves.easeInOut,
+                          )),
                       SizedBox(
                         height: 16,
                       ),

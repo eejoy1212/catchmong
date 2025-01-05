@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:http/http.dart' as http;
 import 'package:catchmong/model/review.dart';
 import 'package:catchmong/widget/card/img_card.dart';
 import 'package:dio/dio.dart';
@@ -111,41 +114,44 @@ class ReviewController extends GetxController {
     }
   }
 
+//후기 수정
   Future<void> updateReview({
     required int reviewId,
     required int userId,
     double? rating,
     String? content,
-    List<String>? images,
   }) async {
+    final String url = '$baseUrl/reviews/update';
+
     try {
       // 요청 데이터 생성
       final Map<String, dynamic> data = {
+        'reviewId': reviewId,
+        'userId': userId,
         if (rating != null) 'rating': rating,
         if (content != null) 'content': content,
-        if (images != null) 'images': images,
       };
 
       // API 호출
-      final response = await _dio.put(
-        '/reviews/update',
-        queryParameters: {
-          'reviewId': reviewId,
-          'userId': userId,
-        },
-        data: data,
-      );
+      final response = await _dio.put(url, data: data);
 
       if (response.statusCode == 200) {
-        print('Review updated successfully: ${response.data}');
+        print("[PUT SUCCESS] 내 리뷰 수정 성공: ${response.data}");
+        final data = response.data;
+        int nowIdx =
+            myReviews.indexWhere((review) => review.id == editing.value!.id);
+        myReviews[nowIdx] = editing.value!;
+        Get.back();
       } else {
-        print('Failed to update review: ${response.data}');
+        print(
+            "[PUT ERROR] 내 리뷰 수정 실패: ${response.statusCode} - ${response.data}");
       }
     } on DioError catch (e) {
       if (e.response != null) {
-        print('Error response: ${e.response?.data}');
+        print(
+            "[PUT ERROR] 서버 응답 에러: ${e.response?.statusCode} - ${e.response?.data}");
       } else {
-        print('Error sending request: $e');
+        print("[PUT ERROR] 요청 중 에러 발생: $e");
       }
     }
   }

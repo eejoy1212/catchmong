@@ -53,6 +53,7 @@ dependencies:
   dio:
   intl:
   shared_preferences:
+  animated_rating_stars:
   kakao_flutter_sdk:
 
 dev_dependencies:
