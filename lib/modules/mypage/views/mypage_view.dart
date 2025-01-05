@@ -1,5 +1,7 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/controller/partner_controller.dart';
 import 'package:catchmong/model/catchmong_user.dart';
+import 'package:catchmong/model/partner.dart';
 import 'package:catchmong/modules/login/controllers/login_controller.dart';
 import 'package:catchmong/modules/mypage/controllers/mypage_controller.dart';
 import 'package:catchmong/modules/mypage/views/mypage_setting.dart';
@@ -668,7 +670,8 @@ void showShareDialog(BuildContext context) {
   );
 }
 
-void showStoreInfo(BuildContext context) {
+void showStoreInfo(BuildContext context, Partner store) {
+  print("in showStoreInfo>>> ${store}");
   double width = MediaQuery.of(context).size.width;
   Color color = Color(0xFFFFCFCF);
   Color color2 = Color(0xFFFF6161);
@@ -695,7 +698,7 @@ void showStoreInfo(BuildContext context) {
     pageBuilder: (context, animation, secondaryAnimation) {
       return Scaffold(
         backgroundColor: CatchmongColors.gray50,
-        appBar: DefaultAppbar(title: "호박꽃마차 대전점"),
+        appBar: DefaultAppbar(title: store.name),
         body: SafeArea(
           child: DefaultTabController(
             length: 4,
@@ -2153,88 +2156,71 @@ void showPreview(BuildContext context) {
 }
 
 void showStoreManage(BuildContext context) {
-  double width = MediaQuery.of(context).size.width;
-  String selectedBusinessType = "선택"; // 업태 기본값
-  String selectedCategory = "선택"; // 카테고리 기본값
-  String selectedDay = "매 주"; // 정기 휴무일 기본값
-
+  final Partner2Controller controller = Get.find<Partner2Controller>();
+  final LoginController loginController = Get.find<LoginController>();
   showGeneralDialog(
     context: context,
-    barrierDismissible: true, // true로 설정했으므로 barrierLabel 필요
-    barrierLabel: "닫기", // 접근성 레이블 설정
-    barrierColor: Colors.black54, // 배경 색상
+    barrierDismissible: true,
+    barrierLabel: "닫기",
+    barrierColor: Colors.black54,
     pageBuilder: (context, animation, secondaryAnimation) {
       return Scaffold(
-          backgroundColor: Colors.white,
-          appBar: DefaultAppbar(
-            title: "가게 관리",
+        backgroundColor: Colors.white,
+        appBar: DefaultAppbar(title: "가게 관리"),
+        body: SafeArea(
+          child: FutureBuilder<List<Partner>>(
+            future:
+                controller.fetchUserPartners(loginController.user.value!.id),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator()); // 로딩 표시
+              } else if (snapshot.hasError) {
+                return Center(child: Text('데이터를 불러오는 중 오류가 발생했습니다.'));
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return Center(child: Text('등록된 가게가 없습니다.'));
+              }
+
+              final storeList = snapshot.data!;
+
+              return ListView.builder(
+                itemCount: storeList.length,
+                itemBuilder: (context, index) {
+                  final store = storeList[index];
+                  print("유저의 가게들 ${store.name}");
+                  return InkWell(
+                    onTap: () {
+                      showStoreInfo(context, store);
+                      // showStoreInfo(context, store['id']); // 가게 정보 상세보기
+                    },
+                    child: Container(
+                      padding:
+                          EdgeInsets.symmetric(vertical: 21, horizontal: 20),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(color: Colors.grey[300]!),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            store.name, // 서버에서 가져온 가게 이름
+                            style: TextStyle(
+                              color: Colors.grey[700],
+                              fontSize: 16,
+                            ),
+                          ),
+                          Image.asset('assets/images/right-arrow.png'),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
           ),
-          body: SafeArea(
-            child: Container(
-              color: Colors.white,
-              height: 182,
-              child: Column(children: [
-                InkWell(
-                  onTap: () {
-                    showStoreInfo(context);
-                  },
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      vertical: 21,
-                      horizontal: 20,
-                    ),
-                    decoration: BoxDecoration(
-                        border: Border(
-                            bottom: BorderSide(
-                      color: CatchmongColors.gray50,
-                    ))),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "호박꽃마차 대전점",
-                          style: TextStyle(
-                            color: CatchmongColors.sub_gray,
-                            fontSize: 16,
-                          ),
-                        ),
-                        Image.asset('assets/images/right-arrow.png')
-                      ],
-                    ),
-                  ),
-                ),
-                InkWell(
-                  onTap: () {
-                    // showStoreAdd(context);
-                  },
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      vertical: 21,
-                      horizontal: 20,
-                    ),
-                    decoration: BoxDecoration(
-                        border: Border(
-                            bottom: BorderSide(
-                      color: CatchmongColors.gray50,
-                    ))),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "호박꽃마차 춘천점",
-                          style: TextStyle(
-                            color: CatchmongColors.sub_gray,
-                            fontSize: 16,
-                          ),
-                        ),
-                        Image.asset('assets/images/right-arrow.png')
-                      ],
-                    ),
-                  ),
-                ),
-              ]),
-            ),
-          ));
+        ),
+      );
     },
   );
 }

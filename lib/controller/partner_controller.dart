@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class Partner2Controller extends GetxController {
   var partners = <Partner>[].obs; // RxList<Partner>
   var isLoading = false.obs; // 로딩 상태
+
   RxInt currentResPage = 0.obs; // 현재 페이지
   RxInt currentHotPage = 0.obs; // 현재 페이지
   RxString searchKeyword = ''.obs; // 검색어 상태 변수
@@ -19,6 +20,7 @@ class Partner2Controller extends GetxController {
   Rxn<Partner> selectedPartner = Rxn<Partner>(); // 선택된 파트너
   RxList<Partner> recentPartners = RxList<Partner>.empty(); // 최근 본 파트너 리스트
   RxList<String> recentSearches = RxList.empty();
+  RxList<Partner> userPartners = RxList<Partner>.empty(); //유저의 등록된 가게
   RxList<int> recentLatestPartnerIds = RxList.empty();
   RxList<Partner> favoritePartners = RxList.empty(); // 인기 파트너 리스트
   RxBool isExpanded = false.obs; // 확장 상태
@@ -149,6 +151,32 @@ class Partner2Controller extends GetxController {
     } catch (e) {
       print("Error parsing businessTime: $e");
       return "마감";
+    }
+  }
+
+  //유저의 파트너 가져오기(가게등록해서 등록된 가게)
+  Future<List<Partner>> fetchUserPartners(int userId) async {
+    try {
+      final response = await _dio.get(
+        '/partners/byUser',
+        queryParameters: {'userId': userId},
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        print("파트너 목록 가져오기 성공: $data");
+        // JSON 배열을 Partner 객체 리스트로 변환
+        userPartners.value = data
+            .map((json) => Partner.fromJson(json as Map<String, dynamic>))
+            .toList();
+        return userPartners; // 파트너 목록을 반환
+      } else {
+        print("파트너 목록 가져오기 실패: ${response.statusCode}");
+        return [];
+      }
+    } catch (error) {
+      print("파트너 목록 가져오기 중 오류 발생: $error");
+      return [];
     }
   }
 
