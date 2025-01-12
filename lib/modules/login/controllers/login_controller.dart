@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:math';
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/model/catchmong_user.dart';
+import 'package:catchmong/model/partner.dart';
 import 'package:catchmong/model/referrer.dart';
 import 'package:catchmong/services/user_service.dart';
 import 'package:dio/dio.dart';
@@ -44,7 +45,7 @@ class LoginController extends GetxController {
   final TextEditingController paybackMethodController = TextEditingController();
   final TextEditingController referrerNicknameController =
       TextEditingController();
-
+  RxList<Partner> scrapedPartners = RxList.empty();
   // 타이머 관련 변수
   RxInt remainingSeconds = 600.obs; // 10분 (600초)
   Timer? countdownTimer;
@@ -935,6 +936,27 @@ class LoginController extends GetxController {
     } catch (e) {
       print("서버 요청 중 오류 발생: $e");
       return {'path': '/login'};
+    }
+  }
+
+  Future<void> fetchScrapedPartners() async {
+    try {
+      final response = await _dio.get(
+        baseUrl + "/api/my-scrap",
+        queryParameters: {'userId': user.value!.id}, // 쿼리 파라미터
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data["data"];
+        List<Partner> scraped = data
+            .map((json) => Partner.fromJson(json as Map<String, dynamic>))
+            .toList();
+        scrapedPartners.value = scraped;
+      } else {
+        throw Exception('Failed to fetch scraped partners');
+      }
+    } catch (e) {
+      throw Exception('Error fetching scraped partners: $e');
     }
   }
 

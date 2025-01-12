@@ -203,7 +203,8 @@ class MyPageView extends StatelessWidget {
           //타일 1-스크랩
           ,
           InkWell(
-            onTap: () {
+            onTap: () async {
+              await loginController.fetchScrapedPartners();
               showScrapedPartners(context);
             },
             child: Container(
@@ -492,6 +493,7 @@ class MyPageView extends StatelessWidget {
 void showScrapedPartners(BuildContext context) {
   double width = MediaQuery.of(context).size.width;
   final LoginController loginController = Get.find<LoginController>();
+
   showGeneralDialog(
     context: context,
     barrierDismissible: true, // true로 설정했으므로 barrierLabel 필요
@@ -499,7 +501,7 @@ void showScrapedPartners(BuildContext context) {
     barrierColor: Colors.black54, // 배경 색상
     pageBuilder: (context, animation, secondaryAnimation) {
       return ScrapView(
-        partners: loginController.user.value!.scrapPartners,
+        partners: loginController.scrapedPartners,
       );
     },
   );
