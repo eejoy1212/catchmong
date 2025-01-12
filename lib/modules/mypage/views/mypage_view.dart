@@ -1,5 +1,6 @@
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/controller/partner_controller.dart';
+import 'package:catchmong/controller/reservation_controller.dart';
 import 'package:catchmong/model/catchmong_user.dart';
 import 'package:catchmong/model/partner.dart';
 import 'package:catchmong/modules/location/scrap/views/scrap_view.dart';
@@ -11,6 +12,7 @@ import 'package:catchmong/widget/bar/close_appbar.dart';
 import 'package:catchmong/widget/bar/default_appbar.dart';
 import 'package:catchmong/widget/bar/preview_appbar.dart';
 import 'package:catchmong/widget/button/YellowElevationBtn.dart';
+import 'package:catchmong/widget/button/outline_btn_with_icon.dart';
 import 'package:catchmong/widget/button/outlined_btn.dart';
 import 'package:catchmong/widget/button/yellow-toggle-btn.dart';
 import 'package:catchmong/widget/card/img_card.dart';
@@ -18,6 +20,7 @@ import 'package:catchmong/widget/card/partner-review-card.dart';
 import 'package:catchmong/widget/card/reservation_status_card.dart';
 import 'package:catchmong/widget/chart/horizontal_stacked_bar_chart.dart';
 import 'package:catchmong/widget/chart/half_pie_chart.dart';
+import 'package:catchmong/widget/chip/map_chip.dart';
 import 'package:catchmong/widget/dialog/UseDialog.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
@@ -25,11 +28,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class MyPageView extends StatelessWidget {
   final LoginController loginController = Get.find<LoginController>();
   final MypageController myPageController = Get.find<MypageController>();
-
+  final ReservationConteroller reservationController =
+      Get.find<ReservationConteroller>();
   @override
   Widget build(BuildContext context) {
     bool isLogin = loginController.user.value != null;
@@ -239,8 +244,11 @@ class MyPageView extends StatelessWidget {
           //타일 1-내 예약
           ,
           InkWell(
-            onTap: () {
-              // Get.toNamed('/scrap');
+            onTap: () async {
+              await reservationController
+                  .fetchReservations(loginController.user.value!.id);
+
+              showReservationDialog(context);
             },
             child: Container(
               padding: EdgeInsets.symmetric(
@@ -262,7 +270,10 @@ class MyPageView extends StatelessWidget {
                       fontSize: 16,
                     ),
                   ),
-                  Image.asset('assets/images/right-arrow.png')
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 16,
+                  )
                 ],
               ),
             ),
@@ -597,6 +608,344 @@ void showRecommenderDialog(BuildContext context) {
                 ),
               );
             },
+          ),
+        ),
+      );
+    },
+  );
+}
+
+//내 예약 창
+void showReservationDialog(BuildContext context) {
+  final ReservationConteroller controller = Get.find<ReservationConteroller>();
+  final LoginController loginController = Get.find<LoginController>();
+  final width = MediaQuery.of(context).size.width;
+  String getTitle(int idx) {
+    switch (idx) {
+      case 0:
+        return "전체";
+      case 1:
+        return "예약대기";
+      case 2:
+        return "예약확정";
+      case 3:
+        return "이용완료";
+      case 4:
+        return "예약취소";
+      default:
+        return "예약확정";
+    }
+  }
+
+  String getStatus(String status) {
+    switch (status) {
+      case "PENDING":
+        return "예약대기";
+      case "CONFIRMED":
+        return "예약확정";
+      case "COMPLETED":
+        return "이용완료";
+      case "CANCELLED":
+        return "예약취소";
+      default:
+        return "예약대기";
+    }
+  }
+
+  Color getStatusColor(String status) {
+    switch (status) {
+      case "PENDING":
+        return CatchmongColors.red;
+      case "CONFIRMED":
+        return CatchmongColors.blue2;
+      case "COMPLETED":
+        return CatchmongColors.gray_800;
+      case "CANCELLED":
+        return CatchmongColors.gray_800;
+      default:
+        return CatchmongColors.red;
+    }
+  }
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      print("내 예약${controller.reservations.length}");
+      return Scaffold(
+        appBar: DefaultAppbar(title: "내 예약"),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(
+                  vertical: 16,
+                ),
+                decoration: BoxDecoration(
+                    border: Border(
+                        bottom: BorderSide(
+                  color: CatchmongColors.gray50,
+                ))),
+                width: width,
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 20,
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      height: 48,
+                      width: 96,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.grey.shade300,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Obx(() => DropdownButton<String>(
+                            icon: Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              color: CatchmongColors.black,
+                            ),
+                            isExpanded: true,
+                            underline: SizedBox(),
+                            value: controller.selectedDatePickType.value,
+                            items: controller.datepickType
+                                .map((String value) => DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(
+                                        value,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ))
+                                .toList(),
+                            onChanged: (String? newValue) {
+                              if (newValue != null) {
+                                controller.selectedDatePickType.value =
+                                    newValue;
+                              }
+                            },
+                          )),
+                    ),
+                    SizedBox(
+                      width: 16,
+                    ),
+                    Expanded(
+                      child: OutlinedBtnWithIcon(
+                        height: 48,
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Icon(
+                              Icons.arrow_left,
+                              color: CatchmongColors.black,
+                            ),
+                            Obx(() => Text(
+                                  DateFormat('yy.MM.dd').format(
+                                          controller.selectedDate[0].value) +
+                                      "~" +
+                                      DateFormat('yy.MM.dd').format(
+                                          controller.selectedDate[1].value),
+                                  style: TextStyle(
+                                    color: CatchmongColors.black,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                )),
+                            Icon(
+                              Icons.arrow_right,
+                              color: CatchmongColors.black,
+                            ),
+                          ],
+                        ),
+                        onPress: () {
+                          controller.selectDate(context);
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      width: 20,
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 12,
+              ),
+              Container(
+                width: width,
+                height: 36,
+                child: Container(
+                  margin: EdgeInsets.only(
+                    left: 20,
+                  ),
+                  child: ListView.builder(
+                      itemCount: 5,
+                      scrollDirection: Axis.horizontal,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Obx(() => MapChip(
+                              onTap: () async {
+                                controller.sortType.value = index;
+
+                                await controller.fetchReservations(
+                                    loginController.user.value!.id);
+                              },
+                              title: getTitle(index),
+                              isActive: controller.sortType.value == index,
+                              marginRight: 8,
+                              leadingIcon: Container(),
+                              useLeadingIcon: false,
+                            ));
+                      }),
+                ),
+              ),
+              SizedBox(
+                height: 8,
+              ),
+              Obx(() => controller.reservations.isEmpty
+                  ? Container(
+                      width: width,
+                      height: 500,
+                      child: Center(
+                        child: Text("예약이 없습니다."),
+                      ),
+                    )
+                  : Container(
+                      width: width,
+                      height: 800,
+                      child: ListView.builder(
+                          scrollDirection: Axis.vertical,
+                          itemCount: controller.reservations.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            final reservation = controller.reservations[index];
+                            return Container(
+                              width: width,
+                              margin: EdgeInsets.only(
+                                left: 20,
+                                top: 16,
+                                right: 20,
+                                bottom: 32,
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    getStatus(reservation.status),
+                                    style: TextStyle(
+                                      color: CatchmongColors.red,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 16,
+                                  ),
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        width: 100,
+                                        height: 100,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(8)),
+                                          border: Border.all(
+                                            color: CatchmongColors.gray,
+                                            width: 1,
+                                          ), // 외부 테두리
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                              8), // 이미지를 둥글게 자르기
+                                          child: ImgCard(
+                                              path:
+                                                  "http://192.168.200.102:3000" +
+                                                      "/" +
+                                                      reservation.partner
+                                                          .storePhotos![0]),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 12,
+                                      ),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              controller.formatReservationTime(
+                                                  reservation.createdAt),
+                                              style: TextStyle(
+                                                color: CatchmongColors.black,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w400,
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              height: 8,
+                                            ),
+                                            Text(
+                                              reservation.partner.name,
+                                              style: TextStyle(
+                                                color: CatchmongColors.black,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w400,
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              height: 8,
+                                            ),
+                                            Text(
+                                              controller.formatReservationDate(
+                                                  reservation.reservationDate),
+                                              softWrap: true,
+                                              style: TextStyle(
+                                                color: CatchmongColors.black,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              height: 12,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 12,
+                                      ),
+                                      Text(
+                                        "${reservation.numOfPeople}명",
+                                        style: TextStyle(
+                                          color: CatchmongColors.black,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 16,
+                                  ),
+                                  OutlinedBtn(
+                                      width: width,
+                                      title: "취소하기",
+                                      onPress: () {})
+                                ],
+                              ),
+                            );
+                          }),
+                    ))
+            ],
           ),
         ),
       );
