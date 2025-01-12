@@ -221,9 +221,12 @@ class PartnerContent extends StatelessWidget {
                                       ),
                                       InkWell(
                                         onTap: () {
+                                          partnerController
+                                              .searchKeyword.value = " ";
                                           partnerController.partners.clear();
                                           partnerController.partners.addAll(
                                               partnerController.recentPartners);
+                                          print("최근 더보기 클릭");
                                         },
                                         child: Text(
                                           "더보기",
@@ -375,6 +378,8 @@ class PartnerContent extends StatelessWidget {
                                       ),
                                       InkWell(
                                         onTap: () {
+                                          partnerController
+                                              .searchKeyword.value = " ";
                                           partnerController.partners.clear();
                                           partnerController.partners.addAll(
                                               partnerController

@@ -2,6 +2,7 @@ import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/controller/partner_controller.dart';
 import 'package:catchmong/controller/review_controller.dart';
 import 'package:catchmong/modules/bottom_nav/bottom_nav_controller.dart';
+import 'package:catchmong/modules/login/controllers/login_controller.dart';
 import 'package:catchmong/modules/mypage/views/mypage_view.dart';
 import 'package:catchmong/modules/partner/views/partner-show-view.dart';
 import 'package:catchmong/widget/bar/mainview_appbar.dart';
@@ -189,6 +190,7 @@ class MainView extends StatelessWidget {
         PageController(); // PageController 추가
     final ReviewController controller = Get.find<ReviewController>();
     final Partner2Controller partnerController = Get.find<Partner2Controller>();
+    final LoginController loginController = Get.find<LoginController>();
     final BottomNavController bottomNavController =
         Get.find<BottomNavController>();
     return SafeArea(
@@ -370,6 +372,11 @@ class MainView extends StatelessWidget {
                           final rating = partnerController.getRating(partner);
                           final replyCount = partnerController
                               .getReplyCount(partner.reviews?.length ?? 0);
+                          bool isScraped = loginController
+                                  .user.value!.scrapPartners
+                                  .firstWhereOrNull(
+                                      (el) => el.id == partner.id) !=
+                              null;
                           return InkWell(
                             onTap: () {
                               partnerController.showSelectedPartner(context,
@@ -377,6 +384,7 @@ class MainView extends StatelessWidget {
                             },
                             child: ReviewCard(
                               review: review,
+                              isScraped: isScraped,
                             ),
                           ); // ReviewCard를 리스트에 삽입
                         },

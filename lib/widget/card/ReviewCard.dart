@@ -9,7 +9,9 @@ import 'package:intl/intl.dart';
 
 class ReviewCard extends StatelessWidget {
   final Review review;
-  const ReviewCard({Key? key, required this.review}) : super(key: key);
+  final bool isScraped;
+  const ReviewCard({Key? key, required this.review, required this.isScraped})
+      : super(key: key);
   @override
   Widget build(BuildContext context) {
     String profileBaseUrl = 'http://192.168.200.102:3000';
@@ -184,7 +186,8 @@ class ReviewCard extends StatelessWidget {
                     )
                   ],
                 ),
-                Image.asset('assets/images/pin.png')
+                SvgPicture.asset(
+                    'assets/images/${isScraped ? "scraped" : "no-scraped"}.svg')
               ],
             ),
           ),
