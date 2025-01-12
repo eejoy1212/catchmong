@@ -46,7 +46,7 @@ class CatchmongSearchBar extends StatelessWidget {
                   ),
                 )
               : null, // 닫기 아이콘 추가
-          hintText: '가게이름을 검색해보세요', // 텍스트 필드에 힌트 넣기 (선택 사항)
+          hintText: '파트너 이름을 검색해보세요', // 텍스트 필드에 힌트 넣기 (선택 사항)
           prefixIcon:
               Image.asset('assets/images/searchbar-icon.png'), // 돋보기 아이콘 추가
           border: InputBorder.none, // 기본 보더 제거
