@@ -1,4 +1,5 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/model/partner.dart';
 import 'package:catchmong/widget/button/AppbarBackBtn.dart';
 import 'package:catchmong/widget/button/outlined_btn.dart';
 import 'package:catchmong/widget/content/scrap_partner_content.dart';
@@ -6,7 +7,8 @@ import 'package:catchmong/widget/content/scrap_store_content.dart';
 import 'package:flutter/material.dart';
 
 class ScrapView extends StatelessWidget {
-  const ScrapView({super.key});
+  final List<Partner> partners;
+  const ScrapView({super.key, required this.partners});
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +55,7 @@ class ScrapView extends StatelessWidget {
           ),
           body: // 파트너 탭
               ScrapPartnerContent(
-            partners: [],
+            partners: partners,
           ),
           // TabBarView(
           //   children: [

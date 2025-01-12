@@ -130,10 +130,8 @@ class PartnerContent extends StatelessWidget {
                                     height: 16,
                                   ),
                                   Container(
-                                    height: (30 *
-                                            partnerController
-                                                .recentSearches.length)
-                                        .toDouble(), // 리스트 높이: 48px * 3 (한 번에 3개 보이도록 설정)
+                                    height:
+                                        100, // 리스트 높이: 48px * 3 (한 번에 3개 보이도록 설정)
                                     child: ListView.builder(
                                       itemCount: partnerController
                                           .recentSearches
@@ -621,6 +619,13 @@ class PartnerContent extends StatelessWidget {
                               child: ListView.builder(
                                   itemCount: partnerController.partners.length,
                                   itemBuilder: (context, index) {
+                                    final partner =
+                                        partnerController.partners[index];
+                                    bool isScraped = loginController
+                                            .user.value!.scrapPartners
+                                            .firstWhereOrNull(
+                                                (el) => el.id == partner.id) !=
+                                        null;
                                     print(
                                         "${index}번째 파트너: ${partnerController.partners[index].id}");
                                     return ScrapPartnerCard(

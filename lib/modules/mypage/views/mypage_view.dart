@@ -2,6 +2,7 @@ import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/controller/partner_controller.dart';
 import 'package:catchmong/model/catchmong_user.dart';
 import 'package:catchmong/model/partner.dart';
+import 'package:catchmong/modules/location/scrap/views/scrap_view.dart';
 import 'package:catchmong/modules/login/controllers/login_controller.dart';
 import 'package:catchmong/modules/mypage/controllers/mypage_controller.dart';
 import 'package:catchmong/modules/mypage/views/mypage_setting.dart';
@@ -203,7 +204,7 @@ class MyPageView extends StatelessWidget {
           ,
           InkWell(
             onTap: () {
-              Get.toNamed('/scrap');
+              showScrapedPartners(context);
             },
             child: Container(
               padding: EdgeInsets.symmetric(
@@ -225,7 +226,11 @@ class MyPageView extends StatelessWidget {
                       fontSize: 16,
                     ),
                   ),
-                  Image.asset('assets/images/right-arrow.png')
+                  // Image.asset('assets/images/right-arrow.png')
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 16,
+                  )
                 ],
               ),
             ),
@@ -234,7 +239,7 @@ class MyPageView extends StatelessWidget {
           ,
           InkWell(
             onTap: () {
-              Get.toNamed('/scrap');
+              // Get.toNamed('/scrap');
             },
             child: Container(
               padding: EdgeInsets.symmetric(
@@ -482,6 +487,22 @@ class MyPageView extends StatelessWidget {
       ),
     ));
   }
+}
+
+void showScrapedPartners(BuildContext context) {
+  double width = MediaQuery.of(context).size.width;
+  final LoginController loginController = Get.find<LoginController>();
+  showGeneralDialog(
+    context: context,
+    barrierDismissible: true, // true로 설정했으므로 barrierLabel 필요
+    barrierLabel: "닫기", // 접근성 레이블 설정
+    barrierColor: Colors.black54, // 배경 색상
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return ScrapView(
+        partners: loginController.user.value!.scrapPartners,
+      );
+    },
+  );
 }
 
 //추천인 창

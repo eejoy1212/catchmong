@@ -1,6 +1,7 @@
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/controller/partner_controller.dart';
 import 'package:catchmong/model/partner.dart';
+import 'package:catchmong/modules/login/controllers/login_controller.dart';
 import 'package:catchmong/modules/partner/views/partner-show-view.dart';
 import 'package:catchmong/widget/status/star_status.dart';
 import 'package:flutter/material.dart';
@@ -10,21 +11,24 @@ import 'package:intl/intl.dart';
 
 class ScrapPartnerCard extends StatelessWidget {
   final Partner partner;
+
   final EdgeInsetsGeometry padding;
   final EdgeInsetsGeometry scrapIconMargin;
-  const ScrapPartnerCard(
-      {super.key,
-      this.padding = const EdgeInsets.only(
-        top: 16,
-        left: 20,
-        bottom: 20,
-      ),
-      this.scrapIconMargin = const EdgeInsets.only(right: 20),
-      required this.partner});
+  const ScrapPartnerCard({
+    super.key,
+    this.padding = const EdgeInsets.only(
+      top: 16,
+      left: 20,
+      bottom: 20,
+    ),
+    this.scrapIconMargin = const EdgeInsets.only(right: 20),
+    required this.partner,
+  });
 
   @override
   Widget build(BuildContext context) {
     final Partner2Controller partnerController = Get.find<Partner2Controller>();
+
     double width = MediaQuery.of(context).size.width;
     final businessStatus = partnerController.getBusinessStatus(
       partner.businessTime ?? "",
@@ -180,7 +184,7 @@ class ScrapPartnerCard extends StatelessWidget {
                     ),
                     //pin 뱃지
                     SvgPicture.asset(
-                      'assets/partners/inactive-pin.svg',
+                      'assets/images/scraped.svg',
                     )
                   ],
                 ),

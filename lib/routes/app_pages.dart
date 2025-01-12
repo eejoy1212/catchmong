@@ -102,10 +102,10 @@ class AppPages {
       name: '/alarm-setting',
       page: () => const AlarmSettingView(),
     ),
-    GetPage(
-      name: '/scrap',
-      page: () => const ScrapView(),
-    ),
+    // GetPage(
+    //   name: '/scrap',
+    //   page: () => const ScrapView(),
+    // ),
     GetPage(
       name: '/my-write',
       page: () => const MyWriteView(),

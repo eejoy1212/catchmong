@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 
 class ScrapPartnerContent extends StatelessWidget {
   final List<Partner> partners;
+
   const ScrapPartnerContent({super.key, required this.partners});
 
   @override
