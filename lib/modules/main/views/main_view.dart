@@ -185,28 +185,34 @@ class MainScreen extends StatelessWidget {
 class MainView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final PageController _pageController =
+        PageController(); // PageController 추가
     final ReviewController controller = Get.find<ReviewController>();
+    final Partner2Controller partnerController = Get.find<Partner2Controller>();
+    final BottomNavController bottomNavController =
+        Get.find<BottomNavController>();
     return SafeArea(
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Stack(children: [
-              Container(
-                width: MediaQuery.of(context).size.width,
-                height: 260, // 카드의 높이와 동일하게 설정
-                color: CatchmongColors.gray50,
-                child: Center(
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal, // 가로로 스크롤되도록 설정
-                    itemCount: 5, // 카드의 개수
-                    itemBuilder: (context, index) {
-                      return Image.asset(
-                        "assets/images/main-banner${index + 1}.png",
-                        width: MediaQuery.of(context).size.width,
-                      ); // ReviewCard를 리스트에 삽입
-                    },
-                  ),
+              SizedBox(
+                height: 260, // 카드 높이
+                child: PageView.builder(
+                  controller: _pageController,
+                  itemCount: 5, // 배너 개수
+                  onPageChanged: (index) {
+                    // 배너 인덱스 변경 시 업데이트
+                    controller.bannerIdx.value = index;
+                  },
+                  itemBuilder: (context, index) {
+                    return Image.asset(
+                      "assets/images/main-banner${index + 1}.png",
+                      width: MediaQuery.of(context).size.width,
+                      fit: BoxFit.cover,
+                    );
+                  },
                 ),
               ),
               Positioned(
@@ -217,8 +223,10 @@ class MainView extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(
                         5,
-                        (index) => PageIndicator(
-                            isCurrent: index == 1 ? true : false)),
+                        (index) => Obx(() => PageIndicator(
+                            isCurrent: index == controller.bannerIdx.value
+                                ? true
+                                : false))),
                   ),
                 ),
               )
@@ -235,7 +243,12 @@ class MainView extends StatelessWidget {
                         Expanded(
                             child: Column(
                           children: [
-                            SvgPicture.asset('assets/images/partner.svg'),
+                            InkWell(
+                                onTap: () {
+                                  bottomNavController.selectedIndex.value = 1;
+                                },
+                                child: SvgPicture.asset(
+                                    'assets/images/partner.svg')),
                             SizedBox(
                               height: 7,
                             ),
@@ -260,7 +273,12 @@ class MainView extends StatelessWidget {
                         Expanded(
                             child: Column(
                           children: [
-                            SvgPicture.asset('assets/images/payback.svg'),
+                            InkWell(
+                                onTap: () {
+                                  bottomNavController.selectedIndex.value = 2;
+                                },
+                                child: SvgPicture.asset(
+                                    'assets/images/payback.svg')),
                             SizedBox(
                               height: 7,
                             ),
@@ -276,7 +294,12 @@ class MainView extends StatelessWidget {
                         Expanded(
                             child: Column(
                           children: [
-                            SvgPicture.asset('assets/images/signin.svg'),
+                            InkWell(
+                                onTap: () {
+                                  showMyStore(context);
+                                },
+                                child: SvgPicture.asset(
+                                    'assets/images/signin.svg')),
                             SizedBox(
                               height: 7,
                             ),
@@ -337,8 +360,24 @@ class MainView extends StatelessWidget {
                         itemCount: controller.favoriteReviews.length, // 카드의 개수
                         itemBuilder: (context, index) {
                           final review = controller.favoriteReviews[index];
-                          return ReviewCard(
-                            review: review,
+                          final partner = review.partner!;
+                          final businessStatus =
+                              partnerController.getBusinessStatus(
+                            partner.businessTime ?? "",
+                            partner.breakTime,
+                            partner.regularHoliday,
+                          );
+                          final rating = partnerController.getRating(partner);
+                          final replyCount = partnerController
+                              .getReplyCount(partner.reviews?.length ?? 0);
+                          return InkWell(
+                            onTap: () {
+                              partnerController.showSelectedPartner(context,
+                                  partner, businessStatus, rating, replyCount);
+                            },
+                            child: ReviewCard(
+                              review: review,
+                            ),
                           ); // ReviewCard를 리스트에 삽입
                         },
                       ),

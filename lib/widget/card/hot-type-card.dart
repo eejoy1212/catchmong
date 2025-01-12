@@ -91,6 +91,7 @@ class HotTypeCard extends StatelessWidget {
                           final category = getTitleForIndex(actualIndex);
                           print('category>>>$category');
                           partner2Controller.searchKeyword.value = category;
+                          partner2Controller.addSearchTerm(category);
                           await partner2Controller
                               .fetchPartnersByCategory(category);
                           bottomNavController.selectedIndex.value = 1;

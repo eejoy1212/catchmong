@@ -11,6 +11,7 @@ import 'package:intl/intl.dart';
 class ReviewController extends GetxController {
   RxList<Review> favoriteReviews = <Review>[].obs;
   RxList<Review> myReviews = <Review>[].obs;
+  RxInt bannerIdx = 0.obs;
   RxBool isLoading = false.obs;
   List<RxBool> isExpanded = <RxBool>[].obs;
   Rxn<Review> editing = Rxn<Review>(null);

@@ -90,6 +90,7 @@ class RestaurantTypeCard extends StatelessWidget {
                           final foodType = getTitleForIndex(actualIndex);
                           print('foodType>>>$foodType');
                           partner2Controller.searchKeyword.value = foodType;
+                          partner2Controller.addSearchTerm(foodType);
                           await partner2Controller
                               .fetchPartnersByFoodCategory(foodType);
                           bottomNavController.selectedIndex.value = 1;

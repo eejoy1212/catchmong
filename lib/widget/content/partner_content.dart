@@ -50,7 +50,8 @@ class PartnerContent extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Obx(() => CatchmongSearchBar(
-                                isResult: partnerController.partners.isNotEmpty,
+                                isResult: partnerController
+                                    .searchKeyword.value.isNotEmpty,
                                 searchKeyword:
                                     partnerController.searchKeyword.value,
                                 onSubmitted: (String value) {
@@ -69,7 +70,8 @@ class PartnerContent extends StatelessWidget {
                         SizedBox(
                           width: 12,
                         ),
-                        Obx(() => partnerController.partners.isNotEmpty
+                        Obx(() => partnerController
+                                .searchKeyword.value.isNotEmpty
                             ? InkWell(
                                 onTap: () {
                                   partnerController.searchKeyword.value = "";
@@ -86,7 +88,7 @@ class PartnerContent extends StatelessWidget {
                   ),
                   //  검색창에 검색어 있으면 검색화면, 아니면 최근 검색어, 최근 본 매장
                   //partnerController.partners의 길이만큼 ScrapPartnerContent를 만들어주세요
-                  Obx(() => partnerController.partners.isEmpty
+                  Obx(() => partnerController.searchKeyword.isEmpty
                       // partnerController.searchKeyword.value.trim() == ""
                       ? Column(
                           children: [
@@ -505,7 +507,8 @@ class PartnerContent extends StatelessWidget {
                                                                         .favoritePartners[
                                                                             index]
                                                                         .reviews)
-                                                                    .toString(),
+                                                                    .toStringAsFixed(
+                                                                        1),
                                                                 style: TextStyle(
                                                                     color: CatchmongColors
                                                                         .gray_800,
@@ -601,17 +604,25 @@ class PartnerContent extends StatelessWidget {
                             )
                           ],
                         )
-                      : Container(
-                          height: 500,
-                          child: ListView.builder(
-                              itemCount: partnerController.partners.length,
-                              itemBuilder: (context, index) {
-                                print(
-                                    "${index}번째 파트너: ${partnerController.partners[index].id}");
-                                return ScrapPartnerCard(
-                                  partner: partnerController.partners[index],
-                                );
-                              })))
+                      : partnerController.partners.isEmpty
+                          ? Container(
+                              height: 500,
+                              child: Center(
+                                child: Text("해당 파트너가 없습니다."),
+                              ),
+                            )
+                          : Container(
+                              height: 500,
+                              child: ListView.builder(
+                                  itemCount: partnerController.partners.length,
+                                  itemBuilder: (context, index) {
+                                    print(
+                                        "${index}번째 파트너: ${partnerController.partners[index].id}");
+                                    return ScrapPartnerCard(
+                                      partner:
+                                          partnerController.partners[index],
+                                    );
+                                  })))
 
                   // partnerController.partners.isEmpty
                 ],

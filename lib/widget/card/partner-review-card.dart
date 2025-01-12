@@ -186,7 +186,7 @@ class PartnerReviewCard extends StatelessWidget {
               itemBuilder: (context, index) {
                 return InkWell(
                   onTap: () {
-                    Get.toNamed('/partner-show');
+                    // Get.toNamed('/partner-show');
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),

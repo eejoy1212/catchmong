@@ -17,7 +17,7 @@ class StarStatus extends StatelessWidget {
         Container(
           margin: EdgeInsets.only(top: 4),
           child: Text(
-            rating.toString(),
+            rating.toStringAsFixed(1),
             style: TextStyle(
                 color: CatchmongColors.gray_800,
                 fontSize: 12,
