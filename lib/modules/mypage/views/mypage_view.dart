@@ -4,6 +4,7 @@ import 'package:catchmong/controller/reservation_controller.dart';
 import 'package:catchmong/model/catchmong_user.dart';
 import 'package:catchmong/model/partner.dart';
 import 'package:catchmong/modules/location/scrap/views/scrap_view.dart';
+import 'package:catchmong/modules/location/views/location_search_view.dart';
 import 'package:catchmong/modules/login/controllers/login_controller.dart';
 import 'package:catchmong/modules/mypage/controllers/mypage_controller.dart';
 import 'package:catchmong/modules/mypage/views/mypage_setting.dart';
@@ -17,17 +18,21 @@ import 'package:catchmong/widget/button/outlined_btn.dart';
 import 'package:catchmong/widget/button/yellow-toggle-btn.dart';
 import 'package:catchmong/widget/card/img_card.dart';
 import 'package:catchmong/widget/card/partner-review-card.dart';
+import 'package:catchmong/widget/card/partner_img_card.dart';
 import 'package:catchmong/widget/card/reservation_status_card.dart';
 import 'package:catchmong/widget/chart/horizontal_stacked_bar_chart.dart';
 import 'package:catchmong/widget/chart/half_pie_chart.dart';
 import 'package:catchmong/widget/chip/map_chip.dart';
 import 'package:catchmong/widget/dialog/UseDialog.dart';
+import 'package:catchmong/widget/txtfield/border-txtfield.dart';
+import 'package:daum_postcode_search/daum_postcode_search.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 class MyPageView extends StatelessWidget {
@@ -124,7 +129,10 @@ class MyPageView extends StatelessWidget {
                               fontWeight: FontWeight.w700,
                               fontSize: 16),
                         ),
-                        Image.asset('assets/images/right-arrow.png')
+                        Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 16,
+                        )
                       ],
                     ),
                   ),
@@ -305,7 +313,10 @@ class MyPageView extends StatelessWidget {
                       fontSize: 16,
                     ),
                   ),
-                  Image.asset('assets/images/right-arrow.png')
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 16,
+                  )
                 ],
               ),
             ),
@@ -336,7 +347,10 @@ class MyPageView extends StatelessWidget {
                       fontSize: 16,
                     ),
                   ),
-                  Image.asset('assets/images/right-arrow.png')
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 16,
+                  )
                 ],
               ),
             ),
@@ -367,7 +381,10 @@ class MyPageView extends StatelessWidget {
                       fontSize: 16,
                     ),
                   ),
-                  Image.asset('assets/images/right-arrow.png')
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 16,
+                  )
                 ],
               ),
             ),
@@ -398,7 +415,10 @@ class MyPageView extends StatelessWidget {
                       fontSize: 16,
                     ),
                   ),
-                  Image.asset('assets/images/right-arrow.png')
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 16,
+                  )
                 ],
               ),
             ),
@@ -434,7 +454,10 @@ class MyPageView extends StatelessWidget {
                       fontSize: 16,
                     ),
                   ),
-                  Image.asset('assets/images/right-arrow.png')
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 16,
+                  )
                 ],
               ),
             ),
@@ -462,7 +485,10 @@ class MyPageView extends StatelessWidget {
                       fontSize: 16,
                     ),
                   ),
-                  Image.asset('assets/images/right-arrow.png')
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 16,
+                  )
                 ],
               ),
             ),
@@ -490,7 +516,10 @@ class MyPageView extends StatelessWidget {
                       fontSize: 16,
                     ),
                   ),
-                  Image.asset('assets/images/right-arrow.png')
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 16,
+                  )
                 ],
               ),
             ),
@@ -2582,7 +2611,10 @@ void showStoreManage(BuildContext context) {
                               fontSize: 16,
                             ),
                           ),
-                          Image.asset('assets/images/right-arrow.png'),
+                          Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 16,
+                          ),
                         ],
                       ),
                     ),
@@ -2602,6 +2634,46 @@ void showStoreAdd(BuildContext context) {
   String selectedBusinessType = "선택"; // 업태 기본값
   String selectedCategory = "선택"; // 카테고리 기본값
   String selectedDay = "매 주"; // 정기 휴무일 기본값
+  final Partner2Controller controller = Get.find<Partner2Controller>();
+  String _formatPhoneNumber(String input) {
+    // 숫자만 추출
+    String digits = input.replaceAll(RegExp(r'[^0-9]'), '');
+    print("digits>>> $input");
+    // 최대 길이 제한: "010-1234-5678" => 13자리
+    if (digits.length > 11) {
+      digits = digits.substring(0, 11);
+    }
+
+    // 형식 적용: 010-XXXX-XXXX
+    if (digits.length <= 3) {
+      return digits; // 3자리 이하
+    } else if (digits.length <= 7) {
+      return '${digits.substring(0, 3)}-${digits.substring(3)}'; // 3-4 형식
+    } else {
+      return '${digits.substring(0, 3)}-${digits.substring(3, 7)}-${digits.substring(7)}'; // 3-4-4 형식
+    }
+  }
+
+  List<String> _getbusinessTimeTitles(String type) {
+    switch (type) {
+      case "매일 같아요":
+        return ["영업 시간", "영업 시간"];
+      case "평일/주말 달라요":
+        return ["평일 영업 시간", "주말 영업 시간"];
+      case "요일별로 달라요":
+        return [
+          "월요일 영업 시간",
+          "화요일 영업 시간",
+          "수요일 영업 시간",
+          "목요일 영업 시간",
+          "금요일 영업 시간",
+          "토요일 영업 시간",
+          "일요일 영업 시간"
+        ];
+      default:
+        return ["영업 시간", "영업 시간"];
+    }
+  }
 
   showGeneralDialog(
     context: context,
@@ -2609,6 +2681,8 @@ void showStoreAdd(BuildContext context) {
     barrierLabel: "닫기", // 접근성 레이블 설정
     barrierColor: Colors.black54, // 배경 색상
     pageBuilder: (context, animation, secondaryAnimation) {
+      final bTitles =
+          _getbusinessTimeTitles(controller.selectedBusinessTimeConfig.value);
       return Scaffold(
           bottomNavigationBar: Container(
             height: 68,
@@ -2659,30 +2733,45 @@ void showStoreAdd(BuildContext context) {
                     ),
                   ),
                   SizedBox(height: 8),
-                  Container(
-                    height: 48, // TextField의 높이 명시적으로 설정
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: CatchmongColors.gray100,
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: "가게명을 입력해주세요.",
-                        border: InputBorder.none, // 기본 border 제거
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ), // 여백 설정
-                      ),
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: CatchmongColors.gray_800,
-                      ),
-                    ),
-                  ),
+                  // Container(
+                  //   height: 48, // TextField의 높이 명시적으로 설정
+                  //   decoration: BoxDecoration(
+                  //     border: Border.all(
+                  //       color: CatchmongColors.gray100,
+                  //     ),
+                  //     borderRadius: BorderRadius.circular(8),
+                  //   ),
+                  //   child: TextField(
+                  //     decoration: InputDecoration(
+                  //       hintText: "가게명을 입력해주세요.",
+                  //       border: InputBorder.none, // 기본 border 제거
+                  //       contentPadding: EdgeInsets.symmetric(
+                  //         horizontal: 16,
+                  //         vertical: 14,
+                  //       ), // 여백 설정
+                  //     ),
+                  //     style: TextStyle(
+                  //       fontSize: 14,
+                  //       fontWeight: FontWeight.w400,
+                  //       color: CatchmongColors.gray_800,
+                  //     ),
+                  //   ),
+                  // ),
+                  BorderTxtField(
+                    controller: controller.partnerNameTxtController,
+                    onChanged: (String value) {
+                      if (controller.partnerNameTxtController.text.length >
+                          300) {
+                        Future.microtask(() {
+                          controller.partnerNameTxtController.value =
+                              TextEditingValue(
+                            text: value.substring(0, 300),
+                            selection: TextSelection.collapsed(offset: 300),
+                          );
+                        });
+                      }
+                    },
+                  )
                 ],
               ),
             ),
@@ -2712,49 +2801,41 @@ void showStoreAdd(BuildContext context) {
                         ),
                         SizedBox(height: 8),
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 8),
-                          height: 48,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: CatchmongColors.gray100,
+                            padding: EdgeInsets.symmetric(horizontal: 8),
+                            height: 48,
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: CatchmongColors.gray100,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: DropdownButton<String>(
-                            isExpanded: true,
-                            underline: SizedBox(),
-                            value: selectedBusinessType,
-                            items: [
-                              "선택",
-                              "한식",
-                              "중식",
-                              "일식",
-                              "양식",
-                              "분식",
-                              "패스트푸드",
-                              "비건식당",
-                              "디저트카페",
-                              "뷔페"
-                            ]
-                                .map((String value) => DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Text(
-                                        value,
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w400,
-                                          color: CatchmongColors.gray_800,
-                                        ),
-                                      ),
-                                    ))
-                                .toList(),
-                            onChanged: (String? newValue) {
-                              if (newValue != null) {
-                                selectedBusinessType = newValue;
-                              }
-                            },
-                          ),
-                        ),
+                            child: Obx(
+                              () => DropdownButton<String>(
+                                isExpanded: true,
+                                underline: SizedBox(),
+                                value: controller.selectedFoodType.value,
+                                items: controller.foodTypes
+                                    .map((String value) =>
+                                        DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(
+                                            value,
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w400,
+                                              color: CatchmongColors.gray_800,
+                                            ),
+                                          ),
+                                        ))
+                                    .toList(),
+                                onChanged: (String? newValue) {
+                                  if (newValue != null) {
+                                    controller.selectedFoodType.value =
+                                        newValue;
+                                  }
+                                },
+                              ),
+                            )),
                       ],
                     ),
                   ),
@@ -2774,50 +2855,41 @@ void showStoreAdd(BuildContext context) {
                         ),
                         SizedBox(height: 8),
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 8),
-                          height: 48,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: CatchmongColors.gray100,
+                            padding: EdgeInsets.symmetric(horizontal: 8),
+                            height: 48,
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: CatchmongColors.gray100,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: DropdownButton<String>(
-                            isExpanded: true,
-                            underline: SizedBox(),
-                            value: selectedCategory,
-                            items: [
-                              "선택",
-                              "데이트 맛집",
-                              "화제의 예능",
-                              "가족 모임",
-                              "혼밥",
-                              "노포",
-                              "인스타 핫플",
-                              "룸이 있는",
-                              "가성비 맛집",
-                              "레스토랑",
-                              "미슐랭",
-                            ]
-                                .map((String value) => DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Text(
-                                        value,
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w400,
-                                          color: CatchmongColors.gray_800,
-                                        ),
-                                      ),
-                                    ))
-                                .toList(),
-                            onChanged: (String? newValue) {
-                              if (newValue != null) {
-                                selectedCategory = newValue;
-                              }
-                            },
-                          ),
-                        ),
+                            child: Obx(
+                              () => DropdownButton<String>(
+                                isExpanded: true,
+                                underline: SizedBox(),
+                                value: controller.selectedCategory.value,
+                                items: controller.categories
+                                    .map((String value) =>
+                                        DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(
+                                            value,
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w400,
+                                              color: CatchmongColors.gray_800,
+                                            ),
+                                          ),
+                                        ))
+                                    .toList(),
+                                onChanged: (String? newValue) {
+                                  if (newValue != null) {
+                                    controller.selectedCategory.value =
+                                        newValue;
+                                  }
+                                },
+                              ),
+                            )),
                       ],
                     ),
                   ),
@@ -2844,14 +2916,32 @@ void showStoreAdd(BuildContext context) {
                     ),
                   ),
                   SizedBox(height: 8),
-                  SizedBox(
-                    height: 102,
-                    child: ListView.builder(
-                        itemCount: 4,
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (context, idx) {
-                          return idx == 0
-                              ? Container(
+                  Obx(
+                    () => SizedBox(
+                      height: 102,
+                      child: ListView.builder(
+                          itemCount: controller.businessProofs.length + 1,
+                          scrollDirection: Axis.horizontal,
+                          itemBuilder: (context, idx) {
+                            if (idx == 0) {
+                              return InkWell(
+                                onTap: () async {
+                                  print("갤러리 열기");
+                                  final ImagePicker picker = ImagePicker();
+                                  final XFile? pickedFile =
+                                      await picker.pickImage(
+                                    source: ImageSource
+                                        .gallery, // or ImageSource.camera
+                                    maxWidth: 800, // Optional: Resize the image
+                                    maxHeight: 800,
+                                  );
+
+                                  if (pickedFile != null) {
+                                    final newImagePath = pickedFile.path;
+                                    controller.businessProofs.add(pickedFile);
+                                  }
+                                },
+                                child: Container(
                                   width: 100,
                                   height: 100,
                                   margin: EdgeInsets.only(right: 8),
@@ -2863,7 +2953,7 @@ void showStoreAdd(BuildContext context) {
                                       SvgPicture.asset(
                                           'assets/images/img-plus.svg'),
                                       Text(
-                                        "사진등록\n(3 / 120)",
+                                        "사진등록\n(${controller.businessProofs.length} / 120)",
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                           color: CatchmongColors.sub_gray,
@@ -2880,51 +2970,34 @@ void showStoreAdd(BuildContext context) {
                                       border: Border.all(
                                         color: CatchmongColors.gray100,
                                       )),
-                                )
-                              : Container(
-                                  width: 100,
-                                  height: 100,
-                                  margin: EdgeInsets.only(right: 8),
-                                  child: Column(
-                                    children: [
-                                      SizedBox(
-                                        height: 7,
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          Icon(
-                                            Icons.close,
-                                            color: CatchmongColors.gray400,
-                                            size: 18,
-                                          ),
-                                          SizedBox(
-                                            width: 6,
-                                          )
-                                        ],
-                                      ),
-                                      Text(
-                                        "첨부한\n가게사진",
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color: CatchmongColors.sub_gray,
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height: 16,
-                                      ),
-                                    ],
-                                  ),
-                                  decoration: BoxDecoration(
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(8)),
-                                      border: Border.all(
-                                        color: CatchmongColors.gray100,
-                                      )),
-                                );
-                        }),
-                  ),
+                                ),
+                              );
+                            } else {
+                              final String? imagePath =
+                                  controller.businessProofs[idx - 1].path;
+                              print("imagePath: $imagePath");
+
+                              return PartnerImgCard(
+                                path: imagePath,
+                                isLocal: true, // 로컬 이미지 여부 전달
+                                onDelete: () {
+                                  // if (controller.editing.value != null) {
+                                  //   controller.editing.value =
+                                  //       controller.editing.value!.copyWith(
+                                  //     images: controller.editing.value!.images!
+                                  //       ..removeAt(idx - 1),
+                                  //   );
+                                  // }
+                                  controller.businessProofs.removeAt(idx - 1);
+                                },
+                                onTab: () {
+                                  print("Tapped image at index $idx");
+                                },
+                              );
+                            }
+                          }),
+                    ),
+                  )
                 ],
               ),
             ),
@@ -2948,14 +3021,32 @@ void showStoreAdd(BuildContext context) {
                     ),
                   ),
                   SizedBox(height: 8),
-                  SizedBox(
-                    height: 102,
-                    child: ListView.builder(
-                        itemCount: 4,
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (context, idx) {
-                          return idx == 0
-                              ? Container(
+                  Obx(
+                    () => SizedBox(
+                      height: 102,
+                      child: ListView.builder(
+                          itemCount: controller.storePhotos.length + 1,
+                          scrollDirection: Axis.horizontal,
+                          itemBuilder: (context, idx) {
+                            if (idx == 0) {
+                              return InkWell(
+                                onTap: () async {
+                                  print("갤러리 열기");
+                                  final ImagePicker picker = ImagePicker();
+                                  final XFile? pickedFile =
+                                      await picker.pickImage(
+                                    source: ImageSource
+                                        .gallery, // or ImageSource.camera
+                                    maxWidth: 800, // Optional: Resize the image
+                                    maxHeight: 800,
+                                  );
+
+                                  if (pickedFile != null) {
+                                    final newImagePath = pickedFile.path;
+                                    controller.storePhotos.add(pickedFile);
+                                  }
+                                },
+                                child: Container(
                                   width: 100,
                                   height: 100,
                                   margin: EdgeInsets.only(right: 8),
@@ -2967,7 +3058,7 @@ void showStoreAdd(BuildContext context) {
                                       SvgPicture.asset(
                                           'assets/images/img-plus.svg'),
                                       Text(
-                                        "사진등록\n(3 / 120)",
+                                        "사진등록\n(${controller.storePhotos.length} / 120)",
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                           color: CatchmongColors.sub_gray,
@@ -2984,51 +3075,35 @@ void showStoreAdd(BuildContext context) {
                                       border: Border.all(
                                         color: CatchmongColors.gray100,
                                       )),
-                                )
-                              : Container(
-                                  width: 100,
-                                  height: 100,
-                                  margin: EdgeInsets.only(right: 8),
-                                  child: Column(
-                                    children: [
-                                      SizedBox(
-                                        height: 7,
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          Icon(
-                                            Icons.close,
-                                            color: CatchmongColors.gray400,
-                                            size: 18,
-                                          ),
-                                          SizedBox(
-                                            width: 6,
-                                          )
-                                        ],
-                                      ),
-                                      Text(
-                                        "첨부한\n가게사진",
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color: CatchmongColors.sub_gray,
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height: 16,
-                                      ),
-                                    ],
-                                  ),
-                                  decoration: BoxDecoration(
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(8)),
-                                      border: Border.all(
-                                        color: CatchmongColors.gray100,
-                                      )),
-                                );
-                        }),
-                  ),
+                                ),
+                              );
+                            } else {
+                              final String? imagePath =
+                                  controller.storePhotos[idx - 1].path;
+                              print("imagePath: $imagePath");
+
+                              return PartnerImgCard(
+                                path: imagePath,
+                                isLocal: true, // 로컬 이미지 여부 전달
+                                onDelete: () {
+                                  // if (controller.editing.value != null) {
+                                  //   controller.editing.value =
+                                  //       controller.editing.value!.copyWith(
+                                  //     images: controller.editing.value!.images!
+                                  //       ..removeAt(idx - 1),
+                                  //   );
+                                  // }
+
+                                  controller.storePhotos.removeAt(idx - 1);
+                                },
+                                onTab: () {
+                                  print("Tapped image at index $idx");
+                                },
+                              );
+                            }
+                          }),
+                    ),
+                  )
                 ],
               ),
             ),
@@ -3055,65 +3130,40 @@ void showStoreAdd(BuildContext context) {
                   Row(
                     children: [
                       Expanded(
-                        child: Container(
-                          height: 48, // TextField의 높이 명시적으로 설정
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: CatchmongColors.gray100,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: TextField(
-                            decoration: InputDecoration(
-                              hintText: "검색한 우편번호로 불러온 주소 value",
-                              border: InputBorder.none, // 기본 border 제거
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
-                              ), // 여백 설정
-                            ),
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: CatchmongColors.gray_800,
-                            ),
-                          ),
-                        ),
-                      ),
+                          child: Obx(() => BorderTxtField(
+                              readOnly: true,
+                              hintText: "우편번호",
+                              controller: TextEditingController(
+                                  text: controller.postCode.value),
+                              onChanged: (String value) {}))),
                       SizedBox(
                         width: 8,
                       ),
                       OutlinedBtn(
-                          height: 48, width: 120, title: "우편번호", onPress: () {})
+                          height: 48,
+                          width: 120,
+                          title: "우편번호",
+                          onPress: () async {
+                            DataModel model = await Get.to(
+                              () => LocationSearchView(),
+                            );
+                            // onSearch(model);
+                            print("주소 검색 결과>>> ${model.address}");
+                            controller.postCode.value = model.zonecode;
+                            controller.address.value = model.address;
+                          })
                     ],
                   ),
                   SizedBox(
                     height: 8,
                   ),
-                  Container(
-                    height: 48, // TextField의 높이 명시적으로 설정
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: CatchmongColors.gray100,
+                  Obx(() => BorderTxtField(
+                      readOnly: true,
+                      hintText: "상세주소",
+                      controller: TextEditingController(
+                        text: controller.address.value,
                       ),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: "상세주소 입력",
-                        border: InputBorder.none, // 기본 border 제거
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ), // 여백 설정
-                      ),
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: CatchmongColors.gray_800,
-                      ),
-                    ),
-                  ),
+                      onChanged: (String value) {}))
                 ],
               ),
             ),
@@ -3137,112 +3187,13 @@ void showStoreAdd(BuildContext context) {
                     ),
                   ),
                   SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          height: 48, // TextField의 높이 명시적으로 설정
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: CatchmongColors.gray100,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: TextField(
-                            decoration: InputDecoration(
-                              hintText: "",
-                              border: InputBorder.none, // 기본 border 제거
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
-                              ), // 여백 설정
-                            ),
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: CatchmongColors.gray_800,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Text(
-                        "-",
-                        style: TextStyle(
-                          fontSize: 20,
-                        ),
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Expanded(
-                        child: Container(
-                          height: 48, // TextField의 높이 명시적으로 설정
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: CatchmongColors.gray100,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: TextField(
-                            decoration: InputDecoration(
-                              hintText: "",
-                              border: InputBorder.none, // 기본 border 제거
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
-                              ), // 여백 설정
-                            ),
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: CatchmongColors.gray_800,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Text(
-                        "-",
-                        style: TextStyle(
-                          fontSize: 20,
-                        ),
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Expanded(
-                        child: Container(
-                          height: 48, // TextField의 높이 명시적으로 설정
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: CatchmongColors.gray100,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: TextField(
-                            decoration: InputDecoration(
-                              hintText: "",
-                              border: InputBorder.none, // 기본 border 제거
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
-                              ), // 여백 설정
-                            ),
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: CatchmongColors.gray_800,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  BorderTxtField(
+                    controller: controller.phoneTxtController,
+                    onChanged: (String value) {
+                      String formattedValue = _formatPhoneNumber(value);
+                      controller.phoneTxtController.text = formattedValue;
+                    },
+                  )
                 ],
               ),
             ),
@@ -3275,12 +3226,26 @@ void showStoreAdd(BuildContext context) {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: TextField(
+                      controller: controller.descriptionTxtController,
+                      onChanged: (String value) {
+                        if (controller.descriptionTxtController.text.length >
+                            300) {
+                          Future.microtask(() {
+                            controller.descriptionTxtController.value =
+                                TextEditingValue(
+                              text: value.substring(0, 300),
+                              selection: TextSelection.collapsed(offset: 300),
+                            );
+                          });
+                        }
+                      },
                       maxLines: null, // 여러 줄 허용
                       expands: true, // TextField가 Container에 꽉 차도록 설정
                       decoration: InputDecoration(
-                        hintText: "   소개문구를 작성해주세요.",
-                        border: InputBorder.none, // 기본 border 제거
-                      ),
+                          hintText: "   소개문구를 작성해주세요.",
+                          border: InputBorder.none, // 기본 border 제거
+                          contentPadding: EdgeInsets.symmetric(
+                              vertical: 14, horizontal: 8)),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w400,
@@ -3319,23 +3284,21 @@ void showStoreAdd(BuildContext context) {
                       runSpacing: 4,
                       spacing: 4,
                       children: [
-                        ...[
-                          "주차",
-                          "쿠폰",
-                          "유아시설",
-                          "애견동반",
-                          "예약",
-                          "콜키지",
-                          "단체석",
-                          "배달",
-                          "발렛"
-                        ].map((data) {
-                          return YellowToggleBtn(
-                            width: MediaQuery.of(context).size.width / 3.6,
-                            title: data,
-                            isSelected: false,
-                            onTap: () {},
-                          );
+                        ...controller.amenities.map((data) {
+                          return Obx(() => YellowToggleBtn(
+                                width: MediaQuery.of(context).size.width / 3.6,
+                                title: data,
+                                isSelected:
+                                    controller.selectedAmenities.contains(data),
+                                onTap: () {
+                                  if (controller.selectedAmenities
+                                      .contains(data)) {
+                                    controller.selectedAmenities.remove(data);
+                                  } else {
+                                    controller.selectedAmenities.add(data);
+                                  }
+                                },
+                              ));
                         }).toList(),
                       ],
                     ),
@@ -3371,16 +3334,21 @@ void showStoreAdd(BuildContext context) {
                       runSpacing: 4,
                       spacing: 4,
                       children: [
-                        ...[
-                          "있어요",
-                          "없어요",
-                        ].map((data) {
-                          return YellowToggleBtn(
-                            width: MediaQuery.of(context).size.width / 2.3,
-                            title: data,
-                            isSelected: data == "있어요" ? true : false,
-                            onTap: () {},
-                          );
+                        ...controller.holidays.map((data) {
+                          return Obx(() => YellowToggleBtn(
+                                width: MediaQuery.of(context).size.width / 2.3,
+                                title: data,
+                                isSelected: data == "있어요"
+                                    ? controller.hasHoliday.value
+                                    : !controller.hasHoliday.value,
+                                onTap: () {
+                                  if (data == "있어요") {
+                                    controller.hasHoliday.value = true;
+                                  } else {
+                                    controller.hasHoliday.value = false;
+                                  }
+                                },
+                              ));
                         }).toList(),
                       ],
                     ),
@@ -3421,35 +3389,30 @@ void showStoreAdd(BuildContext context) {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     padding: EdgeInsets.symmetric(horizontal: 8),
-                    child: DropdownButton<String>(
-                      isExpanded: true,
-                      underline: SizedBox(),
-                      value: selectedDay,
-                      items: [
-                        "매 주",
-                        "첫째 주",
-                        "둘째 주",
-                        "셋째 주",
-                        "넷째 주",
-                      ]
-                          .map((String value) => DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(
-                                  value,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w400,
-                                    color: CatchmongColors.gray_800,
-                                  ),
-                                ),
-                              ))
-                          .toList(),
-                      onChanged: (String? newValue) {
-                        if (newValue != null) {
-                          selectedDay = newValue; // 값 업데이트
-                        }
-                      },
-                    ),
+                    child: Obx(() => DropdownButton<String>(
+                          isExpanded: true,
+                          underline: SizedBox(),
+                          value: controller.selectedHolidayWeek.value,
+                          items: controller.holidayWeeks
+                              .map((String value) => DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(
+                                      value,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400,
+                                        color: CatchmongColors.gray_800,
+                                      ),
+                                    ),
+                                  ))
+                              .toList(),
+                          onChanged: (String? newValue) {
+                            if (newValue != null) {
+                              controller.selectedHolidayWeek.value =
+                                  newValue; // 값 업데이트
+                            }
+                          },
+                        )),
                   ),
                   SizedBox(height: 16),
 
@@ -3458,15 +3421,17 @@ void showStoreAdd(BuildContext context) {
                     spacing: 4, // 버튼 사이 간격
                     runSpacing: 4, // 줄바꿈 시 간격
                     children: [
-                      ...["월", "화", "수", "목", "금", "토", "일"].map((data) {
-                        return YellowToggleBtn(
-                          width: 42, // 버튼 너비
-                          title: data,
-                          isSelected: data == "수", // 기본 선택값
-                          onTap: () {
-                            // 요일 선택 시 동작 추가
-                          },
-                        );
+                      ...controller.regularHolidays.map((data) {
+                        return Obx(() => YellowToggleBtn(
+                              width: 42, // 버튼 너비
+                              title: data,
+                              isSelected: controller.selectedRegularHoliday ==
+                                  data, // 기본 선택값
+                              onTap: () {
+                                controller.selectedRegularHoliday.value = data;
+                                // 요일 선택 시 동작 추가
+                              },
+                            ));
                       }).toList(),
                     ],
                   ),
@@ -3503,15 +3468,61 @@ void showStoreAdd(BuildContext context) {
                       spacing: 4, // 버튼 사이 간격
                       runSpacing: 4, // 줄바꿈 시 간격
                       children: [
-                        ...["매일 같아요", "평일/주말 달라요", "요일별로 달라요"].map((data) {
-                          return YellowToggleBtn(
-                            width: width / 3.6, // 버튼 너비
-                            title: data,
-                            isSelected: data == "수", // 기본 선택값
-                            onTap: () {
-                              // 요일 선택 시 동작 추가
-                            },
-                          );
+                        ...controller.businessTimeConfigs.map((data) {
+                          return Obx(() => YellowToggleBtn(
+                                width: width / 3.6, // 버튼 너비
+                                title: data,
+                                isSelected: controller
+                                        .selectedBusinessTimeConfig.value ==
+                                    data, // 기본 선택값
+                                onTap: () {
+                                  controller.selectedBusinessTimeConfig.value =
+                                      data;
+                                  if (controller
+                                          .selectedBusinessTimeConfig.value ==
+                                      "매일 같아요") {
+                                    controller.businessTime.value = [
+                                      ["10:00", "24:00"]
+                                    ];
+                                    controller.holidayTime.value = [
+                                      ["10:00", "24:00"]
+                                    ];
+                                  } else if (controller
+                                          .selectedBusinessTimeConfig.value ==
+                                      "평일/주말 달라요") {
+                                    controller.bTitles.value = [
+                                      "평일 영업 시간",
+                                      "주말 영업 시간"
+                                    ];
+                                    controller.businessTime.value = [
+                                      ...List.generate(
+                                          2, (int index) => ["10:00", "24:00"])
+                                    ];
+                                    controller.holidayTime.value = [
+                                      ...List.generate(
+                                          2, (int index) => ["10:00", "24:00"])
+                                    ];
+                                  } else {
+                                    controller.bTitles.value = [
+                                      "월요일 영업 시간",
+                                      "화요일 영업 시간",
+                                      "수요일 영업 시간",
+                                      "목요일 영업 시간",
+                                      "금요일 영업 시간",
+                                      "토요일 영업 시간",
+                                      "일요일 영업 시간"
+                                    ];
+                                    controller.businessTime.value = [
+                                      ...List.generate(
+                                          7, (int index) => ["10:00", "24:00"])
+                                    ];
+                                    controller.holidayTime.value = [
+                                      ...List.generate(
+                                          7, (int index) => ["10:00", "24:00"])
+                                    ];
+                                  }
+                                },
+                              ));
                         }).toList(),
                       ],
                     ),
@@ -3519,126 +3530,158 @@ void showStoreAdd(BuildContext context) {
                 ],
               ),
             ),
-            //영업 시간
-            Container(
-              width: width,
-              padding: EdgeInsets.only(
-                left: 20,
-                top: 16,
-                right: 20,
-                bottom: 20,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            // 매일같아요/평일주말달라요/요일별로달라요-영업시간
+            Obx(
+              () => Column(
                 children: [
-                  // "영업 시간" 텍스트
-                  Text(
-                    "영업 시간",
-                    style: TextStyle(
-                      color: CatchmongColors.gray_800,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  SizedBox(height: 8),
+                  ...List.generate(
+                    controller.businessTime.length,
+                    (int index) => Container(
+                      width: width,
+                      padding: EdgeInsets.only(
+                        left: 20,
+                        top: 16,
+                        right: 20,
+                        bottom: 20,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // "영업 시간" 텍스트
 
-                  // 버튼 그룹
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          height: 48, // TextField의 높이 명시적으로 설정
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: CatchmongColors.gray100,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: TextField(
-                            decoration: InputDecoration(
-                              hintText: "11:00",
-                              border: InputBorder.none, // 기본 border 제거
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
-                              ), // 여백 설정
-                            ),
+                          Text(
+                            controller.bTitles[index],
                             style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
                               color: CatchmongColors.gray_800,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Text(
-                        "-",
-                        style: TextStyle(
-                          fontSize: 20,
-                        ),
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Expanded(
-                        child: Container(
-                          height: 48, // TextField의 높이 명시적으로 설정
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: CatchmongColors.gray100,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: TextField(
-                            decoration: InputDecoration(
-                              hintText: "20:00",
-                              border: InputBorder.none, // 기본 border 제거
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
-                              ), // 여백 설정
-                            ),
-                            style: TextStyle(
                               fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: CatchmongColors.gray_800,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Expanded(
-                        child: Container(
-                          height: 48, // TextField의 높이 명시적으로 설정
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: CatchmongColors.gray100,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
+                          SizedBox(height: 8),
+
+                          // 버튼 그룹
+
+                          Row(
+                            children: [
+                              Expanded(
+                                  child: Obx(() => OutlinedBtn(
+                                      title: controller.businessTime[index][0],
+                                      onPress: () {
+                                        if (controller.isAllDay.isFalse) {
+                                          showWheelPicker(context,
+                                              (String value) {
+                                            final copied = [
+                                              ...controller.businessTime
+                                            ];
+                                            copied[index][0] = value;
+                                            controller.businessTime.value =
+                                                copied;
+                                          });
+                                        }
+                                      }))),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Text(
+                                "-",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Expanded(
+                                  child: Obx(() => OutlinedBtn(
+                                      title: controller.businessTime[index][1],
+                                      onPress: () {
+                                        if (controller.isAllDay.isFalse) {
+                                          showWheelPicker(context,
+                                              (String value) {
+                                            final copied = [
+                                              ...controller.businessTime
+                                            ];
+                                            copied[index][1] = value;
+                                            controller.businessTime.value =
+                                                copied;
+                                          });
+                                        }
+                                      }))),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Obx(
+                                () => YellowToggleBtn(
+                                  width: 100,
+                                  title: "24h 운영",
+                                  isSelected: controller.isAllDay.value,
+                                  onTap: () {
+                                    controller.isAllDay.value =
+                                        !controller.isAllDay.value;
+                                    final copied = [...controller.businessTime];
+                                    copied[index][0] = "00:00";
+                                    copied[index][1] = "24:00";
+                                    controller.businessTime.value = copied;
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
-                          child: TextField(
-                            decoration: InputDecoration(
-                              hintText: "24h 운영",
-                              border: InputBorder.none, // 기본 border 제거
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
-                              ), // 여백 설정
-                            ),
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: CatchmongColors.gray_800,
-                            ),
-                          ),
-                        ),
+                          // Row(
+                          //   children: [
+                          //     Expanded(
+                          //         child: Obx(() => OutlinedBtn(
+                          //             title: controller.businessTime[0],
+                          //             onPress: () {
+                          //               if (controller.isAllDay.isFalse) {
+                          //                 showWheelPicker(context, (String value) {
+                          //                   controller.businessTime[0] = value;
+                          //                 });
+                          //               }
+                          //             }))),
+                          //     SizedBox(
+                          //       width: 10,
+                          //     ),
+                          //     Text(
+                          //       "-",
+                          //       style: TextStyle(
+                          //         fontSize: 20,
+                          //       ),
+                          //     ),
+                          //     SizedBox(
+                          //       width: 10,
+                          //     ),
+                          //     Expanded(
+                          //         child: Obx(() => OutlinedBtn(
+                          //             title: controller.businessTime[1],
+                          //             onPress: () {
+                          //               if (controller.isAllDay.isFalse) {
+                          //                 showWheelPicker(context, (String value) {
+                          //                   controller.businessTime[1] = value;
+                          //                 });
+                          //               }
+                          //             }))),
+                          //     SizedBox(
+                          //       width: 10,
+                          //     ),
+                          //     Obx(
+                          //       () => YellowToggleBtn(
+                          //         width: 100,
+                          //         title: "24h 운영",
+                          //         isSelected: controller.isAllDay.value,
+                          //         onTap: () {
+                          //           controller.isAllDay.value =
+                          //               !controller.isAllDay.value;
+                          //           controller.businessTime[0] = "00:00";
+                          //           controller.businessTime[1] = "24:00";
+                          //         },
+                          //       ),
+                          //     ),
+                          //   ],
+                          // ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ],
               ),
@@ -3667,107 +3710,125 @@ void showStoreAdd(BuildContext context) {
                   SizedBox(height: 8),
 
                   // 버튼 그룹
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          height: 48, // TextField의 높이 명시적으로 설정
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: CatchmongColors.gray100,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: TextField(
-                            decoration: InputDecoration(
-                              hintText: "11:00",
-                              border: InputBorder.none, // 기본 border 제거
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
-                              ), // 여백 설정
-                            ),
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: CatchmongColors.gray_800,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Text(
-                        "-",
-                        style: TextStyle(
-                          fontSize: 20,
-                        ),
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Expanded(
-                        child: Container(
-                          height: 48, // TextField의 높이 명시적으로 설정
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: CatchmongColors.gray100,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: TextField(
-                            decoration: InputDecoration(
-                              hintText: "20:00",
-                              border: InputBorder.none, // 기본 border 제거
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
-                              ), // 여백 설정
-                            ),
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: CatchmongColors.gray_800,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Expanded(
-                        child: Container(
-                          height: 48, // TextField의 높이 명시적으로 설정
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: CatchmongColors.gray100,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: TextField(
-                            decoration: InputDecoration(
-                              hintText: "휴게시간 없어요",
-                              border: InputBorder.none, // 기본 border 제거
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
-                              ), // 여백 설정
-                            ),
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: CatchmongColors.gray_800,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  // Row(
+                  //   children: [
+                  //     Expanded(
+                  //         child: Obx(() => OutlinedBtn(
+                  //             title: controller.holidayTime[0],
+                  //             onPress: () {
+                  //               if (controller.isHoliday.isFalse) {
+                  //                 showWheelPicker(context, (String value) {
+                  //                   controller.holidayTime[0] = value;
+                  //                 });
+                  //               }
+                  //             }))),
+                  //     SizedBox(
+                  //       width: 10,
+                  //     ),
+                  //     Text(
+                  //       "-",
+                  //       style: TextStyle(
+                  //         fontSize: 20,
+                  //       ),
+                  //     ),
+                  //     SizedBox(
+                  //       width: 10,
+                  //     ),
+                  //     Expanded(
+                  //         child: Obx(() => OutlinedBtn(
+                  //             title: controller.holidayTime[1],
+                  //             onPress: () {
+                  //               if (controller.isHoliday.isFalse) {
+                  //                 showWheelPicker(context, (String value) {
+                  //                   controller.holidayTime[1] = value;
+                  //                 });
+                  //               }
+                  //             }))),
+                  //     SizedBox(
+                  //       width: 10,
+                  //     ),
+                  //     // 매일같아요/평일주말달라요/요일별로달라요-휴게시간
+                  //     Obx(
+                  //       () => YellowToggleBtn(
+                  //         width: 100,
+                  //         title: controller.isHoliday.isTrue ? "없어요" : "있어요",
+                  //         isSelected: controller.isHoliday.value,
+                  //         onTap: () {
+                  //           controller.isHoliday.value =
+                  //               !controller.isHoliday.value;
+                  //           controller.holidayTime[0] = "00:00";
+                  //           controller.holidayTime[1] = "00:00";
+                  //         },
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
                 ],
               ),
             ),
           ]))));
+    },
+  );
+}
+
+void showWheelPicker(
+    BuildContext context, void Function(String value) onSelectedItemChanged) {
+  // 24시간 형식으로 시간 리스트 생성
+  final List<String> _items = List.generate(
+    25,
+    (index) =>
+        '${index.toString().padLeft(2, '0')}:00', // 2자리 시간 형식 (예: 00:00, 01:00, ..., 23:00)
+  );
+
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      return Container(
+        height: 300,
+        child: Column(
+          children: [
+            // 완료 버튼
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context); // 모달 닫기
+                    },
+                    child: Text(
+                      '완료',
+                      style: TextStyle(
+                          color: CatchmongColors.yellow_main, fontSize: 16),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Wheel Picker
+            Expanded(
+              child: CupertinoPicker(
+                itemExtent: 50, // 각 아이템 높이
+                onSelectedItemChanged: (int index) {
+                  // 선택된 값을 출력
+                  print('Selected: ${_items[index]}');
+                  final selected = _items[index];
+                  onSelectedItemChanged(selected);
+                },
+                children: _items
+                    .map((item) => Center(
+                          child: Text(
+                            item,
+                            style: TextStyle(fontSize: 18),
+                          ),
+                        ))
+                    .toList(),
+              ),
+            ),
+          ],
+        ),
+      );
     },
   );
 }
@@ -3811,7 +3872,10 @@ void showMyStore(BuildContext context) {
                             fontSize: 16,
                           ),
                         ),
-                        Image.asset('assets/images/right-arrow.png')
+                        Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 16,
+                        )
                       ],
                     ),
                   ),
@@ -3840,7 +3904,10 @@ void showMyStore(BuildContext context) {
                             fontSize: 16,
                           ),
                         ),
-                        Image.asset('assets/images/right-arrow.png')
+                        Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 16,
+                        )
                       ],
                     ),
                   ),

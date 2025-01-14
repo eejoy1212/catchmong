@@ -44,7 +44,7 @@ class PaybackContent extends StatelessWidget {
                       ),
                       child: ImgCard(
                           path:
-                              '${loginController.baseUrl}${loginController.user.value?.picture}'),
+                              '${loginController.baseUrl}/${loginController.user.value?.picture}'),
                     ),
                   ),
                   SizedBox(

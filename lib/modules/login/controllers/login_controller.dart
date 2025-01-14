@@ -828,10 +828,10 @@ class LoginController extends GetxController {
 
           // 3. 서버에 사용자 정보 전달
 
-          Get.toNamed('/main');
+          Get.offAndToNamed('/main');
         } else if (response['path'] == '/signup') {
           // 신규 회원: 추가 정보 입력 페이지 이동
-          Get.toNamed('/signup', arguments: {
+          Get.offAndToNamed('/signup', arguments: {
             'sub': nowKakaoUser.id.toString(),
             'loginType': 'kakao',
           });
@@ -952,7 +952,7 @@ class LoginController extends GetxController {
             ageGroup.value = getAgeTypeByBe(user.value!.ageGroup);
             paybackMethod.value = user.value!.paybackMethod;
             referrerNicknameController.text = user.value!.referrerId.toString();
-            Get.toNamed('/main');
+            Get.offAndToNamed('/main');
           }
         } else {
           print("자동 로그인 실패: 사용자 정보가 일치하지 않습니다.");
@@ -960,11 +960,11 @@ class LoginController extends GetxController {
         }
       } catch (e) {
         print("자동 로그인 실패: $e");
-        Get.toNamed('/login');
+        // Get.toNamed('/login');
       }
     } else {
       print("저장된 로그인 정보가 없습니다.");
-      Get.toNamed('/login');
+      // Get.toNamed('/login');
     }
   }
 

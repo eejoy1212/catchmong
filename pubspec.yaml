@@ -55,6 +55,7 @@ dependencies:
   shared_preferences:
   animated_rating_stars:
   kakao_flutter_sdk:
+  wheel_picker: ^0.2.1
 
 dev_dependencies:
   flutter_test:

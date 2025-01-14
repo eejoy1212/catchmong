@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:catchmong/model/partner.dart';
 import 'package:catchmong/model/review.dart';
@@ -6,13 +7,90 @@ import 'package:catchmong/modules/partner/views/partner-show-view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Partner2Controller extends GetxController {
   var partners = <Partner>[].obs; // RxList<Partner>
   var isLoading = false.obs; // 로딩 상태
-
+  //내 가게
+  final TextEditingController partnerNameTxtController =
+      TextEditingController();
+  List<String> foodTypes = [
+    "선택",
+    "한식",
+    "중식",
+    "일식",
+    "양식",
+    "분식",
+    "패스트푸드",
+    "비건식당",
+    "디저트카페",
+    "뷔페"
+  ];
+  RxString selectedFoodType = RxString("선택");
+  List<String> categories = [
+    "선택",
+    "데이트 맛집",
+    "화제의 예능",
+    "가족 모임",
+    "혼밥",
+    "노포",
+    "인스타 핫플",
+    "룸이 있는",
+    "가성비 맛집",
+    "레스토랑",
+    "미슐랭",
+  ];
+  RxString selectedCategory = RxString("선택");
+  RxList<XFile> businessProofs = RxList.empty();
+  RxList<XFile> storePhotos = RxList.empty();
+  RxString postCode = RxString("");
+  RxString address = RxString("");
+  final TextEditingController phoneTxtController = TextEditingController();
+  final TextEditingController descriptionTxtController =
+      TextEditingController();
+  List<String> amenities = [
+    "주차",
+    "쿠폰",
+    "유아시설",
+    "애견동반",
+    "예약",
+    "콜키지",
+    "단체석",
+    "배달",
+    "발렛"
+  ];
+  final RxList<String> selectedAmenities = RxList.empty();
+  final List<String> holidays = [
+    "있어요",
+    "없어요",
+  ];
+  final RxBool hasHoliday = RxBool(true);
+  final List<String> holidayWeeks = [
+    "매 주",
+    "첫째 주",
+    "둘째 주",
+    "셋째 주",
+    "넷째 주",
+  ];
+  RxString selectedHolidayWeek = RxString("매 주");
+  final List<String> regularHolidays = ["월", "화", "수", "목", "금", "토", "일"];
+  RxString selectedRegularHoliday = RxString("");
+  List<String> businessTimeConfigs = ["매일 같아요", "평일/주말 달라요", "요일별로 달라요"];
+  RxString selectedBusinessTimeConfig = RxString("매일 같아요");
+  RxList<List<String>> businessTime = [
+    ["10:00", "24:00"]
+  ].obs;
+  RxBool isAllDay = false.obs;
+  RxBool isHoliday = true.obs;
+  //위에 hasHoliday/holidayWeeks/selectedRegularHoliday 에서 조합해서 휴일저장
+  RxList<List<String>> holidayTime = [
+    ["10:00", "24:00"]
+  ].obs;
+  RxList<String> bTitles = ["영업 시간", "영업 시간"].obs;
+  //내 가게
   RxInt currentResPage = 0.obs; // 현재 페이지
   RxInt currentHotPage = 0.obs; // 현재 페이지
   RxString searchKeyword = ''.obs; // 검색어 상태 변수

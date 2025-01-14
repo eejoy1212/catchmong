@@ -1,3 +1,4 @@
+import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -17,10 +18,10 @@ class AppbarBackBtn extends StatelessWidget {
           });
         }
       },
-      child: Image.asset(
-        'assets/images/left-arrow.png',
-        width: 24, // 적절한 크기로 설정
-        height: 24, // 적절한 크기로 설정
+      child: Icon(
+        Icons.arrow_back_ios_rounded,
+        size: 16,
+        color: CatchmongColors.black,
       ),
     );
   }

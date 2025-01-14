@@ -19,6 +19,8 @@ class MainViewAppbar extends StatelessWidget implements PreferredSizeWidget {
           Get.toNamed('/location-add');
         },
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const Text(
               "모든지역",
@@ -27,7 +29,14 @@ class MainViewAppbar extends StatelessWidget implements PreferredSizeWidget {
                   fontSize: 18,
                   fontWeight: FontWeight.w600),
             ),
-            Image.asset('assets/images/right-arrow.png')
+            SizedBox(
+              width: 6,
+            ),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 16,
+              color: CatchmongColors.black,
+            )
           ],
         ),
       ),
