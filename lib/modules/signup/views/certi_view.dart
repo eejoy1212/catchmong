@@ -114,7 +114,8 @@ class CertiView extends StatelessWidget {
                       await loginController.verifyCode(); // 인증번호 검증
                       if (loginController.isVerified.value) {
                         bool res = isLogin
-                            ? await loginController.updateUserInfo(
+                            ? // 회원정보 수정시->인증 성공 시 추가 정보 전송
+                            await loginController.updateUserInfo(
                                 userId: loginController
                                     .user.value!.id, // 수정할 사용자 ID
                                 newNickname:
@@ -129,8 +130,8 @@ class CertiView extends StatelessWidget {
                                 pictureFile: loginController
                                     .selectedImage.value, // 선택적으로 이미지 파일
                               )
-                            : await loginController
-                                .postAdditionalInfo(); // 인증 성공 시 추가 정보 전송
+                            : // 가입시->인증 성공 시 추가 정보 전송
+                            await loginController.postAdditionalInfo();
                         res
                             ? showConfirmDialog(context, isLogin)
                             : showNoConfirmDialog(context);

@@ -43,8 +43,10 @@ class LoginView extends StatelessWidget {
                     children: [
                       KakaoBtn(
                         onTap: () {
+                          // Get.offAndToNamed('/signup');
                           // Get.offAndToNamed('/main');
                           controller.loginWithKakao();
+                          // controller.kakaoLoginTest();
                         },
                       ),
                       NaverBtn(

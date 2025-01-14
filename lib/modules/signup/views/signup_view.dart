@@ -384,8 +384,12 @@ class SignupView extends StatelessWidget {
                         ),
                         Expanded(
                           child: BorderTxtField(
-                              controller: TextEditingController(),
-                              onChanged: (String value) {}),
+                            controller: loginController.bankAccountController,
+                            onChanged: (String value) {
+                              loginController.bankAccountController.text =
+                                  value;
+                            },
+                          ),
                         ),
                       ],
                     ),
@@ -395,10 +399,14 @@ class SignupView extends StatelessWidget {
                   ),
                   Container(
                     width: double.infinity,
-                    child: OutlinedBtn(
+                    child: Obx(() => OutlinedBtn(
                         width: MediaQuery.of(context).size.width / 4.5,
-                        title: "재인증",
-                        onPress: () {}),
+                        title: loginController.isBankVertified.isFalse
+                            ? "인증하기"
+                            : "재인증",
+                        onPress: () {
+                          loginController.isBankVertified.value = true;
+                        })),
                   ),
                 ],
               ),

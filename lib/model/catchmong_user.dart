@@ -13,6 +13,8 @@ class User {
   final String sub;
   final String ageGroup;
   final String? picture;
+  final String? bankAccount;
+  final String? bankName;
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final int totalReviews;
@@ -32,6 +34,8 @@ class User {
     required this.sub,
     required this.ageGroup,
     this.picture,
+    this.bankAccount,
+    this.bankName,
     this.createdAt,
     this.updatedAt,
     required this.totalReviews,
@@ -54,6 +58,8 @@ class User {
       sub: json['sub'] ?? "",
       ageGroup: json['ageGroup'] ?? "10대",
       picture: json['picture'],
+      bankAccount: json['bankAccount'],
+      bankName: json['bankName'],
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
           : null,
@@ -83,6 +89,8 @@ class User {
       'sub': sub,
       'ageGroup': ageGroup,
       'picture': picture,
+      'bankName': bankName,
+      'bankAccount': bankAccount,
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
       'totalReviews': totalReviews,

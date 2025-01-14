@@ -54,8 +54,8 @@ class ReviewCard extends StatelessWidget {
                   child: Container(
                     width: 36, // 아바타 너비 36px
                     height: 36, // 아바타 높이 36px
-                    child: ImgCard(
-                        path: profileBaseUrl + (review.user?.picture ?? '')),
+                    child:
+                        ImgCard(path: baseUrl + (review.user?.picture ?? '')),
                   ),
                 ),
                 SizedBox(width: 8), // 아바타와 텍스트 사이의 간격

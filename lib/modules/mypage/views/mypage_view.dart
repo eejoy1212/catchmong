@@ -66,7 +66,7 @@ class MyPageView extends StatelessWidget {
                           height: 36, // 아바타 높이 36px
                           child: ImgCard(
                               path:
-                                  '${loginController.baseUrl}${loginController.user.value?.picture}')),
+                                  '${loginController.baseUrl}/${loginController.user.value?.picture}')),
                     ),
                     SizedBox(
                       width: 8,

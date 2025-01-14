@@ -45,11 +45,14 @@ class LoginController extends GetxController {
   final TextEditingController paybackMethodController = TextEditingController();
   final TextEditingController referrerNicknameController =
       TextEditingController();
+  final TextEditingController bankAccountController = TextEditingController();
+  RxString bankName = "신한은행".obs;
   RxList<Partner> scrapedPartners = RxList.empty();
   // 타이머 관련 변수
   RxInt remainingSeconds = 600.obs; // 10분 (600초)
   Timer? countdownTimer;
   RxBool isVerified = false.obs; // 인증 성공 여부
+  RxBool isBankVertified = false.obs;
   RxInt generatedCode = RxInt(0); // 서버에서 생성된 인증번호 저장
   final Dio _dio = Dio(BaseOptions(
     baseUrl: 'http://192.168.200.102:3000', // API 베이스 URL
@@ -60,6 +63,8 @@ class LoginController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    // temp();
+    // kakaoLogoutTest();
     loadBackEndCheck();
     checkAutoLogin();
 
@@ -70,6 +75,14 @@ class LoginController extends GetxController {
       showLatestLoginImage.value = false;
     });
   }
+
+  // void temp() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   await prefs.setString('sub', "");
+  //   await prefs.setString('loginType', "");
+  //   await prefs.setString('accessToken', "");
+  //   await prefs.setString('refreshToken', "");
+  // }
 
   Future<void> pickImage() async {
     final ImagePicker picker = ImagePicker();
@@ -195,6 +208,7 @@ class LoginController extends GetxController {
     }
   }
 
+//인증하기 후 최종 회원가입
   Future<bool> postAdditionalInfo() async {
     if (!isVerified.value) {
       print("회원가입 실패: 인증이 완료되지 않았습니다.");
@@ -217,6 +231,8 @@ class LoginController extends GetxController {
       request.fields['paybackMethod'] = paybackMethod.value;
       request.fields['referrerNickname'] = referrerNicknameController.text;
       request.fields['ageGroup'] = getAgeType(ageGroup.value);
+      request.fields['bankName'] = bankName.value;
+      request.fields['bankAccount'] = bankAccountController.text;
 
       // 이미지 파일 추가 (선택적)
       if (selectedImage.value != null) {
@@ -266,6 +282,7 @@ class LoginController extends GetxController {
             await getReferredInfos(user.value!.id);
           }
           print("user.value 업데이트 완료: ${user.value?.toJson()}");
+
           return true;
         } catch (e) {
           print("User.fromJson에서 오류 발생: $e");
@@ -511,6 +528,7 @@ class LoginController extends GetxController {
   }
 
   Future<void> checkUpdateUserAndGoVerti() async {
+    if (isBankVertified.isFalse) return;
     await checkNicknameForUpdate(user.value!.nickname, nicknameController.text);
     await checkReferrer(referrerNicknameController.text);
     await checkPhone(phoneController.text);
@@ -525,6 +543,7 @@ class LoginController extends GetxController {
   }
 
   Future<void> checkAndGoVerti() async {
+    if (isBankVertified.isFalse) return;
     // 저장 버튼 누르기 전에 1.닉네임 중복인지 2.추천인 유효한지 3. 텍스트필드 필수정보 모두 입력했는지 체크
     await checkNickname(nicknameController.text);
     await checkReferrer(referrerNicknameController.text);
@@ -721,7 +740,37 @@ class LoginController extends GetxController {
     }
   }
 
-//////////////
+////카카오 로그인 연습
+  Future<void> kakaoLoginTest() async {
+    try {
+      // 카카오톡 앱으로 로그인 시도
+      if (await kakao.isKakaoTalkInstalled()) {
+        await kakao.UserApi.instance.loginWithKakaoTalk();
+      } else {
+        // 카카오 계정으로 로그인
+        await kakao.UserApi.instance.loginWithKakaoAccount();
+      }
+
+      // 사용자 정보 가져오기
+      final kakaoUser = await kakao.UserApi.instance.me();
+      print('[테스트]카카오 사용자 정보: ${kakaoUser.kakaoAccount?.email}');
+      // isLoggedIn = true;
+    } catch (error) {
+      print('[테스트]카카오 로그인 실패: $error');
+    }
+  }
+
+  Future<void> kakaoLogoutTest() async {
+    try {
+      await kakao.UserApi.instance.logout();
+      print('[테스트]로그아웃 성공');
+      // isLoggedIn = false;
+    } catch (error) {
+      print('[테스트]로그아웃 실패: $error');
+    }
+  }
+
+////카카오 로그인 연습
   Future<void> loginWithKakao() async {
     try {
       // 1. 카카오톡 설치 여부 확인 후 로그인
@@ -742,6 +791,7 @@ class LoginController extends GetxController {
       final refreshToken = token.refreshToken;
       final sub = kakaoUser.id.toString();
       final bySubResponse = await fetchUserBySub(sub);
+
       if (refreshToken != null) {
         print('액세스 토큰: $accessToken');
         print('리프레시 토큰: $refreshToken');
@@ -755,7 +805,7 @@ class LoginController extends GetxController {
 
         if (response['path'] == '/main') {
           // 기존 회원: 사용자 정보 로컬 저장 및 메인 이동
-          user.value = User.fromJson(bySubResponse?['data']);
+          user.value = User.fromJson(bySubResponse!);
           if (user.value != null) {
             nicknameController.text = user.value!.nickname;
             phoneController.text = user.value!.phone;
@@ -878,7 +928,7 @@ class LoginController extends GetxController {
 
     if (sub != null && loginType != null && accessToken != null) {
       try {
-        print("자동 로그인 중... 사용자 ID: $sub, 로그인 타입: $loginType");
+        print("자동 로그인 중... 사용자 ID: $sub, 로그인 타입: $loginType // $accessToken");
         final bySubResponse = await fetchUserBySub(sub);
         print("자동로그인 by sub>>>>>>>>>>>>>>>>>>>>>>${bySubResponse}");
         // 토큰 유효성 검사 및 갱신
@@ -900,7 +950,7 @@ class LoginController extends GetxController {
           }
         } else {
           print("자동 로그인 실패: 사용자 정보가 일치하지 않습니다.");
-          Get.toNamed('/login');
+          // Get.toNamed('/login');
         }
       } catch (e) {
         print("자동 로그인 실패: $e");
@@ -931,7 +981,7 @@ class LoginController extends GetxController {
         return response.data;
       } else {
         print("로그인 실패: ${response.data}");
-        return {'path': '/login'};
+        return {'path': '/signup'};
       }
     } catch (e) {
       print("서버 요청 중 오류 발생: $e");
