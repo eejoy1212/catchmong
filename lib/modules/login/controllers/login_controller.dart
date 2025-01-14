@@ -760,9 +760,15 @@ class LoginController extends GetxController {
     }
   }
 
-  Future<void> kakaoLogoutTest() async {
+  Future<void> logout() async {
     try {
       await kakao.UserApi.instance.logout();
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.remove("sub");
+      await prefs.remove("loginType");
+      await prefs.remove("accessToken");
+      await prefs.remove("refreshToken");
+      Get.offAndToNamed("/login");
       print('[테스트]로그아웃 성공');
       // isLoggedIn = false;
     } catch (error) {

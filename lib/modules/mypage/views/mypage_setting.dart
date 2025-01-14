@@ -113,7 +113,7 @@ class MypageSetting extends StatelessWidget {
             ),
             InkWell(
               onTap: () {
-                Get.toNamed('/login');
+                controller.logout();
               },
               child: Container(
                 padding: EdgeInsets.symmetric(
