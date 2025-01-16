@@ -4,7 +4,7 @@ import 'review.dart'; // Review 클래스가 정의된 파일 경로를 import
 import 'menu.dart'; // Menu 클래스가 정의된 파일 경로를 import
 
 class Partner {
-  final int id;
+  final int? id;
   final String name;
   final double? latitude; // 위도
   final double? longitude; // 경도
@@ -29,7 +29,7 @@ class Partner {
   final List<Menu>? menus; // 메뉴 리스트
   final int? reviewCount; // 리뷰 개수
   Partner({
-    required this.id,
+    this.id,
     required this.name,
     this.latitude,
     this.longitude,

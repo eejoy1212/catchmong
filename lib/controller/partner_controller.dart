@@ -80,16 +80,33 @@ class Partner2Controller extends GetxController {
   RxString selectedRegularHoliday = RxString("");
   List<String> businessTimeConfigs = ["매일 같아요", "평일/주말 달라요", "요일별로 달라요"];
   RxString selectedBusinessTimeConfig = RxString("매일 같아요");
-  RxList<List<String>> businessTime = [
-    ["10:00", "24:00"]
-  ].obs;
+  RxMap<String, List<dynamic>> businessTime = {
+    "titles": <dynamic>["영업 시간"], // RxList로 감쌈
+    "times": <dynamic>[
+      {
+        "time": ["10:00", "24:00"],
+        "allDay": false,
+      },
+    ] // RxList로 감쌈
+  }.obs;
+  // RxList<List<String>> businessTime = [
+  //   ["10:00", "24:00"]
+  // ].obs;
   RxBool isAllDay = false.obs;
   RxBool isHoliday = true.obs;
   //위에 hasHoliday/holidayWeeks/selectedRegularHoliday 에서 조합해서 휴일저장
-  RxList<List<String>> holidayTime = [
-    ["10:00", "24:00"]
-  ].obs;
-  RxList<String> bTitles = ["영업 시간", "영업 시간"].obs;
+  RxMap<String, List<dynamic>> holidayTime = {
+    "titles": <dynamic>["휴게 시간"], // RxList로 감쌈
+    "times": <dynamic>[
+      {
+        "time": ["10:00", "24:00"],
+        "allDay": false,
+      },
+    ] // RxList로 감쌈
+  }.obs;
+  // RxList<String> bTitles = ["영업 시간"].obs;
+  RxList<String> hTitles = ["휴게 시간"].obs;
+  Rxn<Partner> newPartner = Rxn();
   //내 가게
   RxInt currentResPage = 0.obs; // 현재 페이지
   RxInt currentHotPage = 0.obs; // 현재 페이지
@@ -162,6 +179,53 @@ class Partner2Controller extends GetxController {
       rating = rating / partner.reviews!.length;
     }
     return rating;
+  }
+
+  Future<void> addPostPartner({required int userId}) async {
+    try {
+      final partner = newPartner.value;
+      if (partner == null) return;
+      final response = await _dio.post(
+        baseUrl + "/partners",
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        ),
+        data: {
+          "userId": userId,
+          "name": partner.name,
+          "address": partner.address,
+          "phone": partner.phone,
+          "description": partner.description ?? "-",
+          "foodType": partner.foodType,
+          "category": partner.category,
+          "latitude": partner.latitude ?? 37.5665,
+          "longitude": partner.longitude ?? 126.978,
+          "amenities": partner.amenities,
+          "hasHoliday": partner.regularHoliday == null ? false : true,
+          "businessTimeConfig": "same",
+        },
+      );
+
+      if (response.statusCode == 201) {
+        // 성공 응답 처리
+        print('파트너 등록 성공: ${response.data['message']}');
+      } else {
+        // 실패 응답 처리
+        print('파트너 등록 실패: ${response.data['error']}');
+      }
+    } on DioException catch (e) {
+      // DioException 처리
+      if (e.response != null) {
+        print('서버 오류: ${e.response?.data}');
+      } else {
+        print('요청 오류: ${e.message}');
+      }
+    } catch (e) {
+      // 기타 오류 처리
+      print('파트너 등록 중 오류 발생: $e');
+    }
   }
 
   String getBusinessStatus(
@@ -255,6 +319,29 @@ class Partner2Controller extends GetxController {
     } catch (error) {
       print("파트너 목록 가져오기 중 오류 발생: $error");
       return [];
+    }
+  }
+
+  Future<void> addNewPartner() async {
+    try {
+      DateTime today = DateTime.now();
+      newPartner.value = Partner(
+        id: null,
+        name: partnerNameTxtController.text,
+        storePhotos: storePhotos.map((p) => p.path).toList(),
+        businessProofs: businessProofs.map((p) => p.path).toList(),
+        foodType: selectedFoodType.value,
+        category: selectedCategory.value,
+        address: address.value,
+        phone: phoneTxtController.text,
+        hasHoliday: hasHoliday.value,
+        businessTimeConfig: selectedBusinessTimeConfig.value,
+        createdAt: today,
+        updatedAt: today,
+      );
+      print("[SUCCESS] Add new partner.");
+    } catch (e) {
+      print("[ERROR] Fail add new partner.");
     }
   }
 

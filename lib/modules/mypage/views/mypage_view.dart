@@ -2539,22 +2539,22 @@ void showReplyWrite(BuildContext context) {
   );
 }
 
-void showPreview(BuildContext context) {
-  double width = MediaQuery.of(context).size.width;
-  String selectedBusinessType = "선택"; // 업태 기본값
-  String selectedCategory = "선택"; // 카테고리 기본값
-  String selectedDay = "매 주"; // 정기 휴무일 기본값
-
-  showGeneralDialog(
-    context: context,
-    barrierDismissible: true, // true로 설정했으므로 barrierLabel 필요
-    barrierLabel: "닫기", // 접근성 레이블 설정
-    barrierColor: Colors.black54, // 배경 색상
-    pageBuilder: (context, animation, secondaryAnimation) {
-      return Container(); //PartnerShowView();
-    },
-  );
-}
+// void showPreview(BuildContext context) {
+//   double width = MediaQuery.of(context).size.width;
+//   String selectedBusinessType = "선택"; // 업태 기본값
+//   String selectedCategory = "선택"; // 카테고리 기본값
+//   String selectedDay = "매 주"; // 정기 휴무일 기본값
+//   final Partner2Controller controller = Get.find<Partner2Controller>();
+//   showGeneralDialog(
+//     context: context,
+//     barrierDismissible: true, // true로 설정했으므로 barrierLabel 필요
+//     barrierLabel: "닫기", // 접근성 레이블 설정
+//     barrierColor: Colors.black54, // 배경 색상
+//     pageBuilder: (context, animation, secondaryAnimation) {
+//       return  PartnerShowView(partner: controller.newPartner.value!, businessStatus: '', rating: null, replyCount: '',);
+//     },
+//   );
+// }
 
 void showStoreManage(BuildContext context) {
   final Partner2Controller controller = Get.find<Partner2Controller>();
@@ -2635,6 +2635,7 @@ void showStoreAdd(BuildContext context) {
   String selectedCategory = "선택"; // 카테고리 기본값
   String selectedDay = "매 주"; // 정기 휴무일 기본값
   final Partner2Controller controller = Get.find<Partner2Controller>();
+  final LoginController loginController = Get.find<LoginController>();
   String _formatPhoneNumber(String input) {
     // 숫자만 추출
     String digits = input.replaceAll(RegExp(r'[^0-9]'), '');
@@ -2699,15 +2700,168 @@ void showStoreAdd(BuildContext context) {
               vertical: 8,
             ),
             child: YellowElevationBtn(
-              onPressed: () {},
+              onPressed: () async {
+                await controller.addNewPartner();
+                // showPreview(context);
+                final partner = controller.newPartner.value;
+                if (partner != null) {
+                  final businessStatus = controller.getBusinessStatus(
+                    partner.businessTime ?? "",
+                    partner.breakTime,
+                    partner.regularHoliday,
+                  );
+                  if (partner.storePhotos == null ||
+                      partner.storePhotos!.length < 3) {
+                    Get.snackbar(
+                      "알림",
+                      "업체 사진을 최소 3장이상 등록 해주세요.",
+                      snackPosition: SnackPosition.TOP, // 상단에 표시
+                      backgroundColor: CatchmongColors.yellow_main,
+                      colorText: CatchmongColors.black,
+                      icon: Icon(Icons.check_circle,
+                          color: CatchmongColors.black),
+                      duration: Duration(seconds: 1),
+                      borderRadius: 10,
+                      margin: EdgeInsets.all(10),
+                    );
+                  } else if (partner.businessProofs == null ||
+                      partner.businessProofs!.length < 1) {
+                    Get.snackbar(
+                      "알림",
+                      "증빙서류를 최소 1장이상 등록 해주세요.",
+                      snackPosition: SnackPosition.TOP, // 상단에 표시
+                      backgroundColor: CatchmongColors.yellow_main,
+                      colorText: CatchmongColors.black,
+                      icon: Icon(Icons.check_circle,
+                          color: CatchmongColors.black),
+                      duration: Duration(seconds: 1),
+                      borderRadius: 10,
+                      margin: EdgeInsets.all(10),
+                    );
+                  } else if (partner.address.trim() == "") {
+                    Get.snackbar(
+                      "알림",
+                      "주소를 입력 해주세요.",
+                      snackPosition: SnackPosition.TOP, // 상단에 표시
+                      backgroundColor: CatchmongColors.yellow_main,
+                      colorText: CatchmongColors.black,
+                      icon: Icon(Icons.check_circle,
+                          color: CatchmongColors.black),
+                      duration: Duration(seconds: 1),
+                      borderRadius: 10,
+                      margin: EdgeInsets.all(10),
+                    );
+                  } else if (partner.phone.trim() == "") {
+                    Get.snackbar(
+                      "알림",
+                      "가게 전화번호를 입력 해주세요.",
+                      snackPosition: SnackPosition.TOP, // 상단에 표시
+                      backgroundColor: CatchmongColors.yellow_main,
+                      colorText: CatchmongColors.black,
+                      icon: Icon(Icons.check_circle,
+                          color: CatchmongColors.black),
+                      duration: Duration(seconds: 1),
+                      borderRadius: 10,
+                      margin: EdgeInsets.all(10),
+                    );
+                  } else {
+                    controller.showSelectedPartner(
+                      context,
+                      partner,
+                      businessStatus,
+                      5.0,
+                      "리뷰 0",
+                    );
+                  }
+
+                  controller.addPostPartner(
+                      userId: loginController.user.value!.id);
+                  Get.back(closeOverlays: true);
+
+                  // /main으로 이동
+                  Get.offAllNamed('/main');
+                }
+              },
               title: Text("등록하기"),
             ),
           ),
           backgroundColor: Colors.white,
           appBar: PreviewAppbar(
             title: "가게 등록",
-            onTap: () {
-              showPreview(context);
+            onTap: () async {
+              await controller.addNewPartner();
+              // showPreview(context);
+              final partner = controller.newPartner.value;
+              if (partner != null) {
+                final businessStatus = controller.getBusinessStatus(
+                  partner.businessTime ?? "",
+                  partner.breakTime,
+                  partner.regularHoliday,
+                );
+                if (partner.storePhotos == null ||
+                    partner.storePhotos!.length < 3) {
+                  Get.snackbar(
+                    "알림",
+                    "업체 사진을 최소 3장이상 등록 해주세요.",
+                    snackPosition: SnackPosition.TOP, // 상단에 표시
+                    backgroundColor: CatchmongColors.yellow_main,
+                    colorText: CatchmongColors.black,
+                    icon:
+                        Icon(Icons.check_circle, color: CatchmongColors.black),
+                    duration: Duration(seconds: 1),
+                    borderRadius: 10,
+                    margin: EdgeInsets.all(10),
+                  );
+                } else if (partner.businessProofs == null ||
+                    partner.businessProofs!.length < 1) {
+                  Get.snackbar(
+                    "알림",
+                    "증빙서류를 최소 1장이상 등록 해주세요.",
+                    snackPosition: SnackPosition.TOP, // 상단에 표시
+                    backgroundColor: CatchmongColors.yellow_main,
+                    colorText: CatchmongColors.black,
+                    icon:
+                        Icon(Icons.check_circle, color: CatchmongColors.black),
+                    duration: Duration(seconds: 1),
+                    borderRadius: 10,
+                    margin: EdgeInsets.all(10),
+                  );
+                } else if (partner.address.trim() == "") {
+                  Get.snackbar(
+                    "알림",
+                    "주소를 입력 해주세요.",
+                    snackPosition: SnackPosition.TOP, // 상단에 표시
+                    backgroundColor: CatchmongColors.yellow_main,
+                    colorText: CatchmongColors.black,
+                    icon:
+                        Icon(Icons.check_circle, color: CatchmongColors.black),
+                    duration: Duration(seconds: 1),
+                    borderRadius: 10,
+                    margin: EdgeInsets.all(10),
+                  );
+                } else if (partner.phone.trim() == "") {
+                  Get.snackbar(
+                    "알림",
+                    "가게 전화번호를 입력 해주세요.",
+                    snackPosition: SnackPosition.TOP, // 상단에 표시
+                    backgroundColor: CatchmongColors.yellow_main,
+                    colorText: CatchmongColors.black,
+                    icon:
+                        Icon(Icons.check_circle, color: CatchmongColors.black),
+                    duration: Duration(seconds: 1),
+                    borderRadius: 10,
+                    margin: EdgeInsets.all(10),
+                  );
+                } else {
+                  controller.showSelectedPartner(
+                    context,
+                    partner,
+                    businessStatus,
+                    5.0,
+                    "리뷰 0",
+                  );
+                }
+              }
             },
           ),
           body: SafeArea(
@@ -2733,31 +2887,8 @@ void showStoreAdd(BuildContext context) {
                     ),
                   ),
                   SizedBox(height: 8),
-                  // Container(
-                  //   height: 48, // TextField의 높이 명시적으로 설정
-                  //   decoration: BoxDecoration(
-                  //     border: Border.all(
-                  //       color: CatchmongColors.gray100,
-                  //     ),
-                  //     borderRadius: BorderRadius.circular(8),
-                  //   ),
-                  //   child: TextField(
-                  //     decoration: InputDecoration(
-                  //       hintText: "가게명을 입력해주세요.",
-                  //       border: InputBorder.none, // 기본 border 제거
-                  //       contentPadding: EdgeInsets.symmetric(
-                  //         horizontal: 16,
-                  //         vertical: 14,
-                  //       ), // 여백 설정
-                  //     ),
-                  //     style: TextStyle(
-                  //       fontSize: 14,
-                  //       fontWeight: FontWeight.w400,
-                  //       color: CatchmongColors.gray_800,
-                  //     ),
-                  //   ),
-                  // ),
                   BorderTxtField(
+                    hintText: "가게명을 입력해주세요.",
                     controller: controller.partnerNameTxtController,
                     onChanged: (String value) {
                       if (controller.partnerNameTxtController.text.length >
@@ -3478,32 +3609,54 @@ void showStoreAdd(BuildContext context) {
                                 onTap: () {
                                   controller.selectedBusinessTimeConfig.value =
                                       data;
-                                  if (controller
-                                          .selectedBusinessTimeConfig.value ==
-                                      "매일 같아요") {
-                                    controller.businessTime.value = [
-                                      ["10:00", "24:00"]
+
+                                  // 선택된 값에 따라 businessTime 업데이트
+                                  if (data == "매일 같아요") {
+                                    controller.businessTime["titles"] = [
+                                      "영업 시간"
                                     ];
-                                    controller.holidayTime.value = [
-                                      ["10:00", "24:00"]
+                                    controller.businessTime["times"] = [
+                                      {
+                                        "time": ["10:00", "24:00"],
+                                        "allDay": false,
+                                      },
                                     ];
-                                  } else if (controller
-                                          .selectedBusinessTimeConfig.value ==
-                                      "평일/주말 달라요") {
-                                    controller.bTitles.value = [
-                                      "평일 영업 시간",
-                                      "주말 영업 시간"
+                                    controller.holidayTime["titles"] = [
+                                      "휴게 시간"
                                     ];
-                                    controller.businessTime.value = [
-                                      ...List.generate(
-                                          2, (int index) => ["10:00", "24:00"])
+                                    controller.holidayTime["times"] = [
+                                      {
+                                        "time": ["10:00", "24:00"],
+                                        "allDay": false,
+                                      },
                                     ];
-                                    controller.holidayTime.value = [
-                                      ...List.generate(
-                                          2, (int index) => ["10:00", "24:00"])
+                                  } else if (data == "평일/주말 달라요") {
+                                    controller.businessTime["titles"] =
+                                        ["평일 영업 시간", "주말 영업 시간"].obs;
+                                    controller.businessTime["times"] = [
+                                      {
+                                        "time": ["10:00", "24:00"],
+                                        "allDay": false,
+                                      },
+                                      {
+                                        "time": ["10:00", "24:00"],
+                                        "allDay": false,
+                                      },
+                                    ];
+                                    controller.holidayTime["titles"] =
+                                        ["평일 휴게 시간", "주말 휴게 시간"].obs;
+                                    controller.holidayTime["times"] = [
+                                      {
+                                        "time": ["10:00", "24:00"],
+                                        "allDay": false,
+                                      },
+                                      {
+                                        "time": ["10:00", "24:00"],
+                                        "allDay": false,
+                                      },
                                     ];
                                   } else {
-                                    controller.bTitles.value = [
+                                    controller.businessTime["titles"] = [
                                       "월요일 영업 시간",
                                       "화요일 영업 시간",
                                       "수요일 영업 시간",
@@ -3511,16 +3664,36 @@ void showStoreAdd(BuildContext context) {
                                       "금요일 영업 시간",
                                       "토요일 영업 시간",
                                       "일요일 영업 시간"
-                                    ];
-                                    controller.businessTime.value = [
-                                      ...List.generate(
-                                          7, (int index) => ["10:00", "24:00"])
-                                    ];
-                                    controller.holidayTime.value = [
-                                      ...List.generate(
-                                          7, (int index) => ["10:00", "24:00"])
-                                    ];
+                                    ].obs;
+                                    controller.businessTime["times"] =
+                                        List.generate(
+                                      7,
+                                      (index) => {
+                                        "time": ["10:00", "24:00"],
+                                        "allDay": false,
+                                      },
+                                    );
+                                    controller.holidayTime["titles"] = [
+                                      "월요일 휴게 시간",
+                                      "화요일 휴게 시간",
+                                      "수요일 휴게 시간",
+                                      "목요일 휴게 시간",
+                                      "금요일 휴게 시간",
+                                      "토요일 휴게 시간",
+                                      "일요일 휴게 시간"
+                                    ].obs;
+                                    controller.holidayTime["times"] =
+                                        List.generate(
+                                      7,
+                                      (index) => {
+                                        "time": ["10:00", "24:00"],
+                                        "allDay": false,
+                                      },
+                                    );
                                   }
+
+                                  // 업데이트 후 UI 반영
+                                  controller.businessTime.refresh();
                                 },
                               ));
                         }).toList(),
@@ -3535,7 +3708,7 @@ void showStoreAdd(BuildContext context) {
               () => Column(
                 children: [
                   ...List.generate(
-                    controller.businessTime.length,
+                    controller.businessTime["titles"]!.length,
                     (int index) => Container(
                       width: width,
                       padding: EdgeInsets.only(
@@ -3550,7 +3723,7 @@ void showStoreAdd(BuildContext context) {
                           // "영업 시간" 텍스트
 
                           Text(
-                            controller.bTitles[index],
+                            controller.businessTime["titles"]![index],
                             style: TextStyle(
                               color: CatchmongColors.gray_800,
                               fontSize: 14,
@@ -3565,17 +3738,22 @@ void showStoreAdd(BuildContext context) {
                             children: [
                               Expanded(
                                   child: Obx(() => OutlinedBtn(
-                                      title: controller.businessTime[index][0],
+                                      title: controller
+                                              .businessTime["times"]![index]
+                                          ["time"][0],
                                       onPress: () {
-                                        if (controller.isAllDay.isFalse) {
+                                        if (controller.businessTime["times"]![
+                                                index]["allDay"] ==
+                                            false) {
                                           showWheelPicker(context,
                                               (String value) {
                                             final copied = [
-                                              ...controller.businessTime
+                                              ...controller.businessTime[
+                                                  "times"]![index]["time"]
                                             ];
                                             copied[index][0] = value;
-                                            controller.businessTime.value =
-                                                copied;
+                                            controller.businessTime["times"]![
+                                                index]["time"] = copied;
                                           });
                                         }
                                       }))),
@@ -3593,17 +3771,20 @@ void showStoreAdd(BuildContext context) {
                               ),
                               Expanded(
                                   child: Obx(() => OutlinedBtn(
-                                      title: controller.businessTime[index][1],
+                                      title: controller
+                                              .businessTime["times"]![index]
+                                          ["time"][1],
                                       onPress: () {
                                         if (controller.isAllDay.isFalse) {
                                           showWheelPicker(context,
                                               (String value) {
                                             final copied = [
-                                              ...controller.businessTime
+                                              ...controller.businessTime[
+                                                  "times"]![index]["time"]
                                             ];
                                             copied[index][1] = value;
-                                            controller.businessTime.value =
-                                                copied;
+                                            controller.businessTime["times"]![
+                                                index]["time"] = copied;
                                           });
                                         }
                                       }))),
@@ -3614,71 +3795,34 @@ void showStoreAdd(BuildContext context) {
                                 () => YellowToggleBtn(
                                   width: 100,
                                   title: "24h 운영",
-                                  isSelected: controller.isAllDay.value,
+                                  isSelected:
+                                      controller.businessTime["times"]![index]
+                                          ["allDay"], // 현재 상태
                                   onTap: () {
-                                    controller.isAllDay.value =
-                                        !controller.isAllDay.value;
-                                    final copied = [...controller.businessTime];
-                                    copied[index][0] = "00:00";
-                                    copied[index][1] = "24:00";
-                                    controller.businessTime.value = copied;
+                                    // allDay 값 토글
+                                    controller.businessTime["times"]![index]
+                                        ["allDay"] = !controller
+                                            .businessTime["times"]![index]
+                                        ["allDay"];
+
+                                    // 시간 데이터 업데이트
+                                    if (controller.businessTime["times"]![index]
+                                            ["allDay"] ==
+                                        true) {
+                                      controller.businessTime["times"]![index]
+                                          ["time"] = ["00:00", "24:00"];
+                                    } else {
+                                      controller.businessTime["times"]![index]
+                                          ["time"] = ["10:00", "24:00"];
+                                    }
+
+                                    // RxList 갱신을 위해 refresh 호출
+                                    controller.businessTime.refresh();
                                   },
                                 ),
                               ),
                             ],
                           ),
-                          // Row(
-                          //   children: [
-                          //     Expanded(
-                          //         child: Obx(() => OutlinedBtn(
-                          //             title: controller.businessTime[0],
-                          //             onPress: () {
-                          //               if (controller.isAllDay.isFalse) {
-                          //                 showWheelPicker(context, (String value) {
-                          //                   controller.businessTime[0] = value;
-                          //                 });
-                          //               }
-                          //             }))),
-                          //     SizedBox(
-                          //       width: 10,
-                          //     ),
-                          //     Text(
-                          //       "-",
-                          //       style: TextStyle(
-                          //         fontSize: 20,
-                          //       ),
-                          //     ),
-                          //     SizedBox(
-                          //       width: 10,
-                          //     ),
-                          //     Expanded(
-                          //         child: Obx(() => OutlinedBtn(
-                          //             title: controller.businessTime[1],
-                          //             onPress: () {
-                          //               if (controller.isAllDay.isFalse) {
-                          //                 showWheelPicker(context, (String value) {
-                          //                   controller.businessTime[1] = value;
-                          //                 });
-                          //               }
-                          //             }))),
-                          //     SizedBox(
-                          //       width: 10,
-                          //     ),
-                          //     Obx(
-                          //       () => YellowToggleBtn(
-                          //         width: 100,
-                          //         title: "24h 운영",
-                          //         isSelected: controller.isAllDay.value,
-                          //         onTap: () {
-                          //           controller.isAllDay.value =
-                          //               !controller.isAllDay.value;
-                          //           controller.businessTime[0] = "00:00";
-                          //           controller.businessTime[1] = "24:00";
-                          //         },
-                          //       ),
-                          //     ),
-                          //   ],
-                          // ),
                         ],
                       ),
                     ),
@@ -3687,85 +3831,136 @@ void showStoreAdd(BuildContext context) {
               ),
             ),
             //휴게 시간
-            Container(
-              width: width,
-              padding: EdgeInsets.only(
-                left: 20,
-                top: 16,
-                right: 20,
-                bottom: 20,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            Obx(
+              () => Column(
                 children: [
-                  // "휴게 시간" 텍스트
-                  Text(
-                    "휴게 시간",
-                    style: TextStyle(
-                      color: CatchmongColors.gray_800,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
+                  ...List.generate(
+                    controller.holidayTime["titles"]!.length,
+                    (int index) => Container(
+                      width: width,
+                      padding: EdgeInsets.only(
+                        left: 20,
+                        top: 16,
+                        right: 20,
+                        bottom: 20,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // "영업 시간" 텍스트
+
+                          Text(
+                            controller.holidayTime["titles"]![index],
+                            style: TextStyle(
+                              color: CatchmongColors.gray_800,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+
+                          // 버튼 그룹
+
+                          Row(
+                            children: [
+                              Expanded(
+                                  child: Obx(() => OutlinedBtn(
+                                      title: controller
+                                              .holidayTime["times"]![index]
+                                          ["time"][0],
+                                      onPress: () {
+                                        if (controller.holidayTime["times"]![
+                                                index]["allDay"] ==
+                                            false) {
+                                          showWheelPicker(context,
+                                              (String value) {
+                                            final copied = [
+                                              ...controller.businessTime[
+                                                  "times"]![index]["time"]
+                                            ];
+                                            copied[index][0] = value;
+                                            controller.businessTime["times"]![
+                                                index]["time"] = copied;
+                                          });
+                                        }
+                                      }))),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Text(
+                                "-",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Expanded(
+                                  child: Obx(() => OutlinedBtn(
+                                      title: controller
+                                              .holidayTime["times"]![index]
+                                          ["time"][1],
+                                      onPress: () {
+                                        if (controller.holidayTime["times"]![
+                                                index]["allDay"] ==
+                                            false) {
+                                          showWheelPicker(context,
+                                              (String value) {
+                                            final copied = [
+                                              ...controller.businessTime[
+                                                  "times"]![index]["time"]
+                                            ];
+                                            copied[index][1] = value;
+                                            controller.businessTime["times"]![
+                                                index]["time"] = copied;
+                                          });
+                                        }
+                                      }))),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Obx(
+                                () => YellowToggleBtn(
+                                  width: 100,
+                                  title: "24h 운영",
+                                  isSelected:
+                                      controller.holidayTime["times"]![index]
+                                          ["allDay"], // 현재 상태
+                                  onTap: () {
+                                    // allDay 값 토글
+                                    controller.holidayTime["times"]![index]
+                                            ["allDay"] =
+                                        !controller.holidayTime["times"]![index]
+                                            ["allDay"];
+
+                                    // 시간 데이터 업데이트
+                                    if (controller.holidayTime["times"]![index]
+                                            ["allDay"] ==
+                                        true) {
+                                      controller.holidayTime["times"]![index]
+                                          ["time"] = ["00:00", "24:00"];
+                                    } else {
+                                      controller.holidayTime["times"]![index]
+                                          ["time"] = ["10:00", "24:00"];
+                                    }
+
+                                    // RxList 갱신을 위해 refresh 호출
+                                    controller.holidayTime.refresh();
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  SizedBox(height: 8),
-
-                  // 버튼 그룹
-                  // Row(
-                  //   children: [
-                  //     Expanded(
-                  //         child: Obx(() => OutlinedBtn(
-                  //             title: controller.holidayTime[0],
-                  //             onPress: () {
-                  //               if (controller.isHoliday.isFalse) {
-                  //                 showWheelPicker(context, (String value) {
-                  //                   controller.holidayTime[0] = value;
-                  //                 });
-                  //               }
-                  //             }))),
-                  //     SizedBox(
-                  //       width: 10,
-                  //     ),
-                  //     Text(
-                  //       "-",
-                  //       style: TextStyle(
-                  //         fontSize: 20,
-                  //       ),
-                  //     ),
-                  //     SizedBox(
-                  //       width: 10,
-                  //     ),
-                  //     Expanded(
-                  //         child: Obx(() => OutlinedBtn(
-                  //             title: controller.holidayTime[1],
-                  //             onPress: () {
-                  //               if (controller.isHoliday.isFalse) {
-                  //                 showWheelPicker(context, (String value) {
-                  //                   controller.holidayTime[1] = value;
-                  //                 });
-                  //               }
-                  //             }))),
-                  //     SizedBox(
-                  //       width: 10,
-                  //     ),
-                  //     // 매일같아요/평일주말달라요/요일별로달라요-휴게시간
-                  //     Obx(
-                  //       () => YellowToggleBtn(
-                  //         width: 100,
-                  //         title: controller.isHoliday.isTrue ? "없어요" : "있어요",
-                  //         isSelected: controller.isHoliday.value,
-                  //         onTap: () {
-                  //           controller.isHoliday.value =
-                  //               !controller.isHoliday.value;
-                  //           controller.holidayTime[0] = "00:00";
-                  //           controller.holidayTime[1] = "00:00";
-                  //         },
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
                 ],
               ),
             ),
+
+            // ),
           ]))));
     },
   );
@@ -4775,7 +4970,7 @@ void showStoreEdit(BuildContext context) {
           appBar: PreviewAppbar(
             title: "가게 정보 수정",
             onTap: () {
-              showPreview(context);
+              // showPreview(context);
             },
           ),
           body: SafeArea(

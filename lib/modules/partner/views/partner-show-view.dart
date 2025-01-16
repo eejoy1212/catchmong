@@ -121,6 +121,8 @@ class PartnerShowView extends StatelessWidget {
       return formatter.format(parsedPrice) + "원";
     }
 
+    bool isLocal = partner.storePhotos != null &&
+        !partner.storePhotos!.contains('uploads');
     return Scaffold(
       appBar: AppBar(
         leading: AppbarBackBtn(),
@@ -229,8 +231,13 @@ class PartnerShowView extends StatelessWidget {
                             color: CatchmongColors.gray, width: 1), // 외부 테두리
                       ),
                       child: ImgCard(
-                          path: 'http://192.168.200.102:3000/' +
-                              partner.storePhotos![0])),
+                          isLocal: isLocal,
+                          path: partner.storePhotos!.length > 0
+                              ? (isLocal
+                                  ? partner.storePhotos![0]
+                                  : 'http://192.168.200.102:3000/' +
+                                      partner.storePhotos![0])
+                              : '')),
                 ),
                 SizedBox(
                   width: 2,
@@ -254,8 +261,13 @@ class PartnerShowView extends StatelessWidget {
                                     width: 1), // 외부 테두리
                               ),
                               child: ImgCard(
-                                  path: 'http://192.168.200.102:3000/' +
-                                      partner.storePhotos![1]),
+                                  isLocal: isLocal,
+                                  path: partner.storePhotos!.length > 1
+                                      ? (isLocal
+                                          ? partner.storePhotos![1]
+                                          : 'http://192.168.200.102:3000/' +
+                                              partner.storePhotos![1])
+                                      : ''),
                             ),
                           ),
                           SizedBox(
@@ -271,8 +283,13 @@ class PartnerShowView extends StatelessWidget {
                                     width: 1), // 외부 테두리
                               ),
                               child: ImgCard(
-                                  path: 'http://192.168.200.102:3000/' +
-                                      partner.storePhotos![1]),
+                                  isLocal: isLocal,
+                                  path: partner.storePhotos!.length > 2
+                                      ? (isLocal
+                                          ? partner.storePhotos![2]
+                                          : 'http://192.168.200.102:3000/' +
+                                              partner.storePhotos![2])
+                                      : ''),
                             ),
                           ),
                         ],
@@ -294,8 +311,13 @@ class PartnerShowView extends StatelessWidget {
                                     width: 1), // 외부 테두리
                               ),
                               child: ImgCard(
-                                  path: 'http://192.168.200.102:3000/' +
-                                      partner.storePhotos![1]),
+                                  isLocal: isLocal,
+                                  path: partner.storePhotos!.length > 3
+                                      ? (isLocal
+                                          ? partner.storePhotos![3]
+                                          : 'http://192.168.200.102:3000/' +
+                                              partner.storePhotos![3])
+                                      : ''),
                             ),
                           ),
                           SizedBox(
@@ -312,8 +334,13 @@ class PartnerShowView extends StatelessWidget {
                                       width: 1), // 외부 테두리
                                 ),
                                 child: ImgCard(
-                                    path: 'http://192.168.200.102:3000/' +
-                                        partner.storePhotos![1]),
+                                    isLocal: isLocal,
+                                    path: partner.storePhotos!.length > 4
+                                        ? (isLocal
+                                            ? partner.storePhotos![4]
+                                            : 'http://192.168.200.102:3000/' +
+                                                partner.storePhotos![4])
+                                        : ''),
                               ),
                               if (partner.storePhotos != null &&
                                   partner.storePhotos!.length > 5)
@@ -763,8 +790,9 @@ class PartnerShowView extends StatelessWidget {
                       ),
                     ),
                     // 탭바 뷰
-                    SizedBox(
+                    Container(
                       height: 700, // 탭 뷰 높이 설정
+
                       child: TabBarView(
                         children: [
                           // 메뉴 탭 내용
@@ -812,7 +840,13 @@ class PartnerShowView extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                                if (partner.menus != null)
+
+                                if (partner.menus == null)
+                                  Container(
+                                    height: 550,
+                                    child: Center(child: Text("메뉴가 없습니다.")),
+                                  )
+                                else
                                   ...List.generate(partner.menus!.length,
                                       (int index) {
                                     Map<String, String> priceRanges =
@@ -941,6 +975,7 @@ class PartnerShowView extends StatelessWidget {
                           // 리뷰 탭 내용
                           partner.reviews == null
                               ? Container(
+                                  height: 200,
                                   child: Center(
                                     child: Text("리뷰가 없습니다."),
                                   ),
