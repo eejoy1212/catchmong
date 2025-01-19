@@ -1,3 +1,4 @@
+import 'package:catchmong/model/catchmong_user.dart';
 import 'package:catchmong/model/partner.dart';
 
 class Reservation {
@@ -9,6 +10,7 @@ class Reservation {
   final String? request; // 요청 사항
   final String status; // 예약 상태
   final Partner partner; // 예약된 파트너 정보
+  final User? user; // 예약된 파트너 정보
   Reservation({
     required this.id,
     required this.reservationDate,
@@ -18,6 +20,7 @@ class Reservation {
     this.request,
     required this.status,
     required this.partner,
+    this.user,
   });
 
   // JSON 데이터를 Dart 객체로 변환
@@ -34,6 +37,7 @@ class Reservation {
       request: json['request'],
       status: json['status'],
       partner: Partner.fromJson(json['partners']), // Partner 객체 생성
+      user: User.fromJson(json['users']), // Partner 객체 생성
     );
   }
 
@@ -50,6 +54,7 @@ class Reservation {
       'request': request,
       'status': status,
       'partners': partner.toJson(),
+      'users': user?.toJson(),
     };
   }
 }

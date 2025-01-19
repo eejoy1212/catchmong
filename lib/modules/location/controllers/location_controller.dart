@@ -1,4 +1,5 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/const/constant.dart';
 import 'package:daum_postcode_search/daum_postcode_search.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:geolocator/geolocator.dart';
@@ -11,7 +12,7 @@ class LocationController extends GetxController {
   RxString errorMessage = RxString("");
   Rxn<DataModel> newLocation = Rxn<DataModel>();
   RxDouble radius = RxDouble(100); //m단위임, 5200이면 5200m반경
-  final String baseUrl = 'http://192.168.200.102:3000';
+  final String baseUrl = 'http://$myPort:3000';
   @override
   void onInit() {
     super.onInit();

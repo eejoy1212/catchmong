@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/const/constant.dart';
 import 'package:catchmong/model/catchmong_user.dart';
 import 'package:catchmong/model/partner.dart';
 import 'package:catchmong/model/referrer.dart';
@@ -24,7 +25,7 @@ class LoginController extends GetxController {
   var showLatestLoginImage = true.obs;
   var users = <dynamic>[].obs;
   var isLoading = false.obs;
-  final String baseUrl = 'http://192.168.200.102:3000';
+  final String baseUrl = 'http://$myPort:3000';
   var user = Rxn<User>();
   var referrer = Rxn<Referrer>();
   var referreds = <Referrer>[].obs;
@@ -55,7 +56,7 @@ class LoginController extends GetxController {
   RxBool isBankVertified = false.obs;
   RxInt generatedCode = RxInt(0); // 서버에서 생성된 인증번호 저장
   final Dio _dio = Dio(BaseOptions(
-    baseUrl: 'http://192.168.200.102:3000', // API 베이스 URL
+    baseUrl: 'http://$myPort:3000', // API 베이스 URL
     connectTimeout: const Duration(milliseconds: 5000), // 연결 제한 시간
     receiveTimeout: const Duration(milliseconds: 3000), // 응답 제한 시간
   ));

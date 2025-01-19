@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:catchmong/const/constant.dart';
 import 'package:http/http.dart' as http;
 import 'package:catchmong/model/review.dart';
 import 'package:catchmong/widget/card/img_card.dart';
@@ -11,13 +12,15 @@ import 'package:intl/intl.dart';
 class ReviewController extends GetxController {
   RxList<Review> favoriteReviews = <Review>[].obs;
   RxList<Review> myReviews = <Review>[].obs;
+  RxList<Review> partnerReviews = <Review>[].obs;
   RxInt bannerIdx = 0.obs;
   RxBool isLoading = false.obs;
   List<RxBool> isExpanded = <RxBool>[].obs;
+  List<RxBool> isPartnerExpanded = <RxBool>[].obs;
   Rxn<Review> editing = Rxn<Review>(null);
-  final String baseUrl = 'http://192.168.200.102:3000';
+  final String baseUrl = 'http://$myPort:3000';
   final Dio _dio = Dio(BaseOptions(
-    baseUrl: 'http://192.168.200.102:3000', // API 베이스 URL
+    baseUrl: 'http://$myPort:3000', // API 베이스 URL
     connectTimeout: const Duration(milliseconds: 5000), // 연결 제한 시간
     receiveTimeout: const Duration(milliseconds: 3000), // 응답 제한 시간
   ));
@@ -72,6 +75,37 @@ class ReviewController extends GetxController {
         print('[GET SUCCESS]내 리뷰 : $myReviews');
       } else {
         print('[GET ERROR]내 리뷰 에러: ${response.statusCode}');
+        throw Exception('Failed to fetch reviews: ${response.statusCode}');
+      }
+    } on DioError catch (e) {
+      print('[DIO ERROR]DioError: ${e.response?.statusCode} - ${e.message}');
+      throw Exception(
+          '[DIO ERROR]DioError: ${e.response?.statusCode} - ${e.message}');
+    } catch (e) {
+      print('[GET ERROR]내 리뷰 에러: $e');
+      throw Exception('[GET ERROR]내 리뷰 에러: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+//내 리뷰 조회
+  Future<void> fetchPartnerReviews(int partnerId) async {
+    try {
+      isLoading.value = true;
+      // GET 요청 보내기
+      final response = await _dio.get('/reviews/partner/$partnerId');
+
+      if (response.statusCode == 200) {
+        // 응답 데이터를 List<Review>로 변환
+        final List<dynamic> data = response.data;
+        partnerReviews.value =
+            data.map((review) => Review.fromJson(review)).toList();
+        // isPartnerExpanded =
+        //     List.generate(partnerReviews.length, (index) => false.obs);
+        print('[GET SUCCESS]마이페이지 내 가게 리뷰 : $partnerReviews');
+      } else {
+        print('[GET ERROR]마이페이지 내 가게 리뷰 에러: ${response.statusCode}');
         throw Exception('Failed to fetch reviews: ${response.statusCode}');
       }
     } on DioError catch (e) {

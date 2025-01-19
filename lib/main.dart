@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/controller/partner_controller.dart';
 import 'package:catchmong/controller/reservation_controller.dart';
@@ -16,10 +14,12 @@ import 'package:catchmong/widget/content/payback_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:get/get.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('ko_KR', null);
   KakaoSdk.init(nativeAppKey: "1d3ac880a902ba57caa1d9009392e972");
   // Android WebView 초기화 (최신 코드)
   // if (Platform.isAndroid) {

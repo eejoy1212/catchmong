@@ -1,6 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
-
+import 'package:catchmong/const/constant.dart';
 import 'package:catchmong/model/partner.dart';
 import 'package:catchmong/model/review.dart';
 import 'package:catchmong/modules/partner/views/partner-show-view.dart';
@@ -17,6 +16,8 @@ class Partner2Controller extends GetxController {
   //내 가게
   final TextEditingController partnerNameTxtController =
       TextEditingController();
+  final TextEditingController editingPartnerNameTxtController =
+      TextEditingController();
   List<String> foodTypes = [
     "선택",
     "한식",
@@ -30,6 +31,7 @@ class Partner2Controller extends GetxController {
     "뷔페"
   ];
   RxString selectedFoodType = RxString("선택");
+  RxString editingSelectedFoodType = RxString("선택");
   List<String> categories = [
     "선택",
     "데이트 맛집",
@@ -44,13 +46,23 @@ class Partner2Controller extends GetxController {
     "미슐랭",
   ];
   RxString selectedCategory = RxString("선택");
+  RxString editingSelectedCategory = RxString("선택");
   RxList<XFile> businessProofs = RxList.empty();
+  RxList<XFile> editingBusinessProofs = RxList.empty();
   RxList<XFile> storePhotos = RxList.empty();
+  RxList<XFile> editingStorePhotos = RxList.empty();
   RxString postCode = RxString("");
+  RxString editingPostCode = RxString("");
   RxString address = RxString("");
+  RxString editingAddress = RxString("");
   final TextEditingController phoneTxtController = TextEditingController();
+  final TextEditingController editingPhoneTxtController =
+      TextEditingController();
   final TextEditingController descriptionTxtController =
       TextEditingController();
+  final TextEditingController editingDescriptionTxtController =
+      TextEditingController();
+  Rxn<Partner> editing = Rxn();
   List<String> amenities = [
     "주차",
     "쿠폰",
@@ -63,11 +75,13 @@ class Partner2Controller extends GetxController {
     "발렛"
   ];
   final RxList<String> selectedAmenities = RxList.empty();
+  final RxList<String> editingSelectedAmenities = RxList.empty();
   final List<String> holidays = [
     "있어요",
     "없어요",
   ];
   final RxBool hasHoliday = RxBool(true);
+  final RxBool editingHasHoliday = RxBool(true);
   final List<String> holidayWeeks = [
     "매 주",
     "첫째 주",
@@ -76,11 +90,23 @@ class Partner2Controller extends GetxController {
     "넷째 주",
   ];
   RxString selectedHolidayWeek = RxString("매 주");
+  RxString editingSelectedHolidayWeek = RxString("매 주");
   final List<String> regularHolidays = ["월", "화", "수", "목", "금", "토", "일"];
   RxString selectedRegularHoliday = RxString("");
+  RxString editingSelectedRegularHoliday = RxString("");
   List<String> businessTimeConfigs = ["매일 같아요", "평일/주말 달라요", "요일별로 달라요"];
   RxString selectedBusinessTimeConfig = RxString("매일 같아요");
+  RxString editingSelectedBusinessTimeConfig = RxString("매일 같아요");
   RxMap<String, List<dynamic>> businessTime = {
+    "titles": <dynamic>["영업 시간"], // RxList로 감쌈
+    "times": <dynamic>[
+      {
+        "time": ["10:00", "24:00"],
+        "allDay": false,
+      },
+    ] // RxList로 감쌈
+  }.obs;
+  RxMap<String, List<dynamic>> editingBusinessTime = {
     "titles": <dynamic>["영업 시간"], // RxList로 감쌈
     "times": <dynamic>[
       {
@@ -104,6 +130,15 @@ class Partner2Controller extends GetxController {
       },
     ] // RxList로 감쌈
   }.obs;
+  RxMap<String, List<dynamic>> editingHolidayTime = {
+    "titles": <dynamic>["휴게 시간"], // RxList로 감쌈
+    "times": <dynamic>[
+      {
+        "time": ["10:00", "24:00"],
+        "allDay": false,
+      },
+    ] // RxList로 감쌈
+  }.obs;
   // RxList<String> bTitles = ["영업 시간"].obs;
   RxList<String> hTitles = ["휴게 시간"].obs;
   Rxn<Partner> newPartner = Rxn();
@@ -111,7 +146,7 @@ class Partner2Controller extends GetxController {
   RxInt currentResPage = 0.obs; // 현재 페이지
   RxInt currentHotPage = 0.obs; // 현재 페이지
   RxString searchKeyword = ''.obs; // 검색어 상태 변수
-  String baseUrl = 'http://192.168.200.102:3000'; // API 베이스 URL
+  String baseUrl = 'http://$myPort:3000'; // API 베이스 URL
   Rxn<Partner> selectedPartner = Rxn<Partner>(); // 선택된 파트너
   RxList<Partner> recentPartners = RxList<Partner>.empty(); // 최근 본 파트너 리스트
   RxList<String> recentSearches = RxList.empty();
@@ -119,6 +154,16 @@ class Partner2Controller extends GetxController {
   RxList<int> recentLatestPartnerIds = RxList.empty();
   RxList<Partner> favoritePartners = RxList.empty(); // 인기 파트너 리스트
   RxBool isExpanded = false.obs; // 확장 상태
+  //마이페이지
+  List<String> statisticsItems = [
+    "년간",
+    "월간",
+    "주간",
+    "일간",
+    "직접선택",
+  ];
+  RxString selectedStatisticsItem = "직접선택".obs;
+  //마이페이지
   @override
   void onInit() {
     _loadRecentSearches();
@@ -126,7 +171,7 @@ class Partner2Controller extends GetxController {
   }
 
   final Dio _dio = Dio(BaseOptions(
-    baseUrl: 'http://192.168.200.102:3000', // API 베이스 URL
+    baseUrl: 'http://$myPort:3000', // API 베이스 URL
     connectTimeout: const Duration(milliseconds: 5000), // 연결 제한 시간
     receiveTimeout: const Duration(milliseconds: 3000), // 응답 제한 시간
   ));
@@ -179,6 +224,54 @@ class Partner2Controller extends GetxController {
       rating = rating / partner.reviews!.length;
     }
     return rating;
+  }
+
+  Future<void> updatePartner({
+    required int partnerId,
+    // String? name,
+    // String? address,
+    // String? phone,
+    // String? description,
+    // String? foodType,
+    // String? category,
+    // double? latitude,
+    // double? longitude,
+    // String? amenities,
+    // bool? hasHoliday,
+    // String? businessTimeConfig,
+  }) async {
+    try {
+      if (editing.value == null) return;
+      final response = await _dio.put(
+        baseUrl + "/partners/$partnerId",
+        data: {
+          'name': editing.value!.name,
+          'address': editing.value!.address,
+          'phone': editing.value!.phone,
+          'description': editing.value!.description,
+          'foodType': editing.value!.foodType,
+          'category': editing.value!.category,
+          'latitude': editing.value!.latitude,
+          'longitude': editing.value!.longitude,
+          'amenities': editing.value!.amenities,
+          'hasHoliday': editing.value!.hasHoliday,
+          'businessTimeConfig': editing.value!.businessTimeConfig,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('파트너 수정 성공: ${response.data}');
+        Get.back();
+      } else {
+        print('파트너 수정 실패: ${response.data}');
+      }
+    } on DioError catch (e) {
+      if (e.response != null) {
+        print('서버 응답 오류: ${e.response?.data}');
+      } else {
+        print('요청 오류: ${e.message}');
+      }
+    }
   }
 
   Future<void> addPostPartner({required int userId}) async {
@@ -296,6 +389,47 @@ class Partner2Controller extends GetxController {
     }
   }
 
+  Future<void> fetchPartnerDetails(int partnerId) async {
+    try {
+      final response = await _dio.get(baseUrl + "/partners/$partnerId");
+
+      if (response.statusCode == 200) {
+        final partner = response.data;
+        editing.value = Partner.fromJson(partner);
+        if (editing.value != null) {
+          editingPartnerNameTxtController.text = editing.value!.name;
+          editingSelectedFoodType.value = editing.value!.foodType;
+          editingSelectedCategory.value = editing.value!.category;
+          editingBusinessProofs.value = editing.value!.businessProofs!
+              .map((el) => XFile(baseUrl + "/partners" + "/$el"))
+              .toList();
+          editingStorePhotos.value = editing.value!.storePhotos!
+              .map((el) => XFile(baseUrl + "/partners" + "/$el"))
+              .toList();
+          editingAddress.value = editing.value!.address;
+          editingPhoneTxtController.text = editing.value!.phone;
+          editingDescriptionTxtController.text =
+              editing.value!.description ?? "";
+          editingSelectedAmenities.value = editing.value!.amenities ?? [];
+          editingHasHoliday.value = editing.value!.hasHoliday;
+          editingSelectedRegularHoliday.value =
+              editing.value!.regularHoliday ?? "";
+          editingSelectedBusinessTimeConfig.value =
+              editing.value!.businessTimeConfig;
+        }
+        print('파트너 정보 가져오기 성공: $partner');
+      } else {
+        print('파트너 정보 가져오기 실패: ${response.data}');
+      }
+    } on DioError catch (e) {
+      if (e.response != null) {
+        print('서버 응답 오류: ${e.response?.data}');
+      } else {
+        print('요청 오류: ${e.message}');
+      }
+    }
+  }
+
   //유저의 파트너 가져오기(가게등록해서 등록된 가게)
   Future<List<Partner>> fetchUserPartners(int userId) async {
     try {
@@ -319,6 +453,29 @@ class Partner2Controller extends GetxController {
     } catch (error) {
       print("파트너 목록 가져오기 중 오류 발생: $error");
       return [];
+    }
+  }
+
+  Future<void> addEditingPartner() async {
+    try {
+      DateTime today = DateTime.now();
+      editing.value = Partner(
+        id: null,
+        name: editingPartnerNameTxtController.text,
+        storePhotos: editingStorePhotos.map((p) => p.path).toList(),
+        businessProofs: editingBusinessProofs.map((p) => p.path).toList(),
+        foodType: editingSelectedFoodType.value,
+        category: editingSelectedCategory.value,
+        address: editingAddress.value,
+        phone: editingPhoneTxtController.text,
+        hasHoliday: editingHasHoliday.value,
+        businessTimeConfig: editingSelectedBusinessTimeConfig.value,
+        createdAt: today,
+        updatedAt: today,
+      );
+      print("[SUCCESS] Add new partner.");
+    } catch (e) {
+      print("[ERROR] Fail add new partner.");
     }
   }
 

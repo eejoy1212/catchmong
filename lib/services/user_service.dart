@@ -1,9 +1,10 @@
 import 'dart:convert'; // JSON 디코딩
+import 'package:catchmong/const/constant.dart';
 import 'package:http/http.dart' as http;
 
 class UserService {
   // 서버 주소
-  final String baseUrl = 'http://192.168.200.102:3000';
+  final String baseUrl = 'http://$myPort:3000';
 
   // 사용자 목록 가져오기
   Future<String> fetchUsers() async {

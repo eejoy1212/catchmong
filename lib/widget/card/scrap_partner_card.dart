@@ -1,4 +1,5 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/const/constant.dart';
 import 'package:catchmong/controller/partner_controller.dart';
 import 'package:catchmong/model/partner.dart';
 import 'package:catchmong/modules/login/controllers/login_controller.dart';
@@ -236,7 +237,7 @@ class ScrapPartnerCard extends StatelessWidget {
                                   width: 1), // 외부 테두리
                             ),
                             child: Image.network(
-                              'http://192.168.200.102:3000/${partner.storePhotos?[index]}', // 이미지 경로
+                              'http://$myPort:3000/${partner.storePhotos?[index]}', // 이미지 경로
                               fit: BoxFit.cover, // 이미지가 Container 크기에 맞게 자르기
                             ),
                           ),

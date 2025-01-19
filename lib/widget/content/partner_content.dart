@@ -1,4 +1,5 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/const/constant.dart';
 import 'package:catchmong/controller/partner_controller.dart';
 import 'package:catchmong/model/partner.dart';
 import 'package:catchmong/model/review.dart';
@@ -307,7 +308,7 @@ class PartnerContent extends StatelessWidget {
                                                                       1), // 외부 테두리
                                                             ),
                                                             child: ImgCard(
-                                                              path: 'http://192.168.200.102:3000/' +
+                                                              path: 'http://$myPort:3000/' +
                                                                   partnerController
                                                                       .recentPartners[
                                                                           index]
@@ -450,7 +451,7 @@ class PartnerContent extends StatelessWidget {
                                                           width: 1), // 외부 테두리
                                                     ),
                                                     child: ImgCard(
-                                                      path: 'http://192.168.200.102:3000/' +
+                                                      path: 'http://$myPort:3000/' +
                                                           partnerController
                                                               .favoritePartners[
                                                                   index]

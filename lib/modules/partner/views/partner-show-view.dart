@@ -1,4 +1,5 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/const/constant.dart';
 import 'package:catchmong/model/menu.dart';
 import 'package:catchmong/model/partner.dart';
 import 'package:catchmong/widget/bar/default_appbar.dart';
@@ -235,7 +236,7 @@ class PartnerShowView extends StatelessWidget {
                           path: partner.storePhotos!.length > 0
                               ? (isLocal
                                   ? partner.storePhotos![0]
-                                  : 'http://192.168.200.102:3000/' +
+                                  : 'http://$myPort:3000/' +
                                       partner.storePhotos![0])
                               : '')),
                 ),
@@ -265,7 +266,7 @@ class PartnerShowView extends StatelessWidget {
                                   path: partner.storePhotos!.length > 1
                                       ? (isLocal
                                           ? partner.storePhotos![1]
-                                          : 'http://192.168.200.102:3000/' +
+                                          : 'http://$myPort:3000/' +
                                               partner.storePhotos![1])
                                       : ''),
                             ),
@@ -287,7 +288,7 @@ class PartnerShowView extends StatelessWidget {
                                   path: partner.storePhotos!.length > 2
                                       ? (isLocal
                                           ? partner.storePhotos![2]
-                                          : 'http://192.168.200.102:3000/' +
+                                          : 'http://$myPort:3000/' +
                                               partner.storePhotos![2])
                                       : ''),
                             ),
@@ -315,7 +316,7 @@ class PartnerShowView extends StatelessWidget {
                                   path: partner.storePhotos!.length > 3
                                       ? (isLocal
                                           ? partner.storePhotos![3]
-                                          : 'http://192.168.200.102:3000/' +
+                                          : 'http://$myPort:3000/' +
                                               partner.storePhotos![3])
                                       : ''),
                             ),
@@ -338,7 +339,7 @@ class PartnerShowView extends StatelessWidget {
                                     path: partner.storePhotos!.length > 4
                                         ? (isLocal
                                             ? partner.storePhotos![4]
-                                            : 'http://192.168.200.102:3000/' +
+                                            : 'http://$myPort:3000/' +
                                                 partner.storePhotos![4])
                                         : ''),
                               ),
@@ -926,7 +927,7 @@ class PartnerShowView extends StatelessWidget {
                                                           8), // 이미지를 둥글게 자르기
                                                   child: ImgCard(
                                                       path:
-                                                          'http://192.168.200.102:3000/${partner.menus?[index].image}'),
+                                                          'http://$myPort:3000/${partner.menus?[index].image}'),
                                                 ),
                                               ),
                                               SizedBox(

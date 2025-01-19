@@ -1,4 +1,5 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/const/constant.dart';
 import 'package:catchmong/model/review.dart';
 import 'package:catchmong/widget/card/img_card.dart';
 import 'package:catchmong/widget/chip/TagChip.dart';
@@ -14,8 +15,8 @@ class ReviewCard extends StatelessWidget {
       : super(key: key);
   @override
   Widget build(BuildContext context) {
-    String profileBaseUrl = 'http://192.168.200.102:3000';
-    String baseUrl = 'http://192.168.200.102:3000/';
+    String profileBaseUrl = 'http://$myPort:3000';
+    String baseUrl = 'http://$myPort:3000/';
     String formatDate(DateTime date) {
       return DateFormat('yyyy.MM.dd').format(date); // 원하는 형식 지정
     }

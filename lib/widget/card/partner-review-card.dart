@@ -1,4 +1,5 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/const/constant.dart';
 import 'package:catchmong/controller/partner_controller.dart';
 import 'package:catchmong/model/review.dart';
 import 'package:catchmong/widget/bar/default_appbar.dart';
@@ -13,8 +14,8 @@ class PartnerReviewCard extends StatelessWidget {
   final void Function()? onReplyTap;
   final Review review;
   PartnerReviewCard({super.key, this.onReplyTap, required this.review});
-  String baseUrl = 'http://192.168.200.102:3000/';
-  String profileBaseUrl = 'http://192.168.200.102:3000';
+  String baseUrl = 'http://$myPort:3000/';
+  String profileBaseUrl = 'http://$myPort:3000';
   @override
   Widget build(BuildContext context) {
     print("baseUrl + review.images![0]>>>${baseUrl + review.images![0]}");
