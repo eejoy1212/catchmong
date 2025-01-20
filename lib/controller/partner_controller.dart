@@ -1,4 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:catchmong/model/menu.dart';
+import 'package:http/http.dart' as http;
 import 'package:catchmong/const/constant.dart';
 import 'package:catchmong/model/partner.dart';
 import 'package:catchmong/model/review.dart';
@@ -11,6 +14,19 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Partner2Controller extends GetxController {
+  //메뉴등록
+  Rxn<File> menuImg = Rxn();
+  RxString selectedMenuCategory = "메인메뉴".obs;
+  List<String> menuCaregories = [
+    "메인메뉴",
+    "사이드",
+    "디저트",
+  ];
+  final TextEditingController menuNameTxtController = TextEditingController();
+  final TextEditingController menuPriceTxtController = TextEditingController();
+  //전체 리스트를 보내기(원래거+추가된거, 왜냐면 삭제한것도 반영해야해서)
+  RxList<Menu> newMenus = RxList.empty();
+  //메뉴등록
   var partners = <Partner>[].obs; // RxList<Partner>
   var isLoading = false.obs; // 로딩 상태
   //내 가게
@@ -261,7 +277,7 @@ class Partner2Controller extends GetxController {
 
       if (response.statusCode == 200) {
         print('파트너 수정 성공: ${response.data}');
-        Get.back();
+        // Get.back();
       } else {
         print('파트너 수정 실패: ${response.data}');
       }
@@ -786,5 +802,59 @@ class Partner2Controller extends GetxController {
     } finally {
       isLoading.value = false; // 로딩 종료
     }
+  }
+
+  // 메뉴 등록 함수
+  Future<void> registerMenu({
+    required int partnerId,
+    required String name,
+    required double price,
+    required String category,
+    required File imageFile,
+  }) async {
+    try {
+      final uri = Uri.parse('$baseUrl/partners/$partnerId/menus');
+      final request = http.MultipartRequest('POST', uri);
+
+      // Form 데이터 추가
+      request.fields['name'] = name;
+      request.fields['price'] = price.toString();
+      request.fields['category'] = category;
+
+      // 이미지 파일 추가
+      final imageStream = http.ByteStream(imageFile.openRead());
+      final imageLength = await imageFile.length();
+      final multipartFile = http.MultipartFile(
+        'image',
+        imageStream,
+        imageLength,
+        filename: imageFile.path.split('/').last,
+      );
+      request.files.add(multipartFile);
+
+      // 요청 보내기
+      final response = await request.send();
+
+      if (response.statusCode == 201) {
+        print("메뉴 등록 성공");
+      } else {
+        final errorResponse = await http.Response.fromStream(response);
+        print("메뉴 등록 실패: ${errorResponse.body}");
+      }
+    } catch (e) {
+      print("오류 발생: $e");
+    }
+  }
+
+  // 갤러리에서 이미지 선택
+  Future<void> pickMenuImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      // return File(pickedFile.path);
+      menuImg.value = File(pickedFile.path);
+    }
+    // return null;
   }
 }

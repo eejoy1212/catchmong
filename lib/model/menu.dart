@@ -1,5 +1,5 @@
 class Menu {
-  final int id; // 메뉴 ID
+  final int? id; // 메뉴 ID
   final int partnerId; // 파트너 ID
   final String category; // 메뉴 카테고리 (Appetizer, Main Menu 등)
   final String name; // 메뉴 이름
@@ -9,7 +9,7 @@ class Menu {
   final DateTime? updatedAt; // 수정 날짜
 
   Menu({
-    required this.id,
+    this.id,
     required this.partnerId,
     required this.category,
     required this.name,

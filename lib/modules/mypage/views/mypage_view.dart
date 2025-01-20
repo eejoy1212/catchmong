@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/const/constant.dart';
 import 'package:catchmong/controller/partner_controller.dart';
 import 'package:catchmong/controller/reservation_controller.dart';
 import 'package:catchmong/controller/review_controller.dart';
 import 'package:catchmong/model/catchmong_user.dart';
+import 'package:catchmong/model/menu.dart';
 import 'package:catchmong/model/partner.dart';
 import 'package:catchmong/modules/location/scrap/views/scrap_view.dart';
 import 'package:catchmong/modules/location/views/location_search_view.dart';
@@ -2167,7 +2170,7 @@ void showStoreInfo(BuildContext context, Partner store) {
                                 ),
                                 InkWell(
                                   onTap: () {
-                                    showMenuAdd(context);
+                                    showMenuAdd(context, store);
                                   },
                                   child: Container(
                                     padding: EdgeInsets.symmetric(
@@ -3215,8 +3218,8 @@ void showStoreAdd(BuildContext context) {
                                   );
 
                                   if (pickedFile != null) {
-                                    final newImagePath = pickedFile.path;
                                     controller.businessProofs.add(pickedFile);
+                                    final newImagePath = pickedFile.path;
                                   }
                                 },
                                 child: Container(
@@ -4683,12 +4686,12 @@ void showReservationSetting(BuildContext context) {
 }
 
 //메뉴 등록
-void showMenuAdd(BuildContext context) {
+void showMenuAdd(BuildContext context, Partner partner) {
   double width = MediaQuery.of(context).size.width;
   String selectedBusinessType = "선택"; // 업태 기본값
   String selectedCategory = "선택"; // 카테고리 기본값
   String selectedDay = "매 주"; // 정기 휴무일 기본값
-
+  final Partner2Controller controller = Get.find<Partner2Controller>();
   showGeneralDialog(
     context: context,
     barrierDismissible: true, // true로 설정했으므로 barrierLabel 필요
@@ -4744,33 +4747,72 @@ void showMenuAdd(BuildContext context) {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Container(
-                          width: 100,
-                          height: 100,
-                          child: Column(
-                            children: [
-                              SizedBox(
-                                height: 16,
-                              ),
-                              SvgPicture.asset('assets/images/img-plus.svg'),
-                              Text(
-                                "사진등록",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: CatchmongColors.sub_gray,
+                        Obx(
+                          () => controller.menuImg.value == null
+                              ? InkWell(
+                                  onTap: () async {
+                                    print("갤러리 열기");
+                                    final ImagePicker picker = ImagePicker();
+                                    final XFile? pickedFile =
+                                        await picker.pickImage(
+                                      source: ImageSource
+                                          .gallery, // or ImageSource.camera
+                                      maxWidth:
+                                          800, // Optional: Resize the image
+                                      maxHeight: 800,
+                                    );
+
+                                    if (pickedFile != null) {
+                                      final newImagePath = pickedFile.path;
+                                      controller.menuImg.value =
+                                          File(newImagePath);
+                                    }
+                                  },
+                                  child: Container(
+                                    width: 100,
+                                    height: 100,
+                                    child: Column(
+                                      children: [
+                                        SizedBox(
+                                          height: 16,
+                                        ),
+                                        SvgPicture.asset(
+                                            'assets/images/img-plus.svg'),
+                                        Text(
+                                          "사진등록",
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            color: CatchmongColors.sub_gray,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 16,
+                                        ),
+                                      ],
+                                    ),
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(8)),
+                                        border: Border.all(
+                                          color: CatchmongColors.gray100,
+                                        )),
+                                  ),
+                                )
+                              : PartnerImgCard(
+                                  path: controller.menuImg.value!.path,
+                                  isLocal: true, // 로컬 이미지 여부 전달
+                                  onDelete: () {
+                                    // if (controller.editing.value != null) {
+                                    //   controller.editing.value =
+                                    //       controller.editing.value!.copyWith(
+                                    //     images: controller.editing.value!.images!
+                                    //       ..removeAt(idx - 1),
+                                    //   );
+                                    // }
+                                    controller.menuImg.value = null;
+                                  },
+                                  onTab: () {},
                                 ),
-                              ),
-                              SizedBox(
-                                height: 16,
-                              ),
-                            ],
-                          ),
-                          decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(8)),
-                              border: Border.all(
-                                color: CatchmongColors.gray100,
-                              )),
                         ),
                         SizedBox(
                           width: 12,
@@ -4832,44 +4874,46 @@ void showMenuAdd(BuildContext context) {
                                     ),
                                     //날짜 드롭박스
                                     Container(
-                                      padding:
-                                          EdgeInsets.symmetric(horizontal: 8),
-                                      height: 48,
-                                      width: double.infinity,
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: Colors.grey.shade300,
+                                        padding:
+                                            EdgeInsets.symmetric(horizontal: 8),
+                                        height: 48,
+                                        width: double.infinity,
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: Colors.grey.shade300,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
                                         ),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: DropdownButton<String>(
-                                        isExpanded: true,
-                                        underline: SizedBox(),
-                                        value: "메인메뉴",
-                                        items: [
-                                          "메인메뉴",
-                                          "사이드",
-                                          "디저트",
-                                        ]
-                                            .map((String value) =>
-                                                DropdownMenuItem<String>(
-                                                  value: value,
-                                                  child: Text(
-                                                    value,
-                                                    style: TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.w400,
-                                                      color: Colors.black,
-                                                    ),
-                                                  ),
-                                                ))
-                                            .toList(),
-                                        onChanged: (String? newValue) {
-                                          if (newValue != null) {}
-                                        },
-                                      ),
-                                    ),
+                                        child: Obx(
+                                          () => DropdownButton<String>(
+                                            isExpanded: true,
+                                            underline: SizedBox(),
+                                            value: controller
+                                                .selectedMenuCategory.value,
+                                            items: controller.menuCaregories
+                                                .map((String value) =>
+                                                    DropdownMenuItem<String>(
+                                                      value: value,
+                                                      child: Text(
+                                                        value,
+                                                        style: TextStyle(
+                                                          fontSize: 14,
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                          color: Colors.black,
+                                                        ),
+                                                      ),
+                                                    ))
+                                                .toList(),
+                                            onChanged: (String? newValue) {
+                                              if (newValue != null) {
+                                                controller.selectedMenuCategory
+                                                    .value = newValue;
+                                              }
+                                            },
+                                          ),
+                                        )),
                                   ],
                                 ),
                               ),
@@ -4901,31 +4945,26 @@ void showMenuAdd(BuildContext context) {
                                     SizedBox(
                                       height: 4,
                                     ),
-                                    Container(
-                                      height: 48, // TextField의 높이 명시적으로 설정
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: CatchmongColors.gray100,
-                                        ),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: TextField(
-                                        decoration: InputDecoration(
-                                          hintText: "메뉴명을 입력해주세요.",
-                                          border:
-                                              InputBorder.none, // 기본 border 제거
-                                          contentPadding: EdgeInsets.symmetric(
-                                            horizontal: 16,
-                                            vertical: 14,
-                                          ), // 여백 설정
-                                        ),
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w400,
-                                          color: CatchmongColors.gray_800,
-                                        ),
-                                      ),
-                                    ),
+                                    BorderTxtField(
+                                      controller:
+                                          controller.menuNameTxtController,
+                                      hintText: "메뉴명을 입력해주세요.",
+                                      onChanged: (String value) {
+                                        if (controller.menuNameTxtController
+                                                .text.length >
+                                            300) {
+                                          Future.microtask(() {
+                                            controller.menuNameTxtController
+                                                .value = TextEditingValue(
+                                              text: value.substring(0, 300),
+                                              selection:
+                                                  TextSelection.collapsed(
+                                                      offset: 300),
+                                            );
+                                          });
+                                        }
+                                      },
+                                    )
                                   ],
                                 ),
                               ), //메뉴명
@@ -4933,58 +4972,24 @@ void showMenuAdd(BuildContext context) {
                                 height: 8,
                               ),
                               //가격
-                              Container(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "가격",
-                                          style: TextStyle(
-                                            color: CatchmongColors.gray_800,
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(
-                                      height: 4,
-                                    ),
-                                    Container(
-                                      height: 48, // TextField의 높이 명시적으로 설정
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: CatchmongColors.gray100,
-                                        ),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: TextField(
-                                        decoration: InputDecoration(
-                                          hintText: "금액을 입력해주세요.",
-                                          border:
-                                              InputBorder.none, // 기본 border 제거
-                                          contentPadding: EdgeInsets.symmetric(
-                                            horizontal: 16,
-                                            vertical: 14,
-                                          ), // 여백 설정
-                                        ),
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w400,
-                                          color: CatchmongColors.gray_800,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                              BorderTxtField(
+                                controller: controller.menuPriceTxtController,
+                                hintText: "가격을 입력해주세요.",
+                                onChanged: (String value) {
+                                  if (controller
+                                          .menuPriceTxtController.text.length >
+                                      300) {
+                                    Future.microtask(() {
+                                      controller.menuPriceTxtController.value =
+                                          TextEditingValue(
+                                        text: value.substring(0, 300),
+                                        selection: TextSelection.collapsed(
+                                            offset: 300),
+                                      );
+                                    });
+                                  }
+                                },
+                              )
                             ],
                           ),
                         )
@@ -4994,87 +4999,131 @@ void showMenuAdd(BuildContext context) {
                   SizedBox(
                     height: 16,
                   ),
-                  OutlinedBtn(width: width - 40, title: "등록하기", onPress: () {})
+                  OutlinedBtn(
+                      width: width - 40,
+                      title: "등록하기",
+                      onPress: () {
+                        if (controller.menuImg.value == null) {
+                          Get.snackbar(
+                            "알림",
+                            "메뉴 사진을 최소 1장이상 등록 해주세요.",
+                            snackPosition: SnackPosition.TOP, // 상단에 표시
+                            backgroundColor: CatchmongColors.yellow_main,
+                            colorText: CatchmongColors.black,
+                            icon: Icon(Icons.check_circle,
+                                color: CatchmongColors.black),
+                            duration: Duration(seconds: 1),
+                            borderRadius: 10,
+                            margin: EdgeInsets.all(10),
+                          );
+                        } else {
+                          Menu menu = Menu(
+                              partnerId: partner.id!,
+                              category: controller.selectedMenuCategory.value,
+                              name: controller.menuNameTxtController.text,
+                              price: double.tryParse(
+                                      controller.menuPriceTxtController.text) ??
+                                  0.0,
+                              image: controller.menuImg.value!.path,
+                              createdAt: DateTime.now());
+                          controller.newMenus.add(menu);
+                        }
+                      })
                 ]),
               ),
               //메뉴 리스트 아이템
-              Container(
-                padding: EdgeInsets.only(
-                  left: 20,
-                  top: 16,
-                  right: 20,
-                  bottom: 32,
-                ),
-                width: width,
-                decoration: BoxDecoration(
-                    border: Border(
-                        bottom: BorderSide(
-                  color: CatchmongColors.gray50,
-                ))),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(8)),
-                          border: Border.all(
-                            color: CatchmongColors.gray,
-                            width: 1,
-                          ), // 외부 테두리
-                        ),
-                        child: ClipRRect(
-                          borderRadius:
-                              BorderRadius.circular(8), // 이미지를 둥글게 자르기
-                          child: Image.asset(
-                            'assets/images/review2.jpg', // 이미지 경로
-                            fit: BoxFit.cover, // 이미지가 Container 크기에 맞게 자르기
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 12,
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Text(
-                          "카테고리",
-                          style: TextStyle(
-                            color: CatchmongColors.black,
-                            fontWeight: FontWeight.w400,
-                            fontSize: 12,
-                          ),
-                        ),
-                        Text(
-                          "아보카도 치폴레 크림 쉬림프",
-                          style: TextStyle(
-                            color: CatchmongColors.black,
-                            fontWeight: FontWeight.w400,
-                            fontSize: 16,
-                          ),
-                        ),
-                        Text(
-                          "12,800원",
-                          style: TextStyle(
-                            color: CatchmongColors.black,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 20,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    SvgPicture.asset('assets/images/trash.svg')
-                  ],
-                ),
-              )
+              Obx(() => Column(
+                    children: [
+                      ...List.generate(
+                          controller.newMenus.length,
+                          (int idx) => Container(
+                                padding: EdgeInsets.only(
+                                  left: 20,
+                                  top: 16,
+                                  right: 20,
+                                  bottom: 32,
+                                ),
+                                width: width,
+                                decoration: BoxDecoration(
+                                    border: Border(
+                                        bottom: BorderSide(
+                                  color: CatchmongColors.gray50,
+                                ))),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        width: 100,
+                                        height: 100,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(8)),
+                                          border: Border.all(
+                                            color: CatchmongColors.gray,
+                                            width: 1,
+                                          ), // 외부 테두리
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                              8), // 이미지를 둥글게 자르기
+                                          child: Image.asset(
+                                            'assets/images/review2.jpg', // 이미지 경로
+                                            fit: BoxFit
+                                                .cover, // 이미지가 Container 크기에 맞게 자르기
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 12,
+                                    ),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        Text(
+                                          "카테고리",
+                                          style: TextStyle(
+                                            color: CatchmongColors.black,
+                                            fontWeight: FontWeight.w400,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                        Text(
+                                          "아보카도 치폴레 크림 쉬림프",
+                                          style: TextStyle(
+                                            color: CatchmongColors.black,
+                                            fontWeight: FontWeight.w400,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        Text(
+                                          "12,800원",
+                                          style: TextStyle(
+                                            color: CatchmongColors.black,
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 20,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    InkWell(
+                                        onTap: () {
+                                          controller.newMenus.removeAt(idx);
+                                        },
+                                        child: SvgPicture.asset(
+                                            'assets/images/trash.svg'))
+                                  ],
+                                ),
+                              ))
+                    ],
+                  ))
             ],
           ))));
     },
@@ -5230,7 +5279,7 @@ void showStoreEdit(BuildContext context, int partnerId) {
                   await controller.updatePartner(partnerId: partnerId);
                   // Navigator.pop(context);
                   // /main으로 이동
-                  // Get.offAllNamed('/main');
+                  Get.offAllNamed('/main');
                 }
               },
               title: Text("수정하기"),
