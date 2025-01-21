@@ -654,6 +654,7 @@ void showReservationDialog(BuildContext context) {
   final ReservationConteroller controller = Get.find<ReservationConteroller>();
   final LoginController loginController = Get.find<LoginController>();
   final width = MediaQuery.of(context).size.width;
+  final height = MediaQuery.of(context).size.height;
   String getTitle(int idx) {
     switch (idx) {
       case 0:
@@ -711,6 +712,7 @@ void showReservationDialog(BuildContext context) {
           child: Column(
             children: [
               Container(
+                height: 100,
                 padding: EdgeInsets.symmetric(
                   vertical: 16,
                 ),
@@ -848,7 +850,13 @@ void showReservationDialog(BuildContext context) {
                     )
                   : Container(
                       width: width,
-                      height: 206 * controller.reservations.length.toDouble(),
+                      // constraints: BoxConstraints(
+                      //   minHeight: 500,
+                      // ),
+                      margin: EdgeInsets.only(
+                        bottom: 16,
+                      ),
+                      height: height - 300,
                       child: ListView.separated(
                           separatorBuilder: (BuildContext context, int index) {
                             return Container(
@@ -862,7 +870,7 @@ void showReservationDialog(BuildContext context) {
                             final reservation = controller.reservations[index];
                             return Container(
                               width: width,
-                              height: 206,
+                              height: 220,
                               margin: EdgeInsets.only(
                                 left: 20,
                                 top: 16,
@@ -944,9 +952,12 @@ void showReservationDialog(BuildContext context) {
                                               height: 8,
                                             ),
                                             Text(
-                                              "",
-                                              // controller.formatReservationDate(
-                                              //     reservation.reservationStartDate),
+                                              // "",
+                                              controller.formatReservationDate([
+                                                reservation
+                                                    .reservationStartDate,
+                                                reservation.reservationEndDate,
+                                              ]),
                                               softWrap: true,
                                               style: TextStyle(
                                                 color: CatchmongColors.black,
@@ -984,7 +995,7 @@ void showReservationDialog(BuildContext context) {
                               ),
                             );
                           }),
-                    ))
+                    )),
             ],
           ),
         ),
