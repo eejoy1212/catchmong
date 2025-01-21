@@ -123,7 +123,21 @@ class PartnerShowView extends StatelessWidget {
     }
 
     bool isLocal = partner.storePhotos != null &&
-        !partner.storePhotos!.contains('uploads');
+        partner.storePhotos!.where((el) => el.contains("uploads")).isEmpty;
+    bool getIsLocal(int index) {
+      if (partner.storePhotos != null &&
+          partner.storePhotos!.length > index &&
+          partner.storePhotos![index].contains("uploads")) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+
+    bool _isLocal(String imagePath) {
+      return !imagePath.contains("uploads");
+    }
+
     return Scaffold(
       appBar: AppBar(
         leading: AppbarBackBtn(),
@@ -211,7 +225,11 @@ class PartnerShowView extends StatelessWidget {
                   },
                 );
               },
-              child: Image.asset('assets/images/upload-icon.png')),
+              child: Icon(
+                Icons.file_upload_outlined,
+                color: CatchmongColors.black,
+                // size: 20,
+              )),
           SizedBox(
             width: 20,
           )
@@ -232,12 +250,14 @@ class PartnerShowView extends StatelessWidget {
                             color: CatchmongColors.gray, width: 1), // 외부 테두리
                       ),
                       child: ImgCard(
-                          isLocal: isLocal,
-                          path: partner.storePhotos!.length > 0
-                              ? (isLocal
+                          isLocal: partner.storePhotos != null &&
+                              partner.storePhotos!.length > 0 &&
+                              _isLocal(partner.storePhotos![0]),
+                          path: partner.storePhotos?.isNotEmpty == true &&
+                                  partner.storePhotos!.length > 0
+                              ? (_isLocal(partner.storePhotos![0])
                                   ? partner.storePhotos![0]
-                                  : 'http://$myPort:3000/' +
-                                      partner.storePhotos![0])
+                                  : 'http://$myPort:3000/${partner.storePhotos![0]}')
                               : '')),
                 ),
                 SizedBox(
@@ -262,12 +282,15 @@ class PartnerShowView extends StatelessWidget {
                                     width: 1), // 외부 테두리
                               ),
                               child: ImgCard(
-                                  isLocal: isLocal,
-                                  path: partner.storePhotos!.length > 1
-                                      ? (isLocal
+                                  isLocal: partner.storePhotos != null &&
+                                      partner.storePhotos!.length > 1 &&
+                                      _isLocal(partner.storePhotos![1]),
+                                  path: partner.storePhotos?.isNotEmpty ==
+                                              true &&
+                                          partner.storePhotos!.length > 1
+                                      ? (_isLocal(partner.storePhotos![1])
                                           ? partner.storePhotos![1]
-                                          : 'http://$myPort:3000/' +
-                                              partner.storePhotos![1])
+                                          : 'http://$myPort:3000/${partner.storePhotos![1]}')
                                       : ''),
                             ),
                           ),
@@ -284,12 +307,15 @@ class PartnerShowView extends StatelessWidget {
                                     width: 1), // 외부 테두리
                               ),
                               child: ImgCard(
-                                  isLocal: isLocal,
-                                  path: partner.storePhotos!.length > 2
-                                      ? (isLocal
+                                  isLocal: partner.storePhotos != null &&
+                                      partner.storePhotos!.length > 2 &&
+                                      _isLocal(partner.storePhotos![2]),
+                                  path: partner.storePhotos?.isNotEmpty ==
+                                              true &&
+                                          partner.storePhotos!.length > 2
+                                      ? (_isLocal(partner.storePhotos![2])
                                           ? partner.storePhotos![2]
-                                          : 'http://$myPort:3000/' +
-                                              partner.storePhotos![2])
+                                          : 'http://$myPort:3000/${partner.storePhotos![2]}')
                                       : ''),
                             ),
                           ),
@@ -312,12 +338,15 @@ class PartnerShowView extends StatelessWidget {
                                     width: 1), // 외부 테두리
                               ),
                               child: ImgCard(
-                                  isLocal: isLocal,
-                                  path: partner.storePhotos!.length > 3
-                                      ? (isLocal
+                                  isLocal: partner.storePhotos != null &&
+                                      partner.storePhotos!.length > 3 &&
+                                      _isLocal(partner.storePhotos![3]),
+                                  path: partner.storePhotos?.isNotEmpty ==
+                                              true &&
+                                          partner.storePhotos!.length > 3
+                                      ? (_isLocal(partner.storePhotos![3])
                                           ? partner.storePhotos![3]
-                                          : 'http://$myPort:3000/' +
-                                              partner.storePhotos![3])
+                                          : 'http://$myPort:3000/${partner.storePhotos![3]}')
                                       : ''),
                             ),
                           ),
@@ -335,12 +364,15 @@ class PartnerShowView extends StatelessWidget {
                                       width: 1), // 외부 테두리
                                 ),
                                 child: ImgCard(
-                                    isLocal: isLocal,
-                                    path: partner.storePhotos!.length > 4
-                                        ? (isLocal
+                                    isLocal: partner.storePhotos != null &&
+                                        partner.storePhotos!.length > 4 &&
+                                        _isLocal(partner.storePhotos![4]),
+                                    path: partner.storePhotos?.isNotEmpty ==
+                                                true &&
+                                            partner.storePhotos!.length > 4
+                                        ? (_isLocal(partner.storePhotos![4])
                                             ? partner.storePhotos![4]
-                                            : 'http://$myPort:3000/' +
-                                                partner.storePhotos![4])
+                                            : 'http://$myPort:3000/${partner.storePhotos![4]}')
                                         : ''),
                               ),
                               if (partner.storePhotos != null &&
@@ -926,8 +958,16 @@ class PartnerShowView extends StatelessWidget {
                                                       BorderRadius.circular(
                                                           8), // 이미지를 둥글게 자르기
                                                   child: ImgCard(
-                                                      path:
-                                                          'http://$myPort:3000/${partner.menus?[index].image}'),
+                                                      isLocal: _isLocal(partner
+                                                              .menus?[index]
+                                                              .image ??
+                                                          ""),
+                                                      path: _isLocal(partner
+                                                                  .menus?[index]
+                                                                  .image ??
+                                                              "")
+                                                          ? "${partner.menus?[index].image}"
+                                                          : 'http://$myPort:3000/${partner.menus?[index].image}'),
                                                 ),
                                               ),
                                               SizedBox(

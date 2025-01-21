@@ -3,7 +3,11 @@ import 'package:catchmong/model/partner.dart';
 
 class Reservation {
   final int id; // 예약 ID
-  final List<DateTime> reservationDate; // 예약 날짜
+  // final List<DateTime> reservationDate; // 예약 날짜
+  final int? userId; // 예약한 유저 ID
+  final int? partnerId; // 예약된 파트너 ID
+  final DateTime reservationStartDate; // 예약 날짜
+  final DateTime reservationEndDate; // 예약 날짜
   final DateTime createdAt; // 예약 날짜
   final DateTime updatedAt; // 예약 날짜
   final int numOfPeople; // 예약 인원수
@@ -13,7 +17,10 @@ class Reservation {
   final User? user; // 예약된 파트너 정보
   Reservation({
     required this.id,
-    required this.reservationDate,
+    this.userId,
+    this.partnerId,
+    required this.reservationStartDate,
+    required this.reservationEndDate,
     required this.createdAt,
     required this.updatedAt,
     required this.numOfPeople,
@@ -27,17 +34,19 @@ class Reservation {
   factory Reservation.fromJson(Map<String, dynamic> json) {
     return Reservation(
       id: json['id'],
-      // List<String> -> List<DateTime>으로 변환
-      reservationDate: (json['reservationDate'] as List<dynamic>)
-          .map((date) => DateTime.parse(date as String))
-          .toList(),
+      userId: json['userId'],
+      partnerId: json['partnerId'],
+      reservationStartDate: DateTime.parse(json['reservationStartDate']),
+      reservationEndDate: DateTime.parse(json['reservationEndDate']),
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
       numOfPeople: json['numOfPeople'],
       request: json['request'],
       status: json['status'],
       partner: Partner.fromJson(json['partners']), // Partner 객체 생성
-      user: User.fromJson(json['users']), // Partner 객체 생성
+      user: json['users'] != null
+          ? User.fromJson(json['users'])
+          : null, // Partner 객체 생성
     );
   }
 
@@ -45,9 +54,10 @@ class Reservation {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      // List<DateTime> -> List<String>으로 변환
-      'reservationDate':
-          reservationDate.map((date) => date.toIso8601String()).toList(),
+      'userId': userId,
+      'partnerId': partnerId,
+      'reservationStartDate': reservationStartDate.toIso8601String(),
+      'reservationEndDate': reservationEndDate.toIso8601String(),
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
       'numOfPeople': numOfPeople,

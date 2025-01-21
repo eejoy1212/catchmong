@@ -804,45 +804,82 @@ class Partner2Controller extends GetxController {
     }
   }
 
-  // 메뉴 등록 함수
-  Future<void> registerMenu({
-    required int partnerId,
-    required String name,
-    required double price,
-    required String category,
-    required File imageFile,
-  }) async {
+  Future<void> fetchMenusByPartnerId(int partnerId) async {
     try {
-      final uri = Uri.parse('$baseUrl/partners/$partnerId/menus');
-      final request = http.MultipartRequest('POST', uri);
+      // GET 요청
+      final response = await _dio.get('$baseUrl/partners/$partnerId/menus');
 
-      // Form 데이터 추가
-      request.fields['name'] = name;
-      request.fields['price'] = price.toString();
-      request.fields['category'] = category;
+      if (response.statusCode == 200) {
+        // JSON 데이터를 Menu 객체의 리스트로 변환
+        final List<dynamic> data = response.data;
+        newMenus.value = data
+            .map((menu) => Menu.fromJson(menu as Map<String, dynamic>))
+            .toList();
+        print("[GET SUCCESS] 메뉴 데이터 조회 성공");
+      } else {
+        print("[GET ERROR] 메뉴 데이터 조회 실패: ${response.statusCode}");
+      }
+    } catch (error) {
+      print("[GET ERROR] 메뉴 데이터 조회 중 오류 발생: $error");
+    }
+  }
 
+  // 메뉴 등록 함수
+
+  Future<void> postRegisterMenus({
+    required int partnerId,
+    // required List<File> imageFiles, // 이미지 파일 리스트
+  }) async {
+    final url = '$baseUrl/partners/$partnerId/menus';
+
+    try {
+      // MultipartRequest 생성
+      var request = http.MultipartRequest('POST', Uri.parse(url));
+
+      // menus 리스트를 JSON으로 변환하여 추가
+      request.fields['menus'] =
+          jsonEncode(newMenus.map((menu) => menu.toJson()).toList());
+      final List<File> imageFiles =
+          newMenus.map((file) => File(file.image)).toList();
       // 이미지 파일 추가
-      final imageStream = http.ByteStream(imageFile.openRead());
-      final imageLength = await imageFile.length();
-      final multipartFile = http.MultipartFile(
-        'image',
-        imageStream,
-        imageLength,
-        filename: imageFile.path.split('/').last,
-      );
-      request.files.add(multipartFile);
+      for (int i = 0; i < imageFiles.length; i++) {
+        try {
+          var stream = http.ByteStream(imageFiles[i].openRead());
+          var length = await imageFiles[i].length();
+          var multipartFile = http.MultipartFile(
+            'images', // 백엔드에서 기대하는 필드 이름
+            stream,
+            length,
+            filename: imageFiles[i].path.split('/').last,
+          );
+          request.files.add(multipartFile);
+        } catch (e) {
+          print("이미지 파일 처리 중 오류 발생: $e");
+          return;
+        }
+      }
 
       // 요청 보내기
-      final response = await request.send();
+      var streamedResponse = await request.send();
+
+      // 응답 처리
+      var response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 201) {
-        print("메뉴 등록 성공");
+        print("메뉴 등록 성공: ${response.body}");
+        final List<dynamic> data = jsonDecode(response.body)['menus'];
+        print("메뉴 등록 성공: $data");
+
+        // JSON 데이터를 모델로 변환
+        final registeredMenus = data
+            .map((menu) => Menu.fromJson(menu as Map<String, dynamic>))
+            .toList();
+        newMenus.value = registeredMenus;
       } else {
-        final errorResponse = await http.Response.fromStream(response);
-        print("메뉴 등록 실패: ${errorResponse.body}");
+        print("메뉴 등록 실패: ${response.body}");
       }
-    } catch (e) {
-      print("오류 발생: $e");
+    } catch (error) {
+      print("서버 요청 중 오류 발생: $error");
     }
   }
 

@@ -310,7 +310,7 @@ class MapContent extends StatelessWidget {
                       //         ScrapPartnerContent(), // 새 페이지로 이동
                       //   ),
                       // );
-                      Get.toNamed("/scrap");
+                      // Get.toNamed("/scrap");
                     },
                     child: Container(
                       width: 100,

@@ -161,8 +161,9 @@ class ReservationStatusCard extends StatelessWidget {
                     height: 8,
                   ),
                   Text(
-                    formatReservationTimeWithWeekday(
-                        reservation.reservationDate),
+                    "",
+                    // formatReservationTimeWithWeekday(
+                    //     reservation.reservationDate),
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w400,

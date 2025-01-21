@@ -27,7 +27,7 @@ class PartnerImgCard extends StatelessWidget {
             child: Container(
               width: 100,
               height: 100,
-              margin: EdgeInsets.only(right: 8),
+              // margin: EdgeInsets.only(right: 8),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(8)),
                 border: Border.all(

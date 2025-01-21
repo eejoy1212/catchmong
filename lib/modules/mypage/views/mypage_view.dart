@@ -771,12 +771,8 @@ void showReservationDialog(BuildContext context) {
                       child: OutlinedBtnWithIcon(
                         height: 48,
                         title: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            Icon(
-                              Icons.arrow_left,
-                              color: CatchmongColors.black,
-                            ),
                             Obx(() => Text(
                                   DateFormat('yy.MM.dd').format(
                                           controller.selectedDate[0].value) +
@@ -790,13 +786,16 @@ void showReservationDialog(BuildContext context) {
                                   ),
                                 )),
                             Icon(
-                              Icons.arrow_right,
+                              Icons.calendar_today_rounded,
+                              size: 16,
                               color: CatchmongColors.black,
                             ),
                           ],
                         ),
-                        onPress: () {
-                          controller.selectDate(context);
+                        onPress: () async {
+                          await controller.selectDate(context);
+                          await controller.fetchReservations(
+                              loginController.user.value!.id);
                         },
                       ),
                     ),
@@ -849,14 +848,21 @@ void showReservationDialog(BuildContext context) {
                     )
                   : Container(
                       width: width,
-                      height: 800,
-                      child: ListView.builder(
+                      height: 206 * controller.reservations.length.toDouble(),
+                      child: ListView.separated(
+                          separatorBuilder: (BuildContext context, int index) {
+                            return Container(
+                              height: 1,
+                              color: CatchmongColors.gray50,
+                            );
+                          },
                           scrollDirection: Axis.vertical,
                           itemCount: controller.reservations.length,
                           itemBuilder: (BuildContext context, int index) {
                             final reservation = controller.reservations[index];
                             return Container(
                               width: width,
+                              height: 206,
                               margin: EdgeInsets.only(
                                 left: 20,
                                 top: 16,
@@ -938,8 +944,9 @@ void showReservationDialog(BuildContext context) {
                                               height: 8,
                                             ),
                                             Text(
-                                              controller.formatReservationDate(
-                                                  reservation.reservationDate),
+                                              "",
+                                              // controller.formatReservationDate(
+                                              //     reservation.reservationStartDate),
                                               softWrap: true,
                                               style: TextStyle(
                                                 color: CatchmongColors.black,
@@ -2169,8 +2176,12 @@ void showStoreInfo(BuildContext context, Partner store) {
                                   ),
                                 ),
                                 InkWell(
-                                  onTap: () {
-                                    showMenuAdd(context, store);
+                                  onTap: () async {
+                                    if (store.id != null) {
+                                      await controller
+                                          .fetchMenusByPartnerId(store.id!);
+                                      showMenuAdd(context, store);
+                                    }
                                   },
                                   child: Container(
                                     padding: EdgeInsets.symmetric(
@@ -4697,6 +4708,7 @@ void showMenuAdd(BuildContext context, Partner partner) {
     barrierDismissible: true, // true로 설정했으므로 barrierLabel 필요
     barrierLabel: "닫기", // 접근성 레이블 설정
     barrierColor: Colors.black54, // 배경 색상
+
     pageBuilder: (context, animation, secondaryAnimation) {
       return Scaffold(
           bottomNavigationBar: Container(
@@ -4714,14 +4726,73 @@ void showMenuAdd(BuildContext context, Partner partner) {
               vertical: 8,
             ),
             child: YellowElevationBtn(
-              onPressed: () {},
+              onPressed: () async {
+                if (partner.id != null) {
+                  await controller.postRegisterMenus(partnerId: partner.id!);
+                  Get.snackbar(
+                    "알림",
+                    "성공적으로 저장되었습니다.",
+                    snackPosition: SnackPosition.TOP, // 상단에 표시
+                    backgroundColor: CatchmongColors.green_line,
+                    colorText: Colors.white,
+                    icon: Icon(
+                      Icons.check_circle,
+                      color: Colors.white,
+                    ),
+                    duration: Duration(seconds: 1),
+                    borderRadius: 10,
+                    margin: EdgeInsets.all(10),
+                  );
+                }
+              },
               title: Text("저장하기"),
             ),
           ),
           backgroundColor: Colors.white,
           appBar: PreviewAppbar(
             title: "메뉴 등록",
-            onTap: () {},
+            onTap: () {
+              Partner previewPratner = Partner(
+                  name: partner.name,
+                  foodType: partner.foodType,
+                  category: partner.category,
+                  address: partner.address,
+                  phone: partner.phone,
+                  hasHoliday: partner.hasHoliday,
+                  businessTimeConfig: partner.businessTimeConfig,
+                  menus: controller.newMenus,
+                  amenities: partner.amenities,
+                  breakTime: partner.breakTime,
+                  businessProofs: partner.businessProofs,
+                  businessTime: partner.businessTime,
+                  description: partner.description,
+                  id: partner.id,
+                  latitude: partner.latitude,
+                  longitude: partner.longitude,
+                  qrCode: partner.qrCode,
+                  regionId: partner.regionId,
+                  regularHoliday: partner.regularHoliday,
+                  reviewCount: partner.reviewCount,
+                  reviews: partner.reviews,
+                  storePhotos: partner.storePhotos,
+                  createdAt: DateTime.now(),
+                  updatedAt: DateTime.now());
+              final businessStatus = controller.getBusinessStatus(
+                previewPratner.businessTime ?? "",
+                previewPratner.breakTime,
+                previewPratner.regularHoliday,
+              );
+              final rating = controller.getRating(previewPratner);
+              final replyCount =
+                  controller.getReplyCount(previewPratner.reviews?.length ?? 0);
+              controller.showSelectedPartner(
+                context,
+                previewPratner,
+                businessStatus,
+                rating,
+                replyCount,
+              );
+            },
           ),
           body: SafeArea(
               child: SingleChildScrollView(
@@ -4772,6 +4843,10 @@ void showMenuAdd(BuildContext context, Partner partner) {
                                     width: 100,
                                     height: 100,
                                     child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
                                       children: [
                                         SizedBox(
                                           height: 16,
@@ -5027,6 +5102,10 @@ void showMenuAdd(BuildContext context, Partner partner) {
                               image: controller.menuImg.value!.path,
                               createdAt: DateTime.now());
                           controller.newMenus.add(menu);
+                          controller.selectedMenuCategory.value = "메인메뉴";
+                          controller.menuNameTxtController.clear();
+                          controller.menuPriceTxtController.clear();
+                          controller.menuImg.value = null;
                         }
                       })
                 ]),
@@ -5052,63 +5131,70 @@ void showMenuAdd(BuildContext context, Partner partner) {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Expanded(
-                                      child: Container(
-                                        width: 100,
-                                        height: 100,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(8)),
-                                          border: Border.all(
-                                            color: CatchmongColors.gray,
-                                            width: 1,
-                                          ), // 외부 테두리
-                                        ),
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(
-                                              8), // 이미지를 둥글게 자르기
-                                          child: Image.asset(
-                                            'assets/images/review2.jpg', // 이미지 경로
-                                            fit: BoxFit
-                                                .cover, // 이미지가 Container 크기에 맞게 자르기
-                                          ),
-                                        ),
+                                    Container(
+                                      width: 100,
+                                      height: 100,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(8)),
+                                        border: Border.all(
+                                          color: CatchmongColors.gray,
+                                          width: 1,
+                                        ), // 외부 테두리
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(
+                                            8), // 이미지를 둥글게 자르기
+                                        child: ImgCard(
+                                            isLocal: !controller
+                                                .newMenus[idx].image
+                                                .contains("uploads"),
+                                            path: !controller
+                                                    .newMenus[idx].image
+                                                    .contains("uploads")
+                                                ? controller.newMenus[idx].image
+                                                : "${controller.baseUrl}/${controller.newMenus[idx].image}"), // 이미지
                                       ),
                                     ),
                                     SizedBox(
                                       width: 12,
                                     ),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        Text(
-                                          "카테고리",
-                                          style: TextStyle(
-                                            color: CatchmongColors.black,
-                                            fontWeight: FontWeight.w400,
-                                            fontSize: 12,
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          Text(
+                                            controller.newMenus[idx].category,
+                                            style: TextStyle(
+                                              color: CatchmongColors.black,
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 12,
+                                            ),
                                           ),
-                                        ),
-                                        Text(
-                                          "아보카도 치폴레 크림 쉬림프",
-                                          style: TextStyle(
-                                            color: CatchmongColors.black,
-                                            fontWeight: FontWeight.w400,
-                                            fontSize: 16,
+                                          Text(
+                                            controller.newMenus[idx].name,
+                                            style: TextStyle(
+                                              color: CatchmongColors.black,
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 16,
+                                            ),
                                           ),
-                                        ),
-                                        Text(
-                                          "12,800원",
-                                          style: TextStyle(
-                                            color: CatchmongColors.black,
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 20,
+                                          Text(
+                                            NumberFormat('#,##0', 'en_US')
+                                                    .format(controller
+                                                        .newMenus[idx].price) +
+                                                "원",
+                                            style: TextStyle(
+                                              color: CatchmongColors.black,
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 20,
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                     SizedBox(
                                       width: 10,
@@ -5127,7 +5213,13 @@ void showMenuAdd(BuildContext context, Partner partner) {
             ],
           ))));
     },
-  );
+  ).then((_) {
+    controller.selectedMenuCategory.value = "메인메뉴";
+    controller.menuNameTxtController.clear();
+    controller.menuPriceTxtController.clear();
+    controller.menuImg.value = null;
+    controller.newMenus.clear();
+  });
 }
 
 void showStoreEdit(BuildContext context, int partnerId) {

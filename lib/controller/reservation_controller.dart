@@ -64,7 +64,8 @@ class ReservationConteroller extends GetxController {
         queryParameters: {
           'userId': userId,
           "sortType": getSortType(),
-          "reservationDate": reservationDateSerialized
+          "startDate": reservationDateSerialized[0],
+          "endDate": reservationDateSerialized[1],
         }, // 쿼리 파라미터
       );
 
@@ -76,12 +77,15 @@ class ReservationConteroller extends GetxController {
         reservations.value = data
             .map((json) => Reservation.fromJson(json as Map<String, dynamic>))
             .toList();
+        print("예약 데이터 ${reservations.value}");
       } else {
         reservations.value = [];
+        print("[FAIL] 예약 데이터 불러오기 실패");
         // throw Exception('Failed to fetch reservations');
       }
     } catch (e) {
       reservations.value = [];
+      print("[FAIL] 예약 데이터 불러오기 실패");
       // throw Exception('Error fetching reservations: $e');
     }
   }
@@ -161,9 +165,13 @@ class ReservationConteroller extends GetxController {
 
       case "월간":
         // 월 선택
+        final DateTime now = DateTime.now();
+        // initialDate를 항상 현재 월의 첫 번째 날로 설정
+        final DateTime initialDate = DateTime(now.year, now.month, 1);
+
         final DateTime? pickedMonth = await showDatePicker(
           context: context,
-          initialDate: now,
+          initialDate: initialDate,
           firstDate: DateTime(2000, 1),
           lastDate: DateTime(2100, 12),
           selectableDayPredicate: (date) {
@@ -173,7 +181,8 @@ class ReservationConteroller extends GetxController {
 
         if (pickedMonth != null) {
           // 선택된 월의 시작과 끝 설정
-          selectedDate[0].value = DateTime(pickedMonth.year, pickedMonth.month);
+          selectedDate[0].value =
+              DateTime(pickedMonth.year, pickedMonth.month, 1);
           selectedDate[1].value =
               DateTime(pickedMonth.year, pickedMonth.month + 1, 0);
         }
