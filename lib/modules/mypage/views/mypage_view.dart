@@ -18,6 +18,7 @@ import 'package:catchmong/widget/bar/close_appbar.dart';
 import 'package:catchmong/widget/bar/default_appbar.dart';
 import 'package:catchmong/widget/bar/preview_appbar.dart';
 import 'package:catchmong/widget/button/YellowElevationBtn.dart';
+import 'package:catchmong/widget/button/datepick_btn.dart';
 import 'package:catchmong/widget/button/outline_btn_with_icon.dart';
 import 'package:catchmong/widget/button/outlined_btn.dart';
 import 'package:catchmong/widget/button/yellow-toggle-btn.dart';
@@ -770,37 +771,14 @@ void showReservationDialog(BuildContext context) {
                       width: 16,
                     ),
                     Expanded(
-                      child: OutlinedBtnWithIcon(
-                        height: 48,
-                        title: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Obx(() => Text(
-                                  DateFormat('yy.MM.dd').format(
-                                          controller.selectedDate[0].value) +
-                                      "~" +
-                                      DateFormat('yy.MM.dd').format(
-                                          controller.selectedDate[1].value),
-                                  style: TextStyle(
-                                    color: CatchmongColors.black,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                )),
-                            Icon(
-                              Icons.calendar_today_rounded,
-                              size: 16,
-                              color: CatchmongColors.black,
-                            ),
-                          ],
-                        ),
-                        onPress: () async {
-                          await controller.selectDate(context);
-                          await controller.fetchReservations(
-                              loginController.user.value!.id);
-                        },
-                      ),
-                    ),
+                        child: Obx(() => DatePickBtn(
+                            startDate: controller.selectedDate[0].value,
+                            endDate: controller.selectedDate[1].value,
+                            onPress: () async {
+                              await controller.selectDate(context);
+                              await controller.fetchReservations(
+                                  loginController.user.value!.id);
+                            }))),
                     SizedBox(
                       width: 20,
                     ),
@@ -930,7 +908,8 @@ void showReservationDialog(BuildContext context) {
                                           children: [
                                             Text(
                                               controller.formatReservationTime(
-                                                  reservation.createdAt),
+                                                  reservation
+                                                      .reservationStartDate),
                                               style: TextStyle(
                                                 color: CatchmongColors.black,
                                                 fontSize: 12,
@@ -1656,58 +1635,79 @@ void showStoreInfo(BuildContext context, Partner store) {
                                   children: [
                                     //날짜 드롭박스
                                     Container(
-                                      padding:
-                                          EdgeInsets.symmetric(horizontal: 8),
-                                      height: 48,
-                                      width: 100,
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: Colors.grey.shade300,
+                                        padding:
+                                            EdgeInsets.symmetric(horizontal: 8),
+                                        height: 48,
+                                        width: 100,
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: Colors.grey.shade300,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
                                         ),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: DropdownButton<String>(
-                                        isExpanded: true,
-                                        underline: SizedBox(),
-                                        value: reservationController
-                                            .selectedDateItem.value,
-                                        items: reservationController.dateItems
-                                            .map((String value) =>
-                                                DropdownMenuItem<String>(
-                                                  value: value,
-                                                  child: Text(
-                                                    value,
-                                                    style: TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.w400,
-                                                      color: Colors.black,
-                                                    ),
-                                                  ),
-                                                ))
-                                            .toList(),
-                                        onChanged: (String? newValue) {
-                                          if (newValue != null) {}
-                                        },
-                                      ),
-                                    ),
+                                        child: Obx(
+                                          () => DropdownButton<String>(
+                                            isExpanded: true,
+                                            underline: SizedBox(),
+                                            value: reservationController
+                                                .selectedDateItem.value,
+                                            items: reservationController
+                                                .dateItems
+                                                .map((String value) =>
+                                                    DropdownMenuItem<String>(
+                                                      value: value,
+                                                      child: Text(
+                                                        value,
+                                                        style: TextStyle(
+                                                          fontSize: 14,
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                          color: Colors.black,
+                                                        ),
+                                                      ),
+                                                    ))
+                                                .toList(),
+                                            onChanged: (String? newValue) {
+                                              if (newValue != null) {
+                                                reservationController
+                                                    .selectedDateItem
+                                                    .value = newValue;
+                                              }
+                                            },
+                                          ),
+                                        )),
                                     SizedBox(
                                       width: 10,
                                     ),
                                     //연도
+                                    // Expanded(
+                                    //   child: Obx(() => OutlinedBtn(
+                                    //       height: 48,
+                                    //       title:
+                                    //           '${dateFormatter.format(reservationController.selectedResDate[0].value)}~${dateFormatter.format(reservationController.selectedResDate[1].value)}',
+                                    // onPress: () async {
+                                    //   await reservationController
+                                    //       .selectReservationDate(context);
+                                    //   reservationController
+                                    //       .fetchPartnerReservations(
+                                    //           partnerId: store.id!);
+                                    // })),
+                                    // )
                                     Expanded(
-                                      child: Obx(() => OutlinedBtn(
-                                          height: 48,
-                                          title:
-                                              '${dateFormatter.format(reservationController.selectedResDate[0].value)}~${dateFormatter.format(reservationController.selectedResDate[1].value)}',
-                                          onPress: () async {
-                                            await reservationController
-                                                .selectReservationDate(context);
-                                            reservationController
-                                                .fetchPartnerReservations(
-                                                    partnerId: store.id!);
-                                          })),
-                                    )
+                                        child: Obx(() => DatePickBtn(
+                                            startDate: reservationController
+                                                .selectedResDate[0].value,
+                                            endDate: reservationController
+                                                .selectedResDate[1].value,
+                                            onPress: () async {
+                                              await reservationController
+                                                  .selectReservationDate(
+                                                      context);
+                                              reservationController
+                                                  .fetchPartnerReservations(
+                                                      partnerId: store.id!);
+                                            })))
                                   ],
                                 ),
                               ),

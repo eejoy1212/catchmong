@@ -150,7 +150,7 @@ class ReservationStatusCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    formatCreatedAt(reservation.createdAt),
+                    formatCreatedAt(reservation.reservationStartDate),
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
@@ -161,9 +161,10 @@ class ReservationStatusCard extends StatelessWidget {
                     height: 8,
                   ),
                   Text(
-                    "",
-                    // formatReservationTimeWithWeekday(
-                    //     reservation.reservationDate),
+                    formatReservationTimeWithWeekday([
+                      reservation.reservationStartDate,
+                      reservation.reservationEndDate
+                    ]),
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w400,

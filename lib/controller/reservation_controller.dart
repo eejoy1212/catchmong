@@ -267,7 +267,7 @@ class ReservationConteroller extends GetxController {
     DateTime now = DateTime.now();
 
     // 선택 방식에 따라 날짜 선택 형태 결정
-    switch (selectedResDatePickType.value) {
+    switch (selectedDateItem.value) {
       case "년간":
         // 년도 선택 (Custom Dialog 사용)
         final int? pickedYear = await showDialog<int>(
