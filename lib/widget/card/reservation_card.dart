@@ -1,4 +1,6 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/const/constant.dart';
+import 'package:catchmong/model/reservation_setting.dart';
 import 'package:catchmong/modules/partner/controllers/partner-controller.dart';
 import 'package:catchmong/widget/bar/close_appbar.dart';
 import 'package:catchmong/widget/bar/default_appbar.dart';
@@ -6,6 +8,7 @@ import 'package:catchmong/widget/button/YellowElevationBtn.dart';
 import 'package:catchmong/widget/button/outline_btn_with_icon.dart';
 import 'package:catchmong/widget/button/outlined_btn.dart';
 import 'package:catchmong/widget/button/yellow-toggle-btn.dart';
+import 'package:catchmong/widget/card/img_card.dart';
 import 'package:catchmong/widget/txtfield/border-txtfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -13,18 +16,42 @@ import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ReservationCard extends StatelessWidget {
-  final String imageSrc;
-  const ReservationCard({super.key, required this.imageSrc});
+  final ReservationSetting setting;
+  const ReservationCard({super.key, required this.setting});
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final PartnerController controller = Get.find<PartnerController>();
+    bool isLocal = !setting.reservationImage!.contains("uploads");
+    String formatReservationPeriod(DateTime startDate, DateTime endDate) {
+      // 요일 확인 (1: 월요일 ~ 5: 금요일 -> 평일, 6: 토요일, 7: 일요일 -> 주말)
+      bool isWeekend(DateTime date) {
+        return date.weekday == 6 || date.weekday == 7;
+      }
+
+      // 시간 포맷: HH시 mm분
+      String formatTime(DateTime date) {
+        return "${date.hour.toString().padLeft(2, '0')}시 ${date.minute.toString().padLeft(2, '0')}분";
+      }
+
+      // 시작 시간과 종료 시간 포맷
+      String startTime = formatTime(startDate);
+      String endTime = formatTime(endDate);
+
+      // 평일 또는 주말 판단
+      String dayType = isWeekend(startDate) ? "주말 예약" : "평일 예약";
+
+      // 결과 반환
+      return "$dayType($startTime~$endTime)";
+    }
+
     return InkWell(
       onTap: () {
         showReservationPerPartner(context);
       },
       child: Container(
+        clipBehavior: Clip.hardEdge,
         margin: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         width: width, // 컨테이너 너비
         // height: 200, // 컨테이너 높이
@@ -44,16 +71,31 @@ class ReservationCard extends StatelessWidget {
         child: Center(
           child: Column(
             children: [
+              // Container(
+              //     height: 200,
+              //     child: Center(
+              //         child: Text(
+              //       "첨부한 \n가게사진",
+              //       textAlign: TextAlign.center,
+              //     ))),
               Container(
-                  height: 200,
-                  child: Center(
-                      child: Text(
-                    "첨부한 \n가게사진",
-                    textAlign: TextAlign.center,
-                  ))),
-              Divider(
-                color: CatchmongColors.gray100,
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: CatchmongColors.gray100,
+                    ),
+                  ),
+                ),
+                height: 200,
+                child: ImgCard(
+                    width: double.infinity, // 부모의 너비에 맞게 확장
+                    height: double.infinity, // 부모의 높이에 맞게 확장
+                    isLocal: isLocal,
+                    path: isLocal
+                        ? setting.reservationImage!
+                        : "http://$myPort:3000/${setting.reservationImage!}"),
               ),
+
               Container(
                 width: width,
                 height: 128,
@@ -68,7 +110,8 @@ class ReservationCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "평일 예약(11시30분~20시00분)",
+                      formatReservationPeriod(
+                          setting.startTime, setting.endTime),
                       style: TextStyle(
                         color: CatchmongColors.gray_800,
                         fontSize: 14,
@@ -79,7 +122,7 @@ class ReservationCard extends StatelessWidget {
                       height: 8,
                     ),
                     Text(
-                      "*예약은 최소 1시간전 시간부터 가능합니다.\n예약 시간맞춰서 방문 부탁드립니다.\n*예약시 이탈리아 최고급 탄산수(1병)를 서비스로 드리고 있습니다!\n노쇼 혹은 당일취소는 저희들뿐 아니라 다른 고객분들께 피해가 됩니다.\n신중하게 예약하시길 부탁드립니다!",
+                      setting.description ?? "",
                       style: TextStyle(
                         color: CatchmongColors.gray_800,
                         fontSize: 14,

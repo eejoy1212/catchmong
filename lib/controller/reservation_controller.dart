@@ -1,11 +1,31 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:http/http.dart' as http;
 import 'package:catchmong/const/constant.dart';
 import 'package:catchmong/model/reservation.dart';
+import 'package:catchmong/model/reservation_setting.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 class ReservationConteroller extends GetxController {
+  //예약 설정
+  RxList<ReservationSetting> reservationSettings = RxList.empty();
+  RxBool isSetting = false.obs;
+  final TextEditingController reservationNameController =
+      TextEditingController();
+  final TextEditingController reservationDescriptionController =
+      TextEditingController();
+  // List<String> dayTypeOptions = ["평일", "주말"];
+  RxString selectedDayType = "평일".obs;
+  RxString selectedMinuteType = "30분".obs;
+  Rx<DateTime> selectedStartTime = DateTime.now().obs;
+  Rx<DateTime> selectedEndTime = DateTime.now().obs;
+  RxString selectedNumOfPeople = "1명".obs;
+  final TextEditingController tableNumTxtController = TextEditingController();
+  Rxn<File> selectedSettingImage = Rxn<File>();
+  //예약 설정
   RxList<Reservation> reservations = RxList.empty();
   RxInt sortType = 0.obs;
   List<String> datepickType = [
@@ -123,6 +143,66 @@ class ReservationConteroller extends GetxController {
 
     // 최종 문자열 생성
     return '$reservationType($startTime~$endTime)';
+  }
+
+  Future<void> postCreateReservationSetting({
+    // required int partnerId,
+    // required String name,
+    // String? description,
+    // required String availabilityType, // WEEKDAY, WEEKEND, DAILY 중 하나
+    // required String startTime, // HH:mm:ss 형식
+    // required String endTime, // HH:mm:ss 형식
+    // required String timeUnit, // THIRTY_MIN 또는 ONE_HOUR
+    // required int availableTables,
+    // required List<String> allowedPeople,
+    required ReservationSetting reservationSetting,
+    // required File reservationImage, // 이미지 파일
+  }) async {
+    final uri =
+        Uri.parse('http://$myPort:3000/reservationsetting'); // 서버 URL로 변경
+    final request = http.MultipartRequest('POST', uri);
+
+    // 필드 추가
+    request.fields['partnerId'] = reservationSetting.partnerId.toString();
+    request.fields['name'] = reservationSetting.name;
+    if (reservationSetting.description != null) {
+      request.fields['description'] = reservationSetting.description ?? "";
+    }
+    request.fields['availabilityType'] = reservationSetting.availabilityType;
+    request.fields['startTime'] =
+        reservationSetting.startTime.toIso8601String();
+    request.fields['endTime'] = reservationSetting.endTime.toIso8601String();
+    request.fields['timeUnit'] = reservationSetting.timeUnit;
+    request.fields['availableTables'] =
+        reservationSetting.availableTables.toString();
+    request.fields['allowedPeople'] = reservationSetting.allowedPeople;
+
+    // 이미지 파일 추가
+    if (selectedSettingImage.value != null) {
+      request.files.add(await http.MultipartFile.fromPath(
+        'reservationImage',
+        selectedSettingImage.value!.path,
+      ));
+    }
+
+    try {
+      final response = await request.send();
+
+      if (response.statusCode == 201) {
+        final responseBody = await response.stream.bytesToString();
+        final responseData = jsonDecode(responseBody);
+        print('Reservation setting created: $responseData');
+        reservationSettings.value = [
+          ReservationSetting.fromJson(responseData),
+          ...reservationSettings
+        ];
+      } else {
+        final errorBody = await response.stream.bytesToString();
+        print('Failed to create reservation setting: $errorBody');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
   }
 
   Future<void> selectDate(BuildContext context) async {
@@ -410,6 +490,35 @@ class ReservationConteroller extends GetxController {
       }
     } catch (e) {
       throw Exception('Error fetching partner reservations: $e');
+    }
+  }
+
+  Future<void> fetchReservationSettings(int partnerId) async {
+    try {
+      final response =
+          await _dio.get("http://$myPort:3000/reservationsetting/$partnerId");
+
+      if (response.statusCode == 200) {
+        // JSON 데이터를 리스트로 변환
+        final List<dynamic> jsonData = response.data;
+        final List<Map<String, dynamic>> originReservationSettings =
+            jsonData.map((data) => data as Map<String, dynamic>).toList();
+        List<ReservationSetting> origin = originReservationSettings
+            .map((json) => ReservationSetting.fromJson(json))
+            .toList();
+        reservationSettings.value = origin.reversed.toList();
+        // 콘솔에 출력
+        // print('Reservation Settings for Partner ID $partnerId:');
+        // for (var setting in reservationSettings) {
+        //   print(setting);
+        // }
+      } else if (response.statusCode == 404) {
+        print('No reservation settings found for Partner ID: $partnerId');
+      } else {
+        print('Failed to fetch reservation settings: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching reservation settings: $e');
     }
   }
 }

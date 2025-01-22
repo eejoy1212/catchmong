@@ -11,6 +11,8 @@ class BorderTxtField extends StatelessWidget {
   final bool? readOnly;
   final Widget? suffix;
   final Widget? helper;
+  final int? maxLines;
+  final bool expands; // 텍스트 필드 확장 여부
   const BorderTxtField({
     Key? key,
     this.hintText,
@@ -21,7 +23,9 @@ class BorderTxtField extends StatelessWidget {
     this.errorText,
     this.readOnly = false,
     this.suffix,
-    this.helper, // 에러 메시지 추가
+    this.helper,
+    this.maxLines = 1, // 에러 메시지 추가
+    this.expands = false, // 텍스트 필드 확장 여부
   }) : super(key: key);
 
   @override
@@ -29,6 +33,8 @@ class BorderTxtField extends StatelessWidget {
     return TextField(
       readOnly: readOnly ?? false,
       maxLength: maxLength,
+      maxLines: maxLines,
+      expands: expands,
       keyboardType: textInputType,
       controller: controller,
       onChanged: onChanged,

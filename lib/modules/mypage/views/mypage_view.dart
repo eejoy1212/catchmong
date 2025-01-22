@@ -8,6 +8,8 @@ import 'package:catchmong/controller/review_controller.dart';
 import 'package:catchmong/model/catchmong_user.dart';
 import 'package:catchmong/model/menu.dart';
 import 'package:catchmong/model/partner.dart';
+import 'package:catchmong/model/reservation.dart';
+import 'package:catchmong/model/reservation_setting.dart';
 import 'package:catchmong/modules/location/scrap/views/scrap_view.dart';
 import 'package:catchmong/modules/location/views/location_search_view.dart';
 import 'package:catchmong/modules/login/controllers/login_controller.dart';
@@ -30,6 +32,8 @@ import 'package:catchmong/widget/chart/horizontal_stacked_bar_chart.dart';
 import 'package:catchmong/widget/chart/half_pie_chart.dart';
 import 'package:catchmong/widget/chip/map_chip.dart';
 import 'package:catchmong/widget/dialog/UseDialog.dart';
+import 'package:catchmong/widget/section/reservation_register_section.dart';
+import 'package:catchmong/widget/section/written_reservation_register_section.dart';
 import 'package:catchmong/widget/txtfield/border-txtfield.dart';
 import 'package:daum_postcode_search/daum_postcode_search.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -2224,8 +2228,13 @@ void showStoreInfo(BuildContext context, Partner store) {
                                   ),
                                 ),
                                 InkWell(
-                                  onTap: () {
-                                    showReservationSetting(context);
+                                  onTap: () async {
+                                    if (store.id != null) {
+                                      await reservationController
+                                          .fetchReservationSettings(store.id!);
+                                      showReservationSetting(
+                                          context, store.id!);
+                                    }
                                   },
                                   child: Container(
                                     padding: EdgeInsets.symmetric(
@@ -4628,11 +4637,43 @@ void showStoreVacationAndTime(BuildContext context) {
 }
 
 //메뉴 등록
-void showReservationSetting(BuildContext context) {
+void showReservationSetting(BuildContext context, int partnerId) {
   double width = MediaQuery.of(context).size.width;
   String selectedBusinessType = "선택"; // 업태 기본값
   String selectedCategory = "선택"; // 카테고리 기본값
   String selectedDay = "매 주"; // 정기 휴무일 기본값
+  final ReservationConteroller controller = Get.find<ReservationConteroller>();
+  String getAvailabilityType(String value) {
+    switch (value) {
+      case "평일":
+        return "WEEKDAY";
+      case "주말":
+        return "WEEKEND";
+      case "매일":
+        return "DAILY";
+      default:
+        return "DAILY";
+    }
+  }
+
+  String getTimeUnit(String value) {
+    switch (value) {
+      case "30분":
+        return "THIRTY_MIN";
+      case "1시간":
+        return "ONE_HOUR";
+      default:
+        return "THIRTY_MIN";
+    }
+  }
+
+  bool validateDateRange(DateTime startDate, DateTime endDate) {
+    if (startDate.isAfter(endDate) || startDate.isAtSameMomentAs(endDate)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   showGeneralDialog(
     context: context,
@@ -4641,6 +4682,127 @@ void showReservationSetting(BuildContext context) {
     barrierColor: Colors.black54, // 배경 색상
     pageBuilder: (context, animation, secondaryAnimation) {
       return Scaffold(
+          bottomNavigationBar: Container(
+            height: 68,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(
+                top: BorderSide(
+                  color: CatchmongColors.gray50,
+                ),
+              ),
+            ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20.0,
+              vertical: 8,
+            ),
+            child: YellowElevationBtn(
+              onPressed: () async {
+                // await controller.postReservationSetting();
+                // Get.back();
+                if (controller.reservationNameController.text.isEmpty) {
+                  Get.snackbar(
+                    "알림",
+                    "예약 상품명을 입력 해주세요.",
+                    snackPosition: SnackPosition.TOP, // 상단에 표시
+                    backgroundColor: CatchmongColors.yellow_main,
+                    colorText: CatchmongColors.black,
+                    icon:
+                        Icon(Icons.check_circle, color: CatchmongColors.black),
+                    duration: Duration(seconds: 1),
+                    borderRadius: 10,
+                    margin: EdgeInsets.all(10),
+                  );
+                } else if (controller.tableNumTxtController.text.isEmpty) {
+                  Get.snackbar(
+                    "알림",
+                    "테이블 재고를 입력 해주세요.",
+                    snackPosition: SnackPosition.TOP, // 상단에 표시
+                    backgroundColor: CatchmongColors.yellow_main,
+                    colorText: CatchmongColors.black,
+                    icon:
+                        Icon(Icons.check_circle, color: CatchmongColors.black),
+                    duration: Duration(seconds: 1),
+                    borderRadius: 10,
+                    margin: EdgeInsets.all(10),
+                  );
+                } else if (controller.selectedSettingImage.value == null) {
+                  Get.snackbar(
+                    "알림",
+                    "이미지를 선택해주세요.",
+                    snackPosition: SnackPosition.TOP, // 상단에 표시
+                    backgroundColor: CatchmongColors.yellow_main,
+                    colorText: CatchmongColors.black,
+                    icon:
+                        Icon(Icons.check_circle, color: CatchmongColors.black),
+                    duration: Duration(seconds: 1),
+                    borderRadius: 10,
+                    margin: EdgeInsets.all(10),
+                  );
+                } else if (validateDateRange(controller.selectedStartTime.value,
+                    controller.selectedEndTime.value)) {
+                  Get.snackbar(
+                    "알림",
+                    "기간 설정 오류\n시작 날짜가 종료 날짜와 같거나 이후입니다.",
+                    snackPosition: SnackPosition.TOP, // 상단에 표시
+                    backgroundColor: CatchmongColors.yellow_main,
+                    colorText: CatchmongColors.black,
+                    icon:
+                        Icon(Icons.check_circle, color: CatchmongColors.black),
+                    duration: Duration(seconds: 1),
+                    borderRadius: 10,
+                    margin: EdgeInsets.all(10),
+                  );
+                } else {
+                  ReservationSetting reservationSetting = ReservationSetting(
+                    partnerId: partnerId,
+                    name: controller.reservationNameController.text,
+                    description:
+                        controller.reservationDescriptionController.text,
+                    startTime: controller.selectedStartTime.value,
+                    endTime: controller.selectedEndTime.value,
+                    availabilityType:
+                        getAvailabilityType(controller.selectedDayType.value),
+                    timeUnit: getTimeUnit(controller.selectedMinuteType.value),
+                    availableTables:
+                        int.tryParse(controller.tableNumTxtController.text) ??
+                            0,
+                    allowedPeople: controller.selectedNumOfPeople.value,
+                    reservationImage:
+                        controller.selectedSettingImage.value == null
+                            ? ""
+                            : controller.selectedSettingImage.value!.path,
+                  );
+                  await controller.postCreateReservationSetting(
+                      reservationSetting: reservationSetting);
+                  controller.reservationNameController.clear();
+                  controller.reservationDescriptionController.clear();
+                  controller.selectedDayType.value = "평일";
+                  controller.selectedStartTime.value = DateTime.now();
+                  controller.selectedEndTime.value = DateTime.now();
+                  controller.selectedMinuteType.value = "30분";
+                  controller.tableNumTxtController.clear();
+                  controller.selectedNumOfPeople.value = "1명";
+                  controller.selectedSettingImage.value = null;
+                  Get.snackbar(
+                    "알림",
+                    "예약이 등록되었습니다",
+                    snackPosition: SnackPosition.TOP, // 상단에 표시
+                    backgroundColor: CatchmongColors.green_line,
+                    colorText: Colors.white,
+                    icon: Icon(
+                      Icons.check_circle,
+                      color: Colors.white,
+                    ),
+                    duration: Duration(seconds: 1),
+                    borderRadius: 10,
+                    margin: EdgeInsets.all(10),
+                  );
+                }
+              },
+              title: Text("등록하기"),
+            ),
+          ),
           backgroundColor: CatchmongColors.gray50,
           appBar: DefaultAppbar(
             title: "예약 설정",
@@ -4693,18 +4855,196 @@ void showReservationSetting(BuildContext context) {
                       ],
                     ),
                     const Spacer(), // 오른쪽에 스위치를 배치하기 위해 Spacer 사용
-                    CupertinoSwitch(
-                      value: false, // 현재 스위치 상태
-                      onChanged: (bool value) {},
-                      activeColor: CatchmongColors.blue1, // 스위치가 켜졌을 때 색상
-                    ),
+                    Obx(() => CupertinoSwitch(
+                          value: controller.isSetting.value, // 현재 스위치 상태
+                          onChanged: (bool value) {
+                            controller.isSetting.value = value;
+                          },
+                          activeColor: CatchmongColors.blue1, // 스위치가 켜졌을 때 색상
+                        )),
                   ],
                 ),
               ),
+              Obx(() => controller.isSetting.isTrue
+                  ? ReservationRegisterSection(
+                      selectedDayType: controller.selectedDayType.value,
+                      nameTxtController: controller.reservationNameController,
+                      onChangedName: (String value) {
+                        if (controller.reservationNameController.text.length >
+                            300) {
+                          Future.microtask(() {
+                            controller.reservationNameController.value =
+                                TextEditingValue(
+                              text: value.substring(0, 300),
+                              selection: TextSelection.collapsed(offset: 300),
+                            );
+                          });
+                        }
+                      },
+                      descriptionTxtController:
+                          controller.reservationDescriptionController,
+                      onChangedDescription: (String value) {
+                        if (controller
+                                .reservationDescriptionController.text.length >
+                            300) {
+                          Future.microtask(() {
+                            controller.reservationDescriptionController.value =
+                                TextEditingValue(
+                              text: value.substring(0, 300),
+                              selection: TextSelection.collapsed(offset: 300),
+                            );
+                          });
+                        }
+                      },
+                      onChangedDayType: (String? value) {
+                        if (value != null) {
+                          controller.selectedDayType.value = value;
+                        }
+                      },
+                      selectedStartTime: DateFormat('HH:mm')
+                          .format(controller.selectedStartTime.value),
+                      selectedEndTime: DateFormat('HH:mm')
+                          .format(controller.selectedEndTime.value),
+                      selectedMinuteType: controller.selectedMinuteType.value,
+                      onChangedMinuteType: (String? value) {
+                        if (value != null) {
+                          controller.selectedMinuteType.value = value;
+                        }
+                      },
+                      selectedNumOfPeople: controller.selectedNumOfPeople.value,
+                      onChangedNumOfPeople: (String value) {
+                        controller.selectedNumOfPeople.value = value;
+                      },
+                      tableNumTxtController: controller.tableNumTxtController,
+                      onChangedTableNum: (String value) {
+                        controller.tableNumTxtController.text = value;
+                      },
+                      onImageSelected: (XFile file) {
+                        controller.selectedSettingImage.value = File(file.path);
+                        print(
+                            "선택된 이미지 : ${controller.selectedSettingImage.value}");
+                      },
+                      onDeleteImg: () {
+                        controller.selectedSettingImage.value = null;
+                      },
+                      image: controller.selectedSettingImage.value,
+                      onChangedStartTime: (DateTime value) {
+                        controller.selectedStartTime.value = value;
+                      },
+                      onChangedEndTime: (DateTime value) {
+                        controller.selectedEndTime.value = value;
+                      },
+                    )
+                  : Container()),
+              Obx(() => controller.reservationSettings.isNotEmpty
+                  ? Column(
+                      children: [
+                        ...List.generate(
+                            controller.reservationSettings.length,
+                            (int index) => WrittenReservationRegisterSection(
+                                  selectedDayType:
+                                      controller.selectedDayType.value,
+                                  nameTxtController:
+                                      controller.reservationNameController,
+                                  onChangedName: (String value) {
+                                    if (controller.reservationNameController
+                                            .text.length >
+                                        300) {
+                                      Future.microtask(() {
+                                        controller.reservationNameController
+                                            .value = TextEditingValue(
+                                          text: value.substring(0, 300),
+                                          selection: TextSelection.collapsed(
+                                              offset: 300),
+                                        );
+                                      });
+                                    }
+                                  },
+                                  descriptionTxtController: controller
+                                      .reservationDescriptionController,
+                                  onChangedDescription: (String value) {
+                                    if (controller
+                                            .reservationDescriptionController
+                                            .text
+                                            .length >
+                                        300) {
+                                      Future.microtask(() {
+                                        controller
+                                            .reservationDescriptionController
+                                            .value = TextEditingValue(
+                                          text: value.substring(0, 300),
+                                          selection: TextSelection.collapsed(
+                                              offset: 300),
+                                        );
+                                      });
+                                    }
+                                  },
+                                  onChangedDayType: (String? value) {
+                                    if (value != null) {
+                                      controller.selectedDayType.value = value;
+                                    }
+                                  },
+                                  selectedStartTime:
+                                      "controller.selectedStartTime.value",
+                                  selectedEndTime:
+                                      "controller.selectedEndTime.value",
+                                  selectedMinuteType:
+                                      controller.selectedMinuteType.value,
+                                  onChangedMinuteType: (String? value) {
+                                    if (value != null) {
+                                      controller.selectedMinuteType.value =
+                                          value;
+                                    }
+                                  },
+                                  selectedNumOfPeople:
+                                      controller.selectedNumOfPeople.value,
+                                  onChangedNumOfPeople: (String value) {
+                                    controller.selectedNumOfPeople.value =
+                                        value;
+                                  },
+                                  tableNumTxtController:
+                                      controller.tableNumTxtController,
+                                  onChangedTableNum: (String value) {
+                                    controller.tableNumTxtController.text =
+                                        value;
+                                  },
+                                  onImageSelected: (XFile file) {
+                                    controller.selectedSettingImage.value =
+                                        File(file.path);
+                                    print(
+                                        "선택된 이미지 : ${controller.selectedSettingImage.value}");
+                                  },
+                                  onDeleteImg: () {
+                                    controller.selectedSettingImage.value =
+                                        null;
+                                  },
+                                  image: controller.selectedSettingImage.value,
+                                  onChangedStartTime: (String value) {
+                                    // controller.selectedStartTime.value = value;
+                                  },
+                                  onChangedEndTime: (String value) {
+                                    // controller.selectedEndTime.value = value;
+                                  },
+                                  setting:
+                                      controller.reservationSettings[index],
+                                ))
+                      ],
+                    )
+                  : Container())
             ],
           ))));
     },
-  );
+  ).then((_) {
+    controller.reservationNameController.clear();
+    controller.reservationDescriptionController.clear();
+    controller.selectedDayType.value = "평일";
+    controller.selectedStartTime.value = DateTime.now();
+    controller.selectedEndTime.value = DateTime.now();
+    controller.selectedMinuteType.value = "30분";
+    controller.tableNumTxtController.clear();
+    controller.selectedNumOfPeople.value = "1명";
+    controller.selectedSettingImage.value = null;
+  });
 }
 
 //메뉴 등록

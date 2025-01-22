@@ -1,5 +1,6 @@
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/const/constant.dart';
+import 'package:catchmong/controller/reservation_controller.dart';
 import 'package:catchmong/model/menu.dart';
 import 'package:catchmong/model/partner.dart';
 import 'package:catchmong/widget/bar/default_appbar.dart';
@@ -138,6 +139,8 @@ class PartnerShowView extends StatelessWidget {
       return !imagePath.contains("uploads");
     }
 
+    final ReservationConteroller conteroller =
+        Get.find<ReservationConteroller>();
     return Scaffold(
       appBar: AppBar(
         leading: AppbarBackBtn(),
@@ -708,9 +711,12 @@ class PartnerShowView extends StatelessWidget {
                 ),
                 child: OutlinedBtn(
                     title: "예약하기",
-                    onPress: () {
+                    onPress: () async {
                       //파트너 아이디 넘기기
                       // Get.toNamed("/reservation", parameters: {"partner": "2"});
+                      if (partner.id == null) return;
+
+                      await conteroller.fetchReservationSettings(partner.id!);
                       //full size 다이얼로그
                       showGeneralDialog(
                         context: context,
@@ -769,8 +775,11 @@ class PartnerShowView extends StatelessWidget {
                                           true, // 부모 위젯의 높이를 넘어가지 않도록 설정
                                       physics:
                                           NeverScrollableScrollPhysics(), // 스크롤 비활성화 (필요시)
-                                      itemCount: 6, // 아이템 개수 설정
+                                      itemCount: conteroller.reservationSettings
+                                          .length, // 아이템 개수 설정
                                       itemBuilder: (context, index) {
+                                        final setting = conteroller
+                                            .reservationSettings[index];
                                         return Container(
                                           margin: EdgeInsets.only(
                                               bottom: 12), // 각 아이템의 간격 추가
@@ -782,7 +791,7 @@ class PartnerShowView extends StatelessWidget {
                                             ),
                                           ),
                                           child: ReservationCard(
-                                            imageSrc: '',
+                                            setting: setting,
                                           ),
                                         );
                                       },
