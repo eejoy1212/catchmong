@@ -22,7 +22,7 @@ class ReservationConteroller extends GetxController {
   RxString selectedMinuteType = "30분".obs;
   Rx<DateTime> selectedStartTime = DateTime.now().obs;
   Rx<DateTime> selectedEndTime = DateTime.now().obs;
-  RxString selectedNumOfPeople = "1명".obs;
+  RxList<String> selectedNumOfPeople = RxList.empty();
   final TextEditingController tableNumTxtController = TextEditingController();
   Rxn<File> selectedSettingImage = Rxn<File>();
   //예약 설정
@@ -56,6 +56,15 @@ class ReservationConteroller extends GetxController {
   RxString selectedDateItem = "직접선택".obs;
   List<Rx<DateTime>> selectedResDate = [DateTime.now().obs, DateTime.now().obs];
   RxList<Reservation> myReservations = RxList.empty();
+  Rx<DateTime> selectedReservationDate = DateTime.now().obs;
+  RxInt selectedReservationTimeIdx = 0.obs;
+  RxInt selectedReservationNumOfPeopleIdx = 0.obs;
+  final TextEditingController reservationReqController =
+      TextEditingController();
+  RxBool agreePrivacy = false.obs;
+  RxList<DateTime> fullyDt = RxList.empty();
+  RxString cancelReason = "".obs;
+  RxInt reasonIdx = 0.obs;
   String getSortType() {
     switch (sortType.value) {
       case 0:
@@ -71,6 +80,39 @@ class ReservationConteroller extends GetxController {
       default:
         return "";
     }
+  }
+
+  String formatReservationPeriod(DateTime startDate, DateTime endDate) {
+    // 요일 확인 (1: 월요일 ~ 5: 금요일 -> 평일, 6: 토요일, 7: 일요일 -> 주말)
+    bool isWeekend(DateTime date) {
+      return date.weekday == 6 || date.weekday == 7;
+    }
+
+    // 시간 포맷: HH시 mm분
+    String formatTime(DateTime date) {
+      return "${date.hour.toString().padLeft(2, '0')}시 ${date.minute.toString().padLeft(2, '0')}분";
+    }
+
+    // 시작 시간과 종료 시간 포맷
+    String startTime = formatTime(startDate);
+    String endTime = formatTime(endDate);
+
+    // 평일 또는 주말 판단
+    String dayType = isWeekend(startDate) ? "주말 예약" : "평일 예약";
+
+    // 결과 반환
+    return "$dayType($startTime~$endTime)";
+  }
+
+  List<DateTime> getTimeSlots(DateTime start, DateTime end, String timeUnit) {
+    List<DateTime> slots = [];
+    DateTime current = start;
+    while (current.isBefore(end) || current.isAtSameMomentAs(end)) {
+      slots.add(current);
+      current = current
+          .add(Duration(minutes: timeUnit == "THIRTY_MIN" ? 30 : 60)); // 30분 추가
+    }
+    return slots;
   }
 
   Future<void> fetchReservations(int userId) async {
@@ -519,6 +561,140 @@ class ReservationConteroller extends GetxController {
       }
     } catch (e) {
       print('Error fetching reservation settings: $e');
+    }
+  }
+
+  Future<void> pickPartnerRervationDate(BuildContext context) async {
+    DateTime now = DateTime.now();
+    final DateTime? pickedDay = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+
+    if (pickedDay != null) {
+      // 선택된 날짜 설정
+      selectedReservationDate.value = pickedDay;
+      // selectedDate[0].value = pickedDay;
+      // selectedDate[1].value = pickedDay;
+    }
+  }
+
+  Future<bool> postCreateReservation({
+    required int userId,
+    required int partnerId,
+    required int settingId,
+    required DateTime reservationStartDate,
+    required DateTime reservationEndDate,
+    required int numOfPeople,
+    String? request,
+  }) async {
+    try {
+      // 요청 데이터
+      final Map<String, dynamic> requestBody = {
+        'userId': userId,
+        'partnerId': partnerId,
+        'settingId': settingId,
+        'reservationStartDate': reservationStartDate.toIso8601String(),
+        'reservationEndDate': reservationEndDate.toIso8601String(),
+        'numOfPeople': numOfPeople,
+        'request': request,
+      };
+
+      // POST 요청
+      final response = await http.post(
+        Uri.parse(baseUrl),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(requestBody),
+      );
+
+      // 응답 처리
+      if (response.statusCode == 201) {
+        print('예약 등록 성공: ${response.body}');
+        return true;
+      } else {
+        print('예약 등록 실패: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      // 에러 처리
+      print('예약 등록 중 에러 발생: $e');
+      return false;
+    }
+  }
+
+  Future<void> fetchFullyBookedTimes({required int settingId}) async {
+    try {
+      // GET 요청 보내기
+      final String formattedDate =
+          selectedReservationDate.value.toIso8601String();
+      final response = await http.get(
+        Uri.parse(
+            '$baseUrl/fully-booked?selectedDate=${formattedDate}&settingId=$settingId'),
+      );
+
+      // 응답 상태 확인
+      if (response.statusCode == 200) {
+        // 응답 데이터 파싱
+        final List<dynamic> responseData = jsonDecode(response.body);
+
+        // String 형태의 날짜 데이터를 DateTime으로 변환
+        final List<DateTime> fullyBookedTimes = responseData
+            .map((timeString) => DateTime.parse(timeString as String))
+            .toList();
+        print('예약 꽉찬거 가져오기 성공: ${fullyBookedTimes}');
+        fullyDt.value = fullyBookedTimes;
+      } else {
+        print('예약 데이터 가져오기 실패: ${response.body}');
+      }
+    } catch (e) {
+      print('예약 데이터 가져오는 중 오류 발생: $e');
+    }
+  }
+
+  /// 예약 취소 함수
+  Future<void> patchCancelReservation({
+    required int reservationId,
+  }) async {
+    if (cancelReason.value.isEmpty) {
+      print('취소 사유가 비어 있습니다.');
+      return;
+    }
+
+    try {
+      final response = await _dio.patch(
+        '/$reservationId/cancel',
+        data: {
+          'cancelReason': cancelReason.value,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('예약 취소 성공: ${response.data}');
+        final json = response.data;
+        if (json["reservation"] != null) {
+          final reservation = Reservation.fromJson(json["reservation"]);
+          reservations.removeWhere((el) => el.id == reservationId);
+          reservations.add(reservation);
+          reservations.refresh(); // RxList 업데이트 호출
+        } else {
+          print('예약 데이터가 응답에 포함되지 않았습니다.');
+        }
+      } else {
+        print('예약 취소 실패: ${response.statusCode} ${response.data}');
+      }
+    } on DioError catch (e) {
+      if (e.response != null) {
+        print('API 오류: ${e.response?.statusCode}');
+        print('응답 데이터: ${e.response?.data}');
+      } else {
+        print('네트워크 오류: ${e.message}');
+      }
+    } catch (e) {
+      print('알 수 없는 오류: $e');
     }
   }
 }

@@ -1,6 +1,10 @@
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/const/constant.dart';
+import 'package:catchmong/controller/partner_controller.dart';
+import 'package:catchmong/controller/reservation_controller.dart';
+import 'package:catchmong/model/partner.dart';
 import 'package:catchmong/model/reservation_setting.dart';
+import 'package:catchmong/modules/login/controllers/login_controller.dart';
 import 'package:catchmong/modules/partner/controllers/partner-controller.dart';
 import 'package:catchmong/widget/bar/close_appbar.dart';
 import 'package:catchmong/widget/bar/default_appbar.dart';
@@ -13,6 +17,7 @@ import 'package:catchmong/widget/txtfield/border-txtfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ReservationCard extends StatelessWidget {
@@ -22,33 +27,40 @@ class ReservationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final PartnerController controller = Get.find<PartnerController>();
+    final ReservationConteroller controller =
+        Get.find<ReservationConteroller>();
+    final Partner2Controller partnerController = Get.find<Partner2Controller>();
     bool isLocal = !setting.reservationImage!.contains("uploads");
-    String formatReservationPeriod(DateTime startDate, DateTime endDate) {
-      // 요일 확인 (1: 월요일 ~ 5: 금요일 -> 평일, 6: 토요일, 7: 일요일 -> 주말)
-      bool isWeekend(DateTime date) {
-        return date.weekday == 6 || date.weekday == 7;
-      }
+    // String formatReservationPeriod(DateTime startDate, DateTime endDate) {
+    //   // 요일 확인 (1: 월요일 ~ 5: 금요일 -> 평일, 6: 토요일, 7: 일요일 -> 주말)
+    //   bool isWeekend(DateTime date) {
+    //     return date.weekday == 6 || date.weekday == 7;
+    //   }
 
-      // 시간 포맷: HH시 mm분
-      String formatTime(DateTime date) {
-        return "${date.hour.toString().padLeft(2, '0')}시 ${date.minute.toString().padLeft(2, '0')}분";
-      }
+    //   // 시간 포맷: HH시 mm분
+    //   String formatTime(DateTime date) {
+    //     return "${date.hour.toString().padLeft(2, '0')}시 ${date.minute.toString().padLeft(2, '0')}분";
+    //   }
 
-      // 시작 시간과 종료 시간 포맷
-      String startTime = formatTime(startDate);
-      String endTime = formatTime(endDate);
+    //   // 시작 시간과 종료 시간 포맷
+    //   String startTime = formatTime(startDate);
+    //   String endTime = formatTime(endDate);
 
-      // 평일 또는 주말 판단
-      String dayType = isWeekend(startDate) ? "주말 예약" : "평일 예약";
+    //   // 평일 또는 주말 판단
+    //   String dayType = isWeekend(startDate) ? "주말 예약" : "평일 예약";
 
-      // 결과 반환
-      return "$dayType($startTime~$endTime)";
-    }
+    //   // 결과 반환
+    //   return "$dayType($startTime~$endTime)";
+    // }
 
     return InkWell(
-      onTap: () {
-        showReservationPerPartner(context);
+      onTap: () async {
+        await controller.fetchFullyBookedTimes(settingId: setting.id!);
+        final partner =
+            await partnerController.fetchPartnerPhone(setting.partnerId!);
+        if (partner != null) {
+          showReservationPerPartner(context, setting, partner);
+        }
       },
       child: Container(
         clipBehavior: Clip.hardEdge,
@@ -110,7 +122,7 @@ class ReservationCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      formatReservationPeriod(
+                      controller.formatReservationPeriod(
                           setting.startTime, setting.endTime),
                       style: TextStyle(
                         color: CatchmongColors.gray_800,
@@ -142,15 +154,53 @@ class ReservationCard extends StatelessWidget {
   }
 }
 
-void showReservationPerPartner(BuildContext context) {
+void showReservationPerPartner(
+    BuildContext context, ReservationSetting setting, Partner partner) {
   double width = MediaQuery.of(context).size.width;
-  final PartnerController controller = Get.find<PartnerController>();
+  final Partner2Controller controller = Get.find<Partner2Controller>();
+  final ReservationConteroller reservationConteroller =
+      Get.find<ReservationConteroller>();
+  final LoginController loginController = Get.find<LoginController>();
   showGeneralDialog(
     context: context,
     barrierDismissible: true, // true로 설정했으므로 barrierLabel 필요
     barrierLabel: "닫기", // 접근성 레이블 설정
     barrierColor: Colors.black54, // 배경 색상
     pageBuilder: (context, animation, secondaryAnimation) {
+      List<DateTime> timeSlots = reservationConteroller.getTimeSlots(
+          setting.startTime, setting.endTime, setting.timeUnit);
+
+      final int crossAxisCount = 4; // 한 줄에 표시할 버튼 개수
+      final double buttonHeight = 48; // 버튼 높이
+      final double spacing = 8; // 간격 (세로)
+
+      // 전체 줄 수 계산
+      final int rowCount = (timeSlots.length / crossAxisCount).ceil();
+
+      // 컨테이너 높이 계산
+      final double containerHeight =
+          rowCount * buttonHeight + (rowCount - 1) * spacing; // 버튼 높이와 간격 고려
+      List<String> peopleNumString = setting.allowedPeople.split(',');
+
+      // 2. 숫자 추출 및 변환
+      List<int> numbers = peopleNumString.map((item) {
+        return int.parse(item.replaceAll(RegExp(r'[^0-9]'), ''));
+      }).toList();
+
+      // 3. 오름차순 정렬
+      numbers.sort();
+      RxString formatConfirmDateTime(DateTime date) {
+        // 요일 이름 리스트
+        List<String> weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+
+        // 월, 일, 시간 포맷
+        String formattedDate = DateFormat('MM.dd').format(date); // MM.dd 형식
+        String formattedTime = DateFormat('HH:mm').format(date); // HH:mm 형식
+        String weekday = weekdays[date.weekday - 1]; // 요일 추출 (1부터 시작)
+
+        return '$formattedDate ($weekday) $formattedTime'.obs;
+      }
+
       return Scaffold(
         bottomNavigationBar: Container(
           height: 68,
@@ -171,7 +221,7 @@ void showReservationPerPartner(BuildContext context) {
             children: [
               InkWell(
                 onTap: () {
-                  _makePhoneCall("010-7596-6578");
+                  _makePhoneCall(partner.phone);
                 },
                 child: Container(
                   child: SvgPicture.asset(
@@ -190,8 +240,76 @@ void showReservationPerPartner(BuildContext context) {
               ),
               Expanded(
                 child: YellowElevationBtn(
-                  onPressed: () {
-                    showReservationConfirm(context);
+                  onPressed: () async {
+                    if (setting.id == null) return;
+                    if (reservationConteroller.agreePrivacy.isFalse) {
+                      Get.snackbar(
+                        "알림",
+                        "개인정보 수집 및 이용에 동의해주세요.",
+                        snackPosition: SnackPosition.TOP, // 상단에 표시
+                        backgroundColor: CatchmongColors.yellow_main,
+                        colorText: CatchmongColors.black,
+                        icon: Icon(Icons.check_circle,
+                            color: CatchmongColors.black),
+                        duration: Duration(seconds: 1),
+                        borderRadius: 10,
+                        margin: EdgeInsets.all(10),
+                      );
+                      return;
+                    }
+                    final startDt = DateTime(
+                      reservationConteroller
+                          .selectedReservationDate.value.year, // 연도
+                      reservationConteroller
+                          .selectedReservationDate.value.month, // 월
+                      reservationConteroller
+                          .selectedReservationDate.value.day, // 일
+                      timeSlots[reservationConteroller
+                              .selectedReservationTimeIdx.value]
+                          .hour, // 시간
+                      timeSlots[reservationConteroller
+                              .selectedReservationTimeIdx.value]
+                          .minute, // 분
+                      timeSlots[reservationConteroller
+                              .selectedReservationTimeIdx.value]
+                          .second, // 초 (선택적)
+                      timeSlots[reservationConteroller
+                              .selectedReservationTimeIdx.value]
+                          .millisecond, // 밀리초 (선택적)
+                      timeSlots[reservationConteroller
+                              .selectedReservationTimeIdx.value]
+                          .microsecond, // 마이크로초 (선택적)
+                    );
+                    final endDt = startDt.add(Duration(
+                        minutes: setting.timeUnit == "THIRTY_MIN" ? 30 : 60));
+                    final res =
+                        await reservationConteroller.postCreateReservation(
+                      userId: loginController.user.value!.id,
+                      partnerId: partner.id!,
+                      settingId: setting.id!,
+                      reservationStartDate: startDt,
+                      reservationEndDate: endDt,
+                      numOfPeople: numbers[reservationConteroller
+                          .selectedReservationNumOfPeopleIdx.value],
+                      request:
+                          reservationConteroller.reservationReqController.text,
+                    );
+                    if (res) {
+                      showReservationConfirm(context, setting);
+                    } else {
+                      Get.snackbar(
+                        "알림",
+                        "예약을 실패했습니다.",
+                        snackPosition: SnackPosition.TOP, // 상단에 표시
+                        backgroundColor: CatchmongColors.yellow_main,
+                        colorText: CatchmongColors.black,
+                        icon: Icon(Icons.check_circle,
+                            color: CatchmongColors.black),
+                        duration: Duration(seconds: 1),
+                        borderRadius: 10,
+                        margin: EdgeInsets.all(10),
+                      );
+                    }
                   },
                   title: Text("예약하기"),
                 ),
@@ -245,10 +363,13 @@ void showReservationPerPartner(BuildContext context) {
                     width: MediaQuery.of(context).size.width,
                     height: 200, // 카드의 높이와 동일하게 설정
 
-                    child: Image.asset(
-                      "assets/images/temp-banner.jpg",
-                      width: MediaQuery.of(context).size.width,
-                      fit: BoxFit.cover,
+                    child: ImgCard(
+                      path: !setting.reservationImage!.contains("uploads")
+                          ? setting.reservationImage!
+                          : "http://$myPort:3000/${setting.reservationImage!}",
+                      width: double.infinity, // 부모의 너비에 맞게 확장
+                      height: double.infinity, // 부모의 높이에 맞게 확장
+                      isLocal: !setting.reservationImage!.contains("uploads"),
                     )),
                 //예약 안내문
                 Container(
@@ -266,7 +387,8 @@ void showReservationPerPartner(BuildContext context) {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "평일 예약(11시30분~20시00분)",
+                        reservationConteroller.formatReservationPeriod(
+                            setting.startTime, setting.endTime),
                         style: TextStyle(
                           color: CatchmongColors.gray_800,
                           fontSize: 14,
@@ -277,7 +399,7 @@ void showReservationPerPartner(BuildContext context) {
                         height: 8,
                       ),
                       Text(
-                        "*예약은 최소 1시간전 시간부터 가능합니다.\n예약 시간맞춰서 방문 부탁드립니다.\n*예약시 이탈리아 최고급 탄산수(1병)를 서비스로 드리고 있습니다!\n노쇼 혹은 당일취소는 저희들뿐 아니라 다른 고객분들께 피해가 됩니다.\n신중하게 예약하시길 부탁드립니다!",
+                        setting.description ?? "",
                         style: TextStyle(
                           color: CatchmongColors.gray_800,
                           fontSize: 14,
@@ -362,17 +484,29 @@ void showReservationPerPartner(BuildContext context) {
                                               SizedBox(
                                                 width: 8,
                                               ),
-                                              Text(
-                                                "날짜 선택",
-                                                style: TextStyle(
-                                                  color: CatchmongColors.black,
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                ),
-                                              )
+                                              Obx(() => Text(
+                                                    DateFormat("yyyy-MM-dd").format(
+                                                        reservationConteroller
+                                                            .selectedReservationDate
+                                                            .value),
+                                                    style: TextStyle(
+                                                      color:
+                                                          CatchmongColors.black,
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                    ),
+                                                  ))
                                             ],
                                           ),
-                                          onPress: () {}),
+                                          onPress: () async {
+                                            await reservationConteroller
+                                                .pickPartnerRervationDate(
+                                                    context);
+                                            await reservationConteroller
+                                                .fetchFullyBookedTimes(
+                                                    settingId: setting.id!);
+                                          }),
                                     )
                                     //예약 일자 시간 버튼들
                                     ,
@@ -383,8 +517,10 @@ void showReservationPerPartner(BuildContext context) {
                                     Container(
                                       margin:
                                           EdgeInsets.symmetric(horizontal: 20),
+                                      // constraints:
+                                      //     BoxConstraints(minHeight: 300),
                                       height:
-                                          300, // 높이 설정 (화면 넘치지 않도록)//수정할 부분, 버튼 한줄 높이 계산해서 늘어나는만큼 늘리기
+                                          containerHeight, // 높이 설정 (화면 넘치지 않도록)//수정할 부분, 버튼 한줄 높이 계산해서 늘어나는만큼 늘리기
                                       child: GridView.builder(
                                         gridDelegate:
                                             SliverGridDelegateWithFixedCrossAxisCount(
@@ -396,16 +532,36 @@ void showReservationPerPartner(BuildContext context) {
                                         ),
                                         physics:
                                             NeverScrollableScrollPhysics(), // 스크롤 비활성화
-                                        itemCount: 18, // 버튼 개수
+                                        itemCount: timeSlots.length, // 버튼 개수
                                         itemBuilder: (context, index) {
-                                          return YellowToggleBtn(
-                                            height: 48,
-                                            width: double
-                                                .infinity, // GridView가 알아서 크기를 설정
-                                            title: '11:30',
-                                            isSelected:
-                                                index == 0, // 첫 번째만 선택된 상태 (예시)
-                                          );
+                                          final time = timeSlots[index];
+                                          final formatted =
+                                              DateFormat('HH:mm').format(time);
+                                          return Obx(() => YellowToggleBtn(
+                                                isDisabled: RxBool(
+                                                        reservationConteroller
+                                                            .fullyDt
+                                                            .map((el) =>
+                                                                DateFormat(
+                                                                        'HH:mm')
+                                                                    .format(el))
+                                                            .contains(
+                                                                formatted))
+                                                    .value,
+                                                height: 48,
+                                                width: double
+                                                    .infinity, // GridView가 알아서 크기를 설정
+                                                title: formatted,
+                                                isSelected: index ==
+                                                    reservationConteroller
+                                                        .selectedReservationTimeIdx
+                                                        .value, // 첫 번째만 선택된 상태 (예시)
+                                                onTap: () {
+                                                  reservationConteroller
+                                                      .selectedReservationTimeIdx
+                                                      .value = index;
+                                                },
+                                              ));
                                         },
                                       ),
                                     ),
@@ -450,23 +606,29 @@ void showReservationPerPartner(BuildContext context) {
                                       margin: EdgeInsets.only(left: 20),
                                       height: 50,
                                       child: ListView.builder(
-                                          itemCount: 9,
+                                          itemCount: numbers.length + 1,
                                           scrollDirection: Axis.horizontal,
                                           itemBuilder:
                                               (BuildContext context, int idx) {
                                             return Container(
                                               margin: EdgeInsets.only(right: 8),
-                                              child: idx == 8
-                                                  ? YellowToggleBtn(
-                                                      width: 100,
-                                                      title: '인원문의',
-                                                      isSelected: false)
-                                                  : YellowToggleBtn(
-                                                      width: 56,
-                                                      title: '${idx + 1}명',
-                                                      isSelected: idx == 2
-                                                          ? true
-                                                          : false),
+                                              child: Obx(() => YellowToggleBtn(
+                                                    width: idx == numbers.length
+                                                        ? 120
+                                                        : 70,
+                                                    title: idx == numbers.length
+                                                        ? "인원문의전화"
+                                                        : '${numbers[idx]}명',
+                                                    isSelected: idx ==
+                                                        reservationConteroller
+                                                            .selectedReservationNumOfPeopleIdx
+                                                            .value,
+                                                    onTap: () {
+                                                      reservationConteroller
+                                                          .selectedReservationNumOfPeopleIdx
+                                                          .value = idx;
+                                                    },
+                                                  )),
                                             );
                                           }),
                                     ),
@@ -497,9 +659,26 @@ void showReservationPerPartner(BuildContext context) {
                                         horizontal: 20,
                                       ),
                                       child: BorderTxtField(
-                                        errorText: "",
-                                        controller: TextEditingController(),
-                                        onChanged: (String value) {},
+                                        controller: reservationConteroller
+                                            .reservationReqController,
+                                        onChanged: (String value) {
+                                          if (reservationConteroller
+                                                  .reservationReqController
+                                                  .text
+                                                  .length >
+                                              300) {
+                                            Future.microtask(() {
+                                              reservationConteroller
+                                                  .reservationReqController
+                                                  .value = TextEditingValue(
+                                                text: value.substring(0, 300),
+                                                selection:
+                                                    TextSelection.collapsed(
+                                                        offset: 300),
+                                              );
+                                            });
+                                          }
+                                        },
                                       ),
                                     ),
                                     // SizedBox(
@@ -543,7 +722,10 @@ void showReservationPerPartner(BuildContext context) {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            "평일 예약(11시30분~20시00분)",
+                                            reservationConteroller
+                                                .formatReservationPeriod(
+                                                    setting.startTime,
+                                                    setting.endTime),
                                             style: TextStyle(
                                               color: CatchmongColors.gray_800,
                                               fontWeight: FontWeight.w700,
@@ -567,14 +749,50 @@ void showReservationPerPartner(BuildContext context) {
                                                       fontSize: 14,
                                                     ),
                                                   )),
-                                              Text(
-                                                "12.5 (목) 11:30",
-                                                style: TextStyle(
-                                                  color: CatchmongColors.black,
-                                                  fontWeight: FontWeight.w400,
-                                                  fontSize: 14,
-                                                ),
-                                              )
+                                              Obx(() => Text(
+                                                    formatConfirmDateTime(
+                                                        DateTime(
+                                                      reservationConteroller
+                                                          .selectedReservationDate
+                                                          .value
+                                                          .year, // 연도
+                                                      reservationConteroller
+                                                          .selectedReservationDate
+                                                          .value
+                                                          .month, // 월
+                                                      reservationConteroller
+                                                          .selectedReservationDate
+                                                          .value
+                                                          .day, // 일
+                                                      timeSlots[reservationConteroller
+                                                              .selectedReservationTimeIdx
+                                                              .value]
+                                                          .hour, // 시간
+                                                      timeSlots[reservationConteroller
+                                                              .selectedReservationTimeIdx
+                                                              .value]
+                                                          .minute, // 분
+                                                      timeSlots[reservationConteroller
+                                                              .selectedReservationTimeIdx
+                                                              .value]
+                                                          .second, // 초 (선택적)
+                                                      timeSlots[reservationConteroller
+                                                              .selectedReservationTimeIdx
+                                                              .value]
+                                                          .millisecond, // 밀리초 (선택적)
+                                                      timeSlots[reservationConteroller
+                                                              .selectedReservationTimeIdx
+                                                              .value]
+                                                          .microsecond, // 마이크로초 (선택적)
+                                                    )).value,
+                                                    style: TextStyle(
+                                                      color:
+                                                          CatchmongColors.black,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                      fontSize: 14,
+                                                    ),
+                                                  ))
                                             ],
                                           ),
                                           SizedBox(
@@ -594,14 +812,18 @@ void showReservationPerPartner(BuildContext context) {
                                                       fontSize: 14,
                                                     ),
                                                   )),
-                                              Text(
-                                                "2명",
-                                                style: TextStyle(
-                                                  color: CatchmongColors.black,
-                                                  fontWeight: FontWeight.w400,
-                                                  fontSize: 14,
-                                                ),
-                                              )
+                                              Obx(() => Text(
+                                                    RxString(
+                                                            "${numbers[reservationConteroller.selectedReservationNumOfPeopleIdx.value]}명")
+                                                        .value,
+                                                    style: TextStyle(
+                                                      color:
+                                                          CatchmongColors.black,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                      fontSize: 14,
+                                                    ),
+                                                  ))
                                             ],
                                           ),
                                           SizedBox(
@@ -622,14 +844,20 @@ void showReservationPerPartner(BuildContext context) {
                                                     ),
                                                   )),
                                               Expanded(
-                                                child: Text(
-                                                  "유아의자 2개, 아기식기 2세트 부탁드립니다.",
-                                                  softWrap: true,
-                                                  style: TextStyle(
-                                                    color:
-                                                        CatchmongColors.black,
-                                                    fontWeight: FontWeight.w400,
-                                                    fontSize: 14,
+                                                child: Obx(
+                                                  () => Text(
+                                                    RxString(reservationConteroller
+                                                            .reservationReqController
+                                                            .text)
+                                                        .value,
+                                                    softWrap: true,
+                                                    style: TextStyle(
+                                                      color:
+                                                          CatchmongColors.black,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                      fontSize: 14,
+                                                    ),
                                                   ),
                                                 ),
                                               )
@@ -650,6 +878,7 @@ void showReservationPerPartner(BuildContext context) {
                                   children: [
                                     //안내문구
                                     Container(
+                                      width: width,
                                       color: Colors.white,
                                       padding: EdgeInsets.all(20),
                                       child: Column(
@@ -659,7 +888,10 @@ void showReservationPerPartner(BuildContext context) {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            "평일 예약(11시30분~20시00분)",
+                                            reservationConteroller
+                                                .formatReservationPeriod(
+                                                    setting.startTime,
+                                                    setting.endTime),
                                             style: TextStyle(
                                               color: CatchmongColors.gray_800,
                                               fontSize: 20,
@@ -670,7 +902,7 @@ void showReservationPerPartner(BuildContext context) {
                                             height: 20,
                                           ),
                                           Text(
-                                            "*예약은 최소 1시간전 시간부터 가능합니다. 예약 시간맞춰서 방문 부탁드립니다. *예약시 이탈리아 최고급 탄산수(1병)를 서비스로 드리고 있습니다! 노쇼 혹은 당일취소는 저희들뿐 아니라 다른 고객분들께 피해가 됩니다. 신중하게 예약하시길 부탁드립니다!",
+                                            "*예약은 최소 1시간전 시간부터 가능합니다.\n${setting.description ?? "-"}",
                                             maxLines: 6, // 최대 줄 수
                                             overflow: TextOverflow.ellipsis,
                                           )
@@ -753,7 +985,7 @@ void showReservationPerPartner(BuildContext context) {
                                                                     .black,
                                                           ))),
                                                   Expanded(
-                                                      child: Text("호박꽃마차 대전점",
+                                                      child: Text(partner.name,
                                                           softWrap: true,
                                                           style: TextStyle(
                                                             fontSize: 16,
@@ -768,72 +1000,73 @@ void showReservationPerPartner(BuildContext context) {
                                               SizedBox(
                                                 height: 8,
                                               ),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  SizedBox(
-                                                      width: 120,
-                                                      child: Text("상호",
-                                                          style: TextStyle(
-                                                            fontSize: 16,
-                                                            fontWeight:
-                                                                FontWeight.w400,
-                                                            color:
-                                                                CatchmongColors
-                                                                    .black,
-                                                          ))),
-                                                  Expanded(
-                                                      child: Text("호박꽃마차 대전점",
-                                                          softWrap: true,
-                                                          style: TextStyle(
-                                                            fontSize: 16,
-                                                            fontWeight:
-                                                                FontWeight.w400,
-                                                            color:
-                                                                CatchmongColors
-                                                                    .black,
-                                                          )))
-                                                ],
-                                              ),
-                                              SizedBox(
-                                                height: 8,
-                                              ),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  SizedBox(
-                                                      width: 120,
-                                                      child: Text("대표자명",
-                                                          style: TextStyle(
-                                                            fontSize: 16,
-                                                            fontWeight:
-                                                                FontWeight.w400,
-                                                            color:
-                                                                CatchmongColors
-                                                                    .black,
-                                                          ))),
-                                                  Expanded(
-                                                      child: Text("가게주",
-                                                          softWrap: true,
-                                                          style: TextStyle(
-                                                            fontSize: 16,
-                                                            fontWeight:
-                                                                FontWeight.w400,
-                                                            color:
-                                                                CatchmongColors
-                                                                    .black,
-                                                          )))
-                                                ],
-                                              ),
-                                              SizedBox(
-                                                height: 8,
-                                              ),
+                                              //   Row(
+                                              //     mainAxisAlignment:
+                                              //         MainAxisAlignment.start,
+                                              //     crossAxisAlignment:
+                                              //         CrossAxisAlignment.start,
+                                              //     children: [
+                                              //       SizedBox(
+                                              //           width: 120,
+                                              //           child: Text("상호",
+                                              //               style: TextStyle(
+                                              //                 fontSize: 16,
+                                              //                 fontWeight:
+                                              //                     FontWeight.w400,
+                                              //                 color:
+                                              //                     CatchmongColors
+                                              //                         .black,
+                                              //               ))),
+                                              //       Expanded(
+                                              //           child: Text("호박꽃마차 대전점",
+                                              //               softWrap: true,
+                                              //               style: TextStyle(
+                                              //                 fontSize: 16,
+                                              //                 fontWeight:
+                                              //                     FontWeight.w400,
+                                              //                 color:
+                                              //                     CatchmongColors
+                                              //                         .black,
+                                              //               )))
+                                              //     ],
+                                              //   ),
+
+                                              //  SizedBox(
+                                              //     height: 8,
+                                              //   ),
+                                              // Row(
+                                              //   mainAxisAlignment:
+                                              //       MainAxisAlignment.start,
+                                              //   crossAxisAlignment:
+                                              //       CrossAxisAlignment.start,
+                                              //   children: [
+                                              //     SizedBox(
+                                              //         width: 120,
+                                              //         child: Text("대표자명",
+                                              //             style: TextStyle(
+                                              //               fontSize: 16,
+                                              //               fontWeight:
+                                              //                   FontWeight.w400,
+                                              //               color:
+                                              //                   CatchmongColors
+                                              //                       .black,
+                                              //             ))),
+                                              //     Expanded(
+                                              //         child: Text("가게주",
+                                              //             softWrap: true,
+                                              //             style: TextStyle(
+                                              //               fontSize: 16,
+                                              //               fontWeight:
+                                              //                   FontWeight.w400,
+                                              //               color:
+                                              //                   CatchmongColors
+                                              //                       .black,
+                                              //             )))
+                                              //   ],
+                                              // ),
+                                              // SizedBox(
+                                              //   height: 8,
+                                              // ),
                                               Row(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.start,
@@ -853,7 +1086,7 @@ void showReservationPerPartner(BuildContext context) {
                                                           ))),
                                                   Expanded(
                                                       child: Text(
-                                                          "경기도 파주시 목동동 1110, 1층 피셔맨스키친 파주운정점(경기도 파주시 심학산로423번길 30, 1층 피셔맨스키친 파주운정점)",
+                                                          partner.address,
                                                           softWrap: true,
                                                           style: TextStyle(
                                                             fontSize: 16,
@@ -923,9 +1156,9 @@ void showReservationPerPartner(BuildContext context) {
                                                       child: InkWell(
                                                     onTap: () {
                                                       _makePhoneCall(
-                                                          "010-7596-6578");
+                                                          partner.phone);
                                                     },
-                                                    child: Text("031-945-5969",
+                                                    child: Text(partner.phone,
                                                         softWrap: true,
                                                         style: TextStyle(
                                                           fontSize: 16,
@@ -966,32 +1199,50 @@ void showReservationPerPartner(BuildContext context) {
                         height: 20,
                       ),
                       //동의 체크하는 줄
-                      Row(
-                        children: [
-                          SizedBox(
-                            width: 20,
+                      InkWell(
+                        onTap: () {
+                          reservationConteroller.agreePrivacy.value =
+                              !reservationConteroller.agreePrivacy.value;
+                        },
+                        child: Container(
+                          width: width,
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                width: 20,
+                              ),
+                              Obx(() => Icon(
+                                    reservationConteroller.agreePrivacy.isTrue
+                                        ? Icons.check_circle
+                                        : Icons.check_circle_outline,
+                                    color: reservationConteroller
+                                            .agreePrivacy.isTrue
+                                        ? CatchmongColors.yellow_main
+                                        : CatchmongColors.gray400,
+                                    size: 24,
+                                  )),
+                              SizedBox(
+                                width: 8,
+                              ),
+                              Text(
+                                "[필수]",
+                                style: TextStyle(
+                                  color: CatchmongColors.red,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              Text(
+                                "개인정보 수집 및 이용에 동의합니다.",
+                                style: TextStyle(
+                                  color: CatchmongColors.gray_800,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
+                                ),
+                              )
+                            ],
                           ),
-                          SvgPicture.asset('assets/images/check-circle.svg'),
-                          SizedBox(
-                            width: 8,
-                          ),
-                          Text(
-                            "[필수]",
-                            style: TextStyle(
-                              color: CatchmongColors.red,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14,
-                            ),
-                          ),
-                          Text(
-                            "개인정보 수집 및 이용에 동의합니다.",
-                            style: TextStyle(
-                              color: CatchmongColors.gray_800,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14,
-                            ),
-                          )
-                        ],
+                        ),
                       )
                       //이용동의 안내 카드
                       ,
@@ -1034,15 +1285,37 @@ void showReservationPerPartner(BuildContext context) {
   );
 }
 
-void showReservationConfirm(BuildContext context) {
+void showReservationConfirm(BuildContext context, ReservationSetting setting) {
   double width = MediaQuery.of(context).size.width;
   final PartnerController controller = Get.find<PartnerController>();
+  final ReservationConteroller reservationConteroller =
+      Get.find<ReservationConteroller>();
   showGeneralDialog(
     context: context,
     barrierDismissible: true, // true로 설정했으므로 barrierLabel 필요
     barrierLabel: "닫기", // 접근성 레이블 설정
     barrierColor: Colors.black54, // 배경 색상
     pageBuilder: (context, animation, secondaryAnimation) {
+      List<DateTime> timeSlots = reservationConteroller.getTimeSlots(
+          setting.startTime, setting.endTime, setting.timeUnit);
+      List<String> peopleNumString = setting.allowedPeople.split(',');
+
+      // 2. 숫자 추출 및 변환
+      List<int> numbers = peopleNumString.map((item) {
+        return int.parse(item.replaceAll(RegExp(r'[^0-9]'), ''));
+      }).toList();
+      RxString formatConfirmDateTime(DateTime date) {
+        // 요일 이름 리스트
+        List<String> weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+
+        // 월, 일, 시간 포맷
+        String formattedDate = DateFormat('MM.dd').format(date); // MM.dd 형식
+        String formattedTime = DateFormat('HH:mm').format(date); // HH:mm 형식
+        String weekday = weekdays[date.weekday - 1]; // 요일 추출 (1부터 시작)
+
+        return '$formattedDate ($weekday) $formattedTime'.obs;
+      }
+
       return Scaffold(
         backgroundColor: CatchmongColors.gray50,
         appBar: CloseAppbar(title: "예약완료"),
@@ -1090,10 +1363,13 @@ void showReservationConfirm(BuildContext context) {
                     width: MediaQuery.of(context).size.width,
                     height: 200, // 카드의 높이와 동일하게 설정
 
-                    child: Image.asset(
-                      "assets/images/temp-banner.jpg",
-                      width: MediaQuery.of(context).size.width,
-                      fit: BoxFit.cover,
+                    child: ImgCard(
+                      path: !setting.reservationImage!.contains("uploads")
+                          ? setting.reservationImage!
+                          : "http://$myPort:3000/${setting.reservationImage!}",
+                      width: double.infinity, // 부모의 너비에 맞게 확장
+                      height: double.infinity, // 부모의 높이에 맞게 확장
+                      isLocal: !setting.reservationImage!.contains("uploads"),
                     )),
                 //예약 안내문
                 Container(
@@ -1111,7 +1387,8 @@ void showReservationConfirm(BuildContext context) {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "평일 예약(11시30분~20시00분)",
+                        reservationConteroller.formatReservationPeriod(
+                            setting.startTime, setting.endTime),
                         style: TextStyle(
                           color: CatchmongColors.gray_800,
                           fontSize: 14,
@@ -1122,7 +1399,7 @@ void showReservationConfirm(BuildContext context) {
                         height: 8,
                       ),
                       Text(
-                        "*예약은 최소 1시간전 시간부터 가능합니다.\n예약 시간맞춰서 방문 부탁드립니다.\n*예약시 이탈리아 최고급 탄산수(1병)를 서비스로 드리고 있습니다!\n노쇼 혹은 당일취소는 저희들뿐 아니라 다른 고객분들께 피해가 됩니다.\n신중하게 예약하시길 부탁드립니다!",
+                        "*예약은 최소 1시간전 시간부터 가능합니다.\n예약 시간맞춰서 방문 부탁드립니다.\n*${setting.description ?? ""}",
                         style: TextStyle(
                           color: CatchmongColors.gray_800,
                           fontSize: 14,
@@ -1175,7 +1452,8 @@ void showReservationConfirm(BuildContext context) {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "평일 예약(11시30분~20시00분)",
+                              reservationConteroller.formatReservationPeriod(
+                                  setting.startTime, setting.endTime),
                               style: TextStyle(
                                 color: CatchmongColors.gray_800,
                                 fontWeight: FontWeight.w700,
@@ -1198,7 +1476,33 @@ void showReservationConfirm(BuildContext context) {
                                       ),
                                     )),
                                 Text(
-                                  "12.5 (목) 11:30",
+                                  formatConfirmDateTime(DateTime(
+                                    reservationConteroller
+                                        .selectedReservationDate
+                                        .value
+                                        .year, // 연도
+                                    reservationConteroller
+                                        .selectedReservationDate
+                                        .value
+                                        .month, // 월
+                                    reservationConteroller
+                                        .selectedReservationDate.value.day, // 일
+                                    timeSlots[reservationConteroller
+                                            .selectedReservationTimeIdx.value]
+                                        .hour, // 시간
+                                    timeSlots[reservationConteroller
+                                            .selectedReservationTimeIdx.value]
+                                        .minute, // 분
+                                    timeSlots[reservationConteroller
+                                            .selectedReservationTimeIdx.value]
+                                        .second, // 초 (선택적)
+                                    timeSlots[reservationConteroller
+                                            .selectedReservationTimeIdx.value]
+                                        .millisecond, // 밀리초 (선택적)
+                                    timeSlots[reservationConteroller
+                                            .selectedReservationTimeIdx.value]
+                                        .microsecond, // 마이크로초 (선택적)
+                                  )).value,
                                   style: TextStyle(
                                     color: CatchmongColors.black,
                                     fontWeight: FontWeight.w400,
@@ -1223,7 +1527,7 @@ void showReservationConfirm(BuildContext context) {
                                       ),
                                     )),
                                 Text(
-                                  "2명",
+                                  "${numbers[reservationConteroller.selectedReservationNumOfPeopleIdx.value]}명",
                                   style: TextStyle(
                                     color: CatchmongColors.black,
                                     fontWeight: FontWeight.w400,
@@ -1249,7 +1553,8 @@ void showReservationConfirm(BuildContext context) {
                                     )),
                                 Expanded(
                                   child: Text(
-                                    "유아의자 2개, 아기식기 2세트 부탁드립니다.",
+                                    reservationConteroller
+                                        .reservationReqController.text,
                                     softWrap: true,
                                     style: TextStyle(
                                       color: CatchmongColors.black,

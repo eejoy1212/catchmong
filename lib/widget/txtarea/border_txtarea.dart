@@ -6,9 +6,11 @@ class BorderTxtarea extends StatelessWidget {
   final double width;
   final TextEditingController controller;
   final void Function(String) onChanged;
+  final bool? readOnly;
   const BorderTxtarea(
       {super.key,
       this.hintText,
+      this.readOnly = false,
       required this.width,
       required this.controller,
       required this.onChanged});
@@ -27,6 +29,7 @@ class BorderTxtarea extends StatelessWidget {
         ),
       ),
       child: TextField(
+        readOnly: readOnly ?? false,
         controller: controller,
         onChanged: onChanged,
         maxLines: null, // 여러 줄 허용

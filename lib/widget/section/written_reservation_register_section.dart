@@ -29,7 +29,7 @@ class WrittenReservationRegisterSection extends StatelessWidget {
   final Function(String?) onChangedMinuteType;
   final String selectedStartTime;
   final String selectedEndTime;
-  final String selectedNumOfPeople;
+  final List<String> selectedNumOfPeople;
   final Function(String) onChangedNumOfPeople;
   final Function(String) onChangedTableNum;
   final Function(String) onChangedStartTime;
@@ -99,8 +99,7 @@ class WrittenReservationRegisterSection extends StatelessWidget {
     //     value: "60분",
     //   ),
     // ];
-    List<String> numOfPeople =
-        List.generate(13, (index) => index == 12 ? "인원문의전화" : "${index + 1}명");
+    List<String> numOfPeople = List.generate(12, (index) => "${index + 1}명");
     String formatReservationPeriod(DateTime startDate, DateTime endDate) {
       // 요일 확인 (1: 월요일 ~ 5: 금요일 -> 평일, 6: 토요일, 7: 일요일 -> 주말)
       bool isWeekend(DateTime date) {
@@ -296,14 +295,14 @@ class WrittenReservationRegisterSection extends StatelessWidget {
                       runSpacing: 4, // 줄바꿈 시 간격
                       children: [
                         ...numOfPeople.map((String num) {
-                          return YellowToggleBtn(
-                            width: num == "인원문의전화"
-                                ? (width - 160)
-                                : (width - 160) / 3 - 3, // 버튼 너비
-                            title: num,
-                            isSelected: setting.allowedPeople == num, // 기본 선택값
-                            onTap: () => {},
-                          );
+                          return Obx(() => YellowToggleBtn(
+                                width: (width - 160) / 3 - 3, // 버튼 너비
+                                title: num,
+                                isSelected:
+                                    RxBool(setting.allowedPeople.contains(num))
+                                        .value, // 기본 선택값
+                                onTap: () => {},
+                              ));
                         }).toList(),
                       ],
                     ),

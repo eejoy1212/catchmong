@@ -446,6 +446,29 @@ class Partner2Controller extends GetxController {
     }
   }
 
+  Future<Partner?> fetchPartnerPhone(int partnerId) async {
+    try {
+      final response = await _dio.get(baseUrl + "/partners/$partnerId");
+
+      if (response.statusCode == 200) {
+        final json = response.data;
+
+        return Partner.fromJson(json);
+      } else {
+        print('파트너 정보 가져오기 실패: ${response.data}');
+        return null;
+      }
+    } on DioError catch (e) {
+      if (e.response != null) {
+        print('서버 응답 오류: ${e.response?.data}');
+        return null;
+      } else {
+        print('요청 오류: ${e.message}');
+        return null;
+      }
+    }
+  }
+
   //유저의 파트너 가져오기(가게등록해서 등록된 가게)
   Future<List<Partner>> fetchUserPartners(int userId) async {
     try {

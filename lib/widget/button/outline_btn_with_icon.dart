@@ -7,6 +7,7 @@ class OutlinedBtnWithIcon extends StatelessWidget {
   final Widget title;
   final double fontSize;
   final void Function() onPress;
+  final bool? isDisabled;
   const OutlinedBtnWithIcon({
     super.key,
     this.width = 220,
@@ -14,6 +15,7 @@ class OutlinedBtnWithIcon extends StatelessWidget {
     required this.title,
     this.fontSize = 16,
     required this.onPress,
+    this.isDisabled = false,
   });
 
   @override
@@ -35,7 +37,7 @@ class OutlinedBtnWithIcon extends StatelessWidget {
                   color: CatchmongColors.gray100, width: 1), // 보더 컬러를 노란색으로 설정
             ),
           ),
-          onPressed: onPress,
+          onPressed: (isDisabled ?? false) ? null : onPress,
           child: title),
     );
   }

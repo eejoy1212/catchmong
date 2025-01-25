@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 class ReservationSetting {
+  final int? id;
   final int? partnerId;
   final String name;
   final String? description;
@@ -13,6 +14,7 @@ class ReservationSetting {
   final String? reservationImage; // 이미지 경로
 
   ReservationSetting({
+    this.id,
     this.partnerId,
     required this.name,
     this.description,
@@ -28,6 +30,7 @@ class ReservationSetting {
   // JSON 데이터를 모델로 변환
   factory ReservationSetting.fromJson(Map<String, dynamic> json) {
     return ReservationSetting(
+      id: json['id'],
       partnerId: json['partnerId'],
       name: json['name'],
       description: json['description'],
@@ -44,6 +47,7 @@ class ReservationSetting {
   // 모델 데이터를 JSON으로 변환
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'partnerId': partnerId,
       'name': name,
       'description': description,
@@ -59,6 +63,7 @@ class ReservationSetting {
 
   // copyWith 메서드
   ReservationSetting copyWith({
+    int? id,
     int? partnerId,
     String? name,
     String? description,
@@ -71,6 +76,7 @@ class ReservationSetting {
     String? reservationImage,
   }) {
     return ReservationSetting(
+      id: id ?? this.id,
       partnerId: partnerId ?? this.partnerId,
       name: name ?? this.name,
       description: description ?? this.description,

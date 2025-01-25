@@ -34,6 +34,7 @@ import 'package:catchmong/widget/chip/map_chip.dart';
 import 'package:catchmong/widget/dialog/UseDialog.dart';
 import 'package:catchmong/widget/section/reservation_register_section.dart';
 import 'package:catchmong/widget/section/written_reservation_register_section.dart';
+import 'package:catchmong/widget/txtarea/border_txtarea.dart';
 import 'package:catchmong/widget/txtfield/border-txtfield.dart';
 import 'package:daum_postcode_search/daum_postcode_search.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -822,6 +823,7 @@ void showReservationDialog(BuildContext context) {
               SizedBox(
                 height: 8,
               ),
+              //예약대기 & 예약 확정
               Obx(() => controller.reservations.isEmpty
                   ? Container(
                       width: width,
@@ -850,135 +852,306 @@ void showReservationDialog(BuildContext context) {
                           itemCount: controller.reservations.length,
                           itemBuilder: (BuildContext context, int index) {
                             final reservation = controller.reservations[index];
-                            return Container(
-                              width: width,
-                              height: 220,
-                              margin: EdgeInsets.only(
-                                left: 20,
-                                top: 16,
-                                right: 20,
-                                bottom: 32,
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    getStatus(reservation.status),
-                                    style: TextStyle(
-                                      color: CatchmongColors.red,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w700,
+                            return Opacity(
+                              opacity: reservation.status == "COMPLETED" ||
+                                      reservation.status == "CANCELLED"
+                                  ? 0.6
+                                  : 1,
+                              child: Container(
+                                width: width,
+                                height: 220,
+                                margin: EdgeInsets.only(
+                                  left: 20,
+                                  top: 16,
+                                  right: 20,
+                                  bottom: 32,
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      getStatus(reservation.status),
+                                      style: TextStyle(
+                                        color:
+                                            getStatusColor(reservation.status),
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w700,
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(
-                                    height: 16,
-                                  ),
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        width: 100,
-                                        height: 100,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(8)),
-                                          border: Border.all(
-                                            color: CatchmongColors.gray,
-                                            width: 1,
-                                          ), // 외부 테두리
+                                    SizedBox(
+                                      height: 16,
+                                    ),
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          width: 100,
+                                          height: 100,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(8)),
+                                            border: Border.all(
+                                              color: CatchmongColors.gray,
+                                              width: 1,
+                                            ), // 외부 테두리
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                                8), // 이미지를 둥글게 자르기
+                                            child: ImgCard(
+                                                path: "http://$myPort:3000" +
+                                                    "/" +
+                                                    reservation.partner
+                                                        .storePhotos![0]),
+                                          ),
                                         ),
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(
-                                              8), // 이미지를 둥글게 자르기
-                                          child: ImgCard(
-                                              path: "http://$myPort:3000" +
-                                                  "/" +
+                                        SizedBox(
+                                          width: 12,
+                                        ),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                controller.formatReservationTime(
+                                                    reservation
+                                                        .reservationStartDate),
+                                                style: TextStyle(
+                                                  color: CatchmongColors.black,
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                height: 8,
+                                              ),
+                                              Text(
+                                                reservation.partner.name,
+                                                style: TextStyle(
+                                                  color: CatchmongColors.black,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                height: 8,
+                                              ),
+                                              Text(
+                                                // "",
+                                                controller
+                                                    .formatReservationDate([
                                                   reservation
-                                                      .partner.storePhotos![0]),
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        width: 12,
-                                      ),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              controller.formatReservationTime(
+                                                      .reservationStartDate,
                                                   reservation
-                                                      .reservationStartDate),
-                                              style: TextStyle(
-                                                color: CatchmongColors.black,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w400,
+                                                      .reservationEndDate,
+                                                ]),
+                                                softWrap: true,
+                                                style: TextStyle(
+                                                  color: CatchmongColors.black,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
                                               ),
-                                            ),
-                                            SizedBox(
-                                              height: 8,
-                                            ),
-                                            Text(
-                                              reservation.partner.name,
-                                              style: TextStyle(
-                                                color: CatchmongColors.black,
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w400,
+                                              SizedBox(
+                                                height: 12,
                                               ),
-                                            ),
-                                            SizedBox(
-                                              height: 8,
-                                            ),
-                                            Text(
-                                              // "",
-                                              controller.formatReservationDate([
-                                                reservation
-                                                    .reservationStartDate,
-                                                reservation.reservationEndDate,
-                                              ]),
-                                              softWrap: true,
-                                              style: TextStyle(
-                                                color: CatchmongColors.black,
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w700,
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              height: 12,
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                      SizedBox(
-                                        width: 12,
-                                      ),
-                                      Text(
-                                        "${reservation.numOfPeople}명",
-                                        style: TextStyle(
-                                          color: CatchmongColors.black,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w700,
+                                        SizedBox(
+                                          width: 12,
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 16,
-                                  ),
-                                  OutlinedBtn(
-                                      width: width,
-                                      title: "취소하기",
-                                      onPress: () {})
-                                ],
+                                        Text(
+                                          "${reservation.numOfPeople}명",
+                                          style: TextStyle(
+                                            color: CatchmongColors.black,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      height: 16,
+                                    ),
+                                    OutlinedBtn(
+                                        width: width,
+                                        title: "취소하기",
+                                        onPress: () {
+                                          showCancelDialog(
+                                              context, reservation.id);
+                                        })
+                                  ],
+                                ),
                               ),
                             );
                           }),
                     )),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+//취소하기 창
+void showCancelDialog(BuildContext context, int reservationId) {
+  String selectedReason = ""; // 선택된 취소 사유를 저장할 변수
+  double width = MediaQuery.of(context).size.width;
+  final TextEditingController txtController = TextEditingController();
+  final List<String> reasons = [
+    "개인 사정으로 방문이 어렵습니다.",
+    "예약 날짜 및 시간 변경이 필요합니다.",
+    "단순 변심",
+    "기타 (직접 입력)",
+  ];
+  final ReservationConteroller conteroller = Get.find<ReservationConteroller>();
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: Colors.white,
+        title: Text(
+          "사장님께 예약 취소 사유를 알려주세요 🥲",
+          style: TextStyle(
+            color: CatchmongColors.black,
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: SizedBox(
+          height: 450, // 리스트 높이 조정
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              // 라디오 버튼과 텍스트 리스트
+              Expanded(
+                child: ListView.separated(
+                  itemCount: reasons.length + 1,
+                  separatorBuilder: (context, index) => Divider(
+                    color: reasons.length - 1 == index
+                        ? Colors.transparent
+                        : CatchmongColors.gray50, // 구분선 색상
+                    thickness: 1,
+                  ),
+                  itemBuilder: (context, index) {
+                    return index == reasons.length
+                        ? SizedBox(
+                            width: width,
+                            height: 100,
+                            child: Obx(() => BorderTxtarea(
+                                readOnly: conteroller.reasonIdx.value != 3,
+                                width: width,
+                                hintText: "내용을 작성해주세요.",
+                                controller: txtController,
+                                onChanged: (String value) {
+                                  conteroller.cancelReason.value = value;
+                                  if (txtController.text.length > 300) {
+                                    Future.microtask(() {
+                                      txtController.value = TextEditingValue(
+                                        text: value.substring(0, 300),
+                                        selection: TextSelection.collapsed(
+                                            offset: 300),
+                                      );
+                                    });
+                                  }
+                                })),
+                          )
+                        : ListTile(
+                            contentPadding: EdgeInsets.all(0),
+                            leading: Obx(() => Radio<String>(
+                                  activeColor: CatchmongColors.yellow_main,
+                                  value: reasons[index],
+                                  groupValue:
+                                      reasons[conteroller.reasonIdx.value],
+                                  onChanged: (String? value) {
+                                    if (value != null) {
+                                      conteroller.reasonIdx.value = index;
+                                      if (index == 3) {
+                                        conteroller.cancelReason.value = "";
+                                      } else {
+                                        conteroller.cancelReason.value = value;
+                                      }
+                                    }
+                                  },
+                                )),
+                            title: Text(reasons[index]),
+                          );
+                  },
+                ),
+              ),
+              SizedBox(
+                width: width,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: YellowElevationBtn(
+                        onPressed: () async {
+                          print("선택된 취소 사유: ${conteroller.cancelReason.value}");
+                          if (conteroller.cancelReason.value.trim() == "") {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("취소 사유를 선택해주세요.")),
+                            );
+                            return;
+                          }
+                          await conteroller.patchCancelReservation(
+                              reservationId: reservationId);
+                          Get.back(); // 다이얼로그 닫기
+                          Get.snackbar(
+                            "알림",
+                            "예약이 취소되었습니다.",
+                            snackPosition: SnackPosition.TOP, // 상단에 표시
+                            backgroundColor: CatchmongColors.yellow_main,
+                            colorText: CatchmongColors.black,
+                            icon: Icon(Icons.check_circle,
+                                color: CatchmongColors.black),
+                            duration: Duration(seconds: 1),
+                            borderRadius: 10,
+                            margin: EdgeInsets.all(10),
+                          );
+                          // 선택된 취소 사유 처리
+                        },
+                        title: Text(
+                          "확인",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 8,
+                    ),
+                    Expanded(
+                      child: YellowElevationBtn(
+                        onPressed: () {
+                          Get.back(); // 다이얼로그 닫기
+                          // 선택된 취소 사유 처리
+                          print("선택된 취소 사유: ${conteroller.cancelReason.value}");
+                        },
+                        title: Text(
+                          "취소",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -4767,7 +4940,7 @@ void showReservationSetting(BuildContext context, int partnerId) {
                     availableTables:
                         int.tryParse(controller.tableNumTxtController.text) ??
                             0,
-                    allowedPeople: controller.selectedNumOfPeople.value,
+                    allowedPeople: controller.selectedNumOfPeople.join(","),
                     reservationImage:
                         controller.selectedSettingImage.value == null
                             ? ""
@@ -4782,7 +4955,7 @@ void showReservationSetting(BuildContext context, int partnerId) {
                   controller.selectedEndTime.value = DateTime.now();
                   controller.selectedMinuteType.value = "30분";
                   controller.tableNumTxtController.clear();
-                  controller.selectedNumOfPeople.value = "1명";
+                  controller.selectedNumOfPeople.clear();
                   controller.selectedSettingImage.value = null;
                   Get.snackbar(
                     "알림",
@@ -4911,9 +5084,9 @@ void showReservationSetting(BuildContext context, int partnerId) {
                           controller.selectedMinuteType.value = value;
                         }
                       },
-                      selectedNumOfPeople: controller.selectedNumOfPeople.value,
+                      selectedNumOfPeople: controller.selectedNumOfPeople,
                       onChangedNumOfPeople: (String value) {
-                        controller.selectedNumOfPeople.value = value;
+                        controller.selectedNumOfPeople.add(value);
                       },
                       tableNumTxtController: controller.tableNumTxtController,
                       onChangedTableNum: (String value) {
@@ -4997,10 +5170,9 @@ void showReservationSetting(BuildContext context, int partnerId) {
                                     }
                                   },
                                   selectedNumOfPeople:
-                                      controller.selectedNumOfPeople.value,
+                                      controller.selectedNumOfPeople,
                                   onChangedNumOfPeople: (String value) {
-                                    controller.selectedNumOfPeople.value =
-                                        value;
+                                    controller.selectedNumOfPeople.add(value);
                                   },
                                   tableNumTxtController:
                                       controller.tableNumTxtController,
@@ -5042,7 +5214,7 @@ void showReservationSetting(BuildContext context, int partnerId) {
     controller.selectedEndTime.value = DateTime.now();
     controller.selectedMinuteType.value = "30분";
     controller.tableNumTxtController.clear();
-    controller.selectedNumOfPeople.value = "1명";
+    controller.selectedNumOfPeople.clear();
     controller.selectedSettingImage.value = null;
   });
 }
