@@ -63,8 +63,12 @@ class ReservationConteroller extends GetxController {
       TextEditingController();
   RxBool agreePrivacy = false.obs;
   RxList<DateTime> fullyDt = RxList.empty();
-  RxString cancelReason = "".obs;
+  RxString cancelReason = "개인 사정으로 방문이 어렵습니다.".obs;
   RxInt reasonIdx = 0.obs;
+  //점주측 취소 창
+  RxInt ceoReasonIdx = 0.obs;
+  RxString ceoCancelReason = "임시 휴업/영업 시간 변경".obs;
+  //점주측 취소 창
   String getSortType() {
     switch (sortType.value) {
       case 0:
@@ -656,19 +660,19 @@ class ReservationConteroller extends GetxController {
   }
 
   /// 예약 취소 함수
-  Future<void> patchCancelReservation({
+  Future<Reservation?> patchCancelReservation({
     required int reservationId,
   }) async {
-    if (cancelReason.value.isEmpty) {
+    if (ceoCancelReason.value.isEmpty) {
       print('취소 사유가 비어 있습니다.');
-      return;
+      return null;
     }
 
     try {
       final response = await _dio.patch(
         '/$reservationId/cancel',
         data: {
-          'cancelReason': cancelReason.value,
+          'cancelReason': ceoCancelReason.value,
         },
       );
 
@@ -677,24 +681,65 @@ class ReservationConteroller extends GetxController {
         final json = response.data;
         if (json["reservation"] != null) {
           final reservation = Reservation.fromJson(json["reservation"]);
-          reservations.removeWhere((el) => el.id == reservationId);
-          reservations.add(reservation);
-          reservations.refresh(); // RxList 업데이트 호출
+          // reservations.removeWhere((el) => el.id == reservationId);
+          // reservations.add(reservation);
+          // reservations.refresh(); // RxList 업데이트 호출
+          return reservation;
         } else {
           print('예약 데이터가 응답에 포함되지 않았습니다.');
+          return null;
         }
       } else {
         print('예약 취소 실패: ${response.statusCode} ${response.data}');
+        return null;
       }
     } on DioError catch (e) {
       if (e.response != null) {
         print('API 오류: ${e.response?.statusCode}');
         print('응답 데이터: ${e.response?.data}');
+        return null;
       } else {
         print('네트워크 오류: ${e.message}');
+        return null;
       }
     } catch (e) {
       print('알 수 없는 오류: $e');
+      return null;
+    }
+  }
+
+  /// 예약 확정 함수
+  Future<Reservation?> patchConfirmReservation(int reservationId) async {
+    try {
+      final response = await _dio.patch(
+        '/$reservationId/confirm',
+      );
+
+      if (response.statusCode == 200) {
+        print('예약 확정 성공: ${response.data}');
+        // 응답에서 업데이트된 예약 데이터를 가져오기
+        final updatedReservation =
+            Reservation.fromJson(response.data['reservation']);
+        return updatedReservation;
+        // // 예제: 컨트롤러의 예약 리스트를 업데이트하는 코드
+        // controller.myReservations[controller.myReservations.indexWhere((el) => el.id == reservationId)] =
+        //     updatedReservation;
+        // controller.myReservations.refresh();
+      } else {
+        print('예약 확정 실패: ${response.statusCode} ${response.data}');
+        return null;
+      }
+    } on DioError catch (e) {
+      if (e.response != null) {
+        print('API 오류: ${e.response?.statusCode} ${e.response?.data}');
+        return null;
+      } else {
+        print('네트워크 오류: ${e.message}');
+        return null;
+      }
+    } catch (e) {
+      print('알 수 없는 오류: $e');
+      return null;
     }
   }
 }

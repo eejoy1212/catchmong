@@ -859,7 +859,11 @@ void showReservationDialog(BuildContext context) {
                                   : 1,
                               child: Container(
                                 width: width,
-                                height: 220,
+                                height:
+                                    // reservation.status == "CANCELLED"
+                                    //     ? 220 - 52
+                                    // :
+                                    220,
                                 margin: EdgeInsets.only(
                                   left: 20,
                                   top: 16,
@@ -981,6 +985,7 @@ void showReservationDialog(BuildContext context) {
                                     SizedBox(
                                       height: 16,
                                     ),
+                                    // if (reservation.status != "CANCELLED")
                                     OutlinedBtn(
                                         width: width,
                                         title: "취소하기",
@@ -1102,21 +1107,37 @@ void showCancelDialog(BuildContext context, int reservationId) {
                             );
                             return;
                           }
-                          await conteroller.patchCancelReservation(
-                              reservationId: reservationId);
-                          Get.back(); // 다이얼로그 닫기
-                          Get.snackbar(
-                            "알림",
-                            "예약이 취소되었습니다.",
-                            snackPosition: SnackPosition.TOP, // 상단에 표시
-                            backgroundColor: CatchmongColors.yellow_main,
-                            colorText: CatchmongColors.black,
-                            icon: Icon(Icons.check_circle,
-                                color: CatchmongColors.black),
-                            duration: Duration(seconds: 1),
-                            borderRadius: 10,
-                            margin: EdgeInsets.all(10),
-                          );
+                          final reservation =
+                              await conteroller.patchCancelReservation(
+                                  reservationId: reservationId);
+                          if (reservation != null) {
+                            int index = conteroller.reservations
+                                .indexWhere((el) => el.id == reservationId);
+
+                            if (index != -1) {
+                              // 기존 요소를 업데이트
+                              conteroller.reservations[index] = reservation;
+                              conteroller.reservations
+                                  .refresh(); // RxList 변경 사항 반영
+                            } else {
+                              print('해당 ID를 가진 예약이 리스트에 없습니다: $reservationId');
+                            }
+
+                            Get.back(); // 다이얼로그 닫기
+                            Get.snackbar(
+                              "알림",
+                              "예약이 취소되었습니다.",
+                              snackPosition: SnackPosition.TOP, // 상단에 표시
+                              backgroundColor: CatchmongColors.yellow_main,
+                              colorText: CatchmongColors.black,
+                              icon: Icon(Icons.check_circle,
+                                  color: CatchmongColors.black),
+                              duration: Duration(seconds: 1),
+                              borderRadius: 10,
+                              margin: EdgeInsets.all(10),
+                            );
+                          }
+
                           // 선택된 취소 사유 처리
                         },
                         title: Text(
