@@ -5061,6 +5061,7 @@ void showReservationSetting(BuildContext context, int partnerId) {
               ),
               Obx(() => controller.isSetting.isTrue
                   ? ReservationRegisterSection(
+                      isEditMode: true,
                       selectedDayType: controller.selectedDayType.value,
                       nameTxtController: controller.reservationNameController,
                       onChangedName: (String value) {
@@ -5137,7 +5138,7 @@ void showReservationSetting(BuildContext context, int partnerId) {
                             controller.reservationSettings.length,
                             (int index) => WrittenReservationRegisterSection(
                                   selectedDayType:
-                                      controller.selectedDayType.value,
+                                      controller.selectedEditDayType.value,
                                   nameTxtController:
                                       controller.reservationNameController,
                                   onChangedName: (String value) {
@@ -5175,25 +5176,27 @@ void showReservationSetting(BuildContext context, int partnerId) {
                                   },
                                   onChangedDayType: (String? value) {
                                     if (value != null) {
-                                      controller.selectedDayType.value = value;
+                                      controller.selectedEditDayType.value =
+                                          value;
                                     }
                                   },
-                                  selectedStartTime:
-                                      "controller.selectedStartTime.value",
-                                  selectedEndTime:
-                                      "controller.selectedEndTime.value",
+                                  selectedStartTime: DateFormat('HH:mm').format(
+                                      controller.selectedEditStartTime.value),
+                                  selectedEndTime: DateFormat('HH:mm').format(
+                                      controller.selectedEditEndTime.value),
                                   selectedMinuteType:
-                                      controller.selectedMinuteType.value,
+                                      controller.selectedEditMinuteType.value,
                                   onChangedMinuteType: (String? value) {
                                     if (value != null) {
-                                      controller.selectedMinuteType.value =
+                                      controller.selectedEditMinuteType.value =
                                           value;
                                     }
                                   },
                                   selectedNumOfPeople:
-                                      controller.selectedNumOfPeople,
+                                      controller.selectedEditNumOfPeople,
                                   onChangedNumOfPeople: (String value) {
-                                    controller.selectedNumOfPeople.add(value);
+                                    controller.selectedEditNumOfPeople
+                                        .add(value);
                                   },
                                   tableNumTxtController:
                                       controller.tableNumTxtController,
@@ -5202,24 +5205,77 @@ void showReservationSetting(BuildContext context, int partnerId) {
                                         value;
                                   },
                                   onImageSelected: (XFile file) {
-                                    controller.selectedSettingImage.value =
+                                    controller.selectedEditSettingImage.value =
                                         File(file.path);
                                     print(
-                                        "선택된 이미지 : ${controller.selectedSettingImage.value}");
+                                        "선택된 이미지 : ${controller.selectedEditSettingImage.value}");
                                   },
                                   onDeleteImg: () {
-                                    controller.selectedSettingImage.value =
+                                    controller.selectedEditSettingImage.value =
                                         null;
                                   },
-                                  image: controller.selectedSettingImage.value,
-                                  onChangedStartTime: (String value) {
-                                    // controller.selectedStartTime.value = value;
+                                  image:
+                                      controller.selectedEditSettingImage.value,
+                                  onChangedStartTime: (DateTime value) {
+                                    controller.selectedEditStartTime.value =
+                                        value;
                                   },
-                                  onChangedEndTime: (String value) {
-                                    // controller.selectedEndTime.value = value;
+                                  onChangedEndTime: (DateTime value) {
+                                    controller.selectedEditEndTime.value =
+                                        value;
                                   },
                                   setting:
                                       controller.reservationSettings[index],
+                                  isEditMode: RxBool(controller
+                                          .reservationSettingEditModes[index])
+                                      .value,
+                                  onEditToggle: () {
+                                    if (controller
+                                        .reservationSettingEditModes[index]) {
+                                      controller.selectedEditSettingImage
+                                          .value = null;
+                                    } else {
+                                      controller.selectedEditSettingImage
+                                          .value = File(controller
+                                              .reservationSettings[index]
+                                              .reservationImage ??
+                                          "");
+                                      String getDayType(String type) {
+                                        switch (type) {
+                                          case "DAILY":
+                                            return "매일";
+                                          case "WEEKDAY":
+                                            return "평일";
+                                          case "WEEKEND":
+                                            return "주말";
+                                          default:
+                                            return "매일";
+                                        }
+                                      }
+
+                                      controller.selectedEditDayType.value =
+                                          getDayType(controller
+                                              .reservationSettings[index]
+                                              .availabilityType);
+                                      controller.selectedEditStartTime.value =
+                                          controller.reservationSettings[index]
+                                              .startTime;
+                                      controller.selectedEditEndTime.value =
+                                          controller.reservationSettings[index]
+                                              .endTime;
+                                      controller.selectedEditNumOfPeople.value =
+                                          controller.reservationSettings[index]
+                                              .allowedPeople
+                                              .split(",");
+                                    }
+
+                                    controller.reservationSettingEditModes[
+                                            index] =
+                                        !controller
+                                            .reservationSettingEditModes[index];
+                                    controller.reservationSettingEditModes
+                                        .refresh();
+                                  },
                                 ))
                       ],
                     )

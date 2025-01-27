@@ -18,6 +18,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 class WrittenReservationRegisterSection extends StatelessWidget {
+  final void Function() onEditToggle;
   final TextEditingController nameTxtController;
   final Function(String) onChangedName;
   final TextEditingController descriptionTxtController;
@@ -32,12 +33,13 @@ class WrittenReservationRegisterSection extends StatelessWidget {
   final List<String> selectedNumOfPeople;
   final Function(String) onChangedNumOfPeople;
   final Function(String) onChangedTableNum;
-  final Function(String) onChangedStartTime;
-  final Function(String) onChangedEndTime;
+  final Function(DateTime) onChangedStartTime;
+  final Function(DateTime) onChangedEndTime;
   final Function(XFile) onImageSelected;
   final void Function() onDeleteImg;
   final File? image;
   final ReservationSetting setting;
+  final bool isEditMode;
   const WrittenReservationRegisterSection({
     super.key,
     required this.nameTxtController,
@@ -60,6 +62,8 @@ class WrittenReservationRegisterSection extends StatelessWidget {
     required this.onChangedStartTime,
     required this.onChangedEndTime,
     required this.setting,
+    required this.isEditMode,
+    required this.onEditToggle,
   });
 
   @override
@@ -135,6 +139,12 @@ class WrittenReservationRegisterSection extends StatelessWidget {
       }
     }
 
+    final TextEditingController nameTxtController =
+        TextEditingController(text: setting.name);
+    final TextEditingController descriptionTxtController =
+        TextEditingController(text: setting.description);
+    final TextEditingController tableNumTxtController =
+        TextEditingController(text: setting.availableTables.toString());
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: 20,
@@ -148,14 +158,20 @@ class WrittenReservationRegisterSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              PartnerImgCard(
-                onDelete: () {},
-                onTab: () {},
-                path: !setting.reservationImage!.contains("uploads")
-                    ? setting.reservationImage!
-                    : "http://$myPort:3000/" + setting.reservationImage!,
-                isLocal: !setting.reservationImage!.contains("uploads"),
-              ),
+              isEditMode
+                  ? SingleImgBtn(
+                      image: image,
+                      onImageSelected: onImageSelected,
+                      onDelete: onDeleteImg,
+                    )
+                  : PartnerImgCard(
+                      onDelete: () {},
+                      onTab: () {},
+                      path: !setting.reservationImage!.contains("uploads")
+                          ? setting.reservationImage!
+                          : "http://$myPort:3000/" + setting.reservationImage!,
+                      isLocal: !setting.reservationImage!.contains("uploads"),
+                    ),
               SizedBox(
                 width: 12,
               ),
@@ -163,27 +179,66 @@ class WrittenReservationRegisterSection extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(
-                    width: width - 160,
-                    child: Text(
-                        formatReservationPeriod(
-                            setting.startTime, setting.endTime),
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                        )),
-                  ),
-                  SizedBox(height: 8),
-                  SizedBox(
-                    width: width - 160,
-                    child: Text(
-                      setting.description ?? "",
+                  if (isEditMode)
+                    Text(
+                      "예약 상품명",
                       style: TextStyle(
                         color: CatchmongColors.gray_800,
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
+                  if (isEditMode)
+                    SizedBox(
+                      height: 4,
+                    ),
+                  SizedBox(
+                    width: width - 160,
+                    child: isEditMode
+                        ? BorderTxtField(
+                            hintText: "예약 상품명을 입력해주세요",
+                            controller: nameTxtController,
+                            onChanged: onChangedName,
+                          )
+                        : Text(
+                            formatReservationPeriod(
+                                setting.startTime, setting.endTime),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            )),
+                  ),
+                  SizedBox(height: 8),
+                  if (isEditMode)
+                    Text(
+                      "상세 설명",
+                      style: TextStyle(
+                        color: CatchmongColors.gray_800,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  if (isEditMode)
+                    SizedBox(
+                      height: 4,
+                    ),
+                  SizedBox(
+                    width: width - 160,
+                    child: isEditMode
+                        ? BorderTxtarea(
+                            hintText: "내용을 입력해주세요",
+                            controller: descriptionTxtController,
+                            onChanged: onChangedDescription,
+                            width: width - 160,
+                          )
+                        : Text(
+                            setting.description ?? "",
+                            style: TextStyle(
+                              color: CatchmongColors.gray_800,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                   ),
                   SizedBox(height: 8),
                   Text(
@@ -203,10 +258,17 @@ class WrittenReservationRegisterSection extends StatelessWidget {
                   //   width: width - 160,
                   //   onChanged: onChangedDayType,
                   // ),
-                  OutlinedBtn(
-                      width: width - 160,
-                      title: getAvailabilityTitle(setting.availabilityType),
-                      onPress: () {}),
+                  isEditMode
+                      ? BorderDroprown(
+                          items: items,
+                          selected: selectedDayType,
+                          width: width - 160,
+                          onChanged: onChangedDayType,
+                        )
+                      : OutlinedBtn(
+                          width: width - 160,
+                          title: getAvailabilityTitle(setting.availabilityType),
+                          onPress: () {}),
                   SizedBox(height: 8),
                   Text(
                     "시간",
@@ -227,9 +289,39 @@ class WrittenReservationRegisterSection extends StatelessWidget {
                             children: [
                               Expanded(
                                   child: OutlinedBtn(
-                                      title: DateFormat('HH:mm')
-                                          .format(setting.startTime),
-                                      onPress: () {})),
+                                      title: isEditMode
+                                          ? selectedStartTime
+                                          : DateFormat('HH:mm')
+                                              .format(setting.startTime),
+                                      onPress: () {
+                                        if (isEditMode) {
+                                          showWheelPicker(context,
+                                              (String value) {
+                                            // 현재 날짜 가져오기
+                                            final now = DateTime.now();
+
+                                            // 선택한 시간 문자열 "01:00" 분리
+                                            final parts = value.split(':');
+                                            final hour = int.parse(parts[0]);
+                                            final minute = int.parse(parts[1]);
+
+                                            // 현재 날짜 + 선택한 시간으로 새로운 DateTime 생성
+                                            final selectedDateTime = DateTime(
+                                                now.year,
+                                                now.month,
+                                                now.day,
+                                                hour,
+                                                minute);
+
+                                            // DateTime 객체를 변수에 할당
+                                            onChangedStartTime(
+                                                selectedDateTime);
+
+                                            print(
+                                                "선택한 시간: $value, DateTime 객체: $selectedDateTime");
+                                          });
+                                        }
+                                      })),
                               SizedBox(
                                 width: 10,
                               ),
@@ -244,20 +336,56 @@ class WrittenReservationRegisterSection extends StatelessWidget {
                               ),
                               Expanded(
                                   child: OutlinedBtn(
-                                      title: DateFormat('HH:mm')
-                                          .format(setting.endTime),
-                                      onPress: () {})),
+                                      title: isEditMode
+                                          ? selectedEndTime
+                                          : DateFormat('HH:mm')
+                                              .format(setting.endTime),
+                                      onPress: () {
+                                        if (isEditMode) {
+                                          showWheelPicker(context,
+                                              (String value) {
+                                            // 현재 날짜 가져오기
+                                            final now = DateTime.now();
+
+                                            // 선택한 시간 문자열 "01:00" 분리
+                                            final parts = value.split(':');
+                                            final hour = int.parse(parts[0]);
+                                            final minute = int.parse(parts[1]);
+
+                                            // 현재 날짜 + 선택한 시간으로 새로운 DateTime 생성
+                                            final selectedDateTime = DateTime(
+                                                now.year,
+                                                now.month,
+                                                now.day,
+                                                hour,
+                                                minute);
+
+                                            // DateTime 객체를 변수에 할당
+                                            onChangedEndTime(selectedDateTime);
+
+                                            print(
+                                                "선택한 시간: $value, DateTime 객체: $selectedDateTime");
+                                          });
+                                        }
+                                      })),
                             ],
                           ),
                           SizedBox(
                             height: 4,
                           ),
-                          OutlinedBtn(
-                              width: width - 160,
-                              title: setting.timeUnit == "THIRTY_MIN"
-                                  ? "30분"
-                                  : "1시간",
-                              onPress: () {})
+                          isEditMode
+                              ? BorderDroprown(
+                                  items: minuteItems,
+                                  selected: selectedMinuteType,
+                                  width: width - 160,
+                                  onChanged: onChangedMinuteType,
+                                )
+                              : OutlinedBtn(
+                                  width: width - 160,
+                                  title: setting.timeUnit == "THIRTY_MIN"
+                                      ? "30분"
+                                      : "1시간",
+                                  onPress: () {})
                         ],
                       )),
                   SizedBox(height: 8),
@@ -272,10 +400,21 @@ class WrittenReservationRegisterSection extends StatelessWidget {
                   SizedBox(
                     height: 4,
                   ),
-                  OutlinedBtn(
-                      width: width - 160,
-                      title: setting.availableTables.toString() + "개",
-                      onPress: () {}),
+
+                  isEditMode
+                      ? SizedBox(
+                          width: width - 160,
+                          child: BorderTxtField(
+                            textInputType: TextInputType.number,
+                            hintText: "테이블 재고를 입력해주세요",
+                            controller: tableNumTxtController,
+                            onChanged: onChangedTableNum,
+                          ),
+                        )
+                      : OutlinedBtn(
+                          width: width - 160,
+                          title: setting.availableTables.toString() + "개",
+                          onPress: () {}),
                   SizedBox(height: 8),
                   Text(
                     "인원수",
@@ -290,22 +429,39 @@ class WrittenReservationRegisterSection extends StatelessWidget {
                   ),
                   SizedBox(
                     width: width - 160,
-                    child: Wrap(
-                      spacing: 4, // 버튼 사이 간격
-                      runSpacing: 4, // 줄바꿈 시 간격
-                      children: [
-                        ...numOfPeople.map((String num) {
-                          return Obx(() => YellowToggleBtn(
-                                width: (width - 160) / 3 - 3, // 버튼 너비
-                                title: num,
-                                isSelected:
-                                    RxBool(setting.allowedPeople.contains(num))
-                                        .value, // 기본 선택값
-                                onTap: () => {},
-                              ));
-                        }).toList(),
-                      ],
-                    ),
+                    child: isEditMode
+                        ? Wrap(
+                            spacing: 4, // 버튼 사이 간격
+                            runSpacing: 4, // 줄바꿈 시 간격
+                            children: [
+                              ...numOfPeople.map((String num) {
+                                return Obx(() => YellowToggleBtn(
+                                      width: (width - 160) / 3 - 3, // 버튼 너비
+                                      title: num,
+                                      isSelected: RxBool(
+                                              selectedNumOfPeople.contains(num))
+                                          .value, // 기본 선택값
+                                      onTap: () => onChangedNumOfPeople(num),
+                                    ));
+                              }).toList(),
+                            ],
+                          )
+                        : Wrap(
+                            spacing: 4, // 버튼 사이 간격
+                            runSpacing: 4, // 줄바꿈 시 간격
+                            children: [
+                              ...numOfPeople.map((String num) {
+                                return Obx(() => YellowToggleBtn(
+                                      width: (width - 160) / 3 - 3, // 버튼 너비
+                                      title: num,
+                                      isSelected: RxBool(setting.allowedPeople
+                                              .contains(num))
+                                          .value, // 기본 선택값
+                                      onTap: () => {},
+                                    ));
+                              }).toList(),
+                            ],
+                          ),
                   ),
                 ],
               )
@@ -318,8 +474,8 @@ class WrittenReservationRegisterSection extends StatelessWidget {
             children: [
               Expanded(
                 child: OutlinedBtn(
-                  title: "수정",
-                  onPress: () {},
+                  title: isEditMode ? "수정완료" : "수정",
+                  onPress: onEditToggle,
                 ),
               ),
               SizedBox(

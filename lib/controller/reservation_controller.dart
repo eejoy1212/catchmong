@@ -12,6 +12,7 @@ import 'package:intl/intl.dart';
 class ReservationConteroller extends GetxController {
   //예약 설정
   RxList<ReservationSetting> reservationSettings = RxList.empty();
+  RxList<bool> reservationSettingEditModes = RxList.empty();
   RxBool isSetting = false.obs;
   final TextEditingController reservationNameController =
       TextEditingController();
@@ -19,12 +20,18 @@ class ReservationConteroller extends GetxController {
       TextEditingController();
   // List<String> dayTypeOptions = ["평일", "주말"];
   RxString selectedDayType = "평일".obs;
+  RxString selectedEditDayType = "평일".obs;
   RxString selectedMinuteType = "30분".obs;
+  RxString selectedEditMinuteType = "30분".obs;
   Rx<DateTime> selectedStartTime = DateTime.now().obs;
   Rx<DateTime> selectedEndTime = DateTime.now().obs;
+  Rx<DateTime> selectedEditStartTime = DateTime.now().obs;
+  Rx<DateTime> selectedEditEndTime = DateTime.now().obs;
   RxList<String> selectedNumOfPeople = RxList.empty();
+  RxList<String> selectedEditNumOfPeople = RxList.empty();
   final TextEditingController tableNumTxtController = TextEditingController();
   Rxn<File> selectedSettingImage = Rxn<File>();
+  Rxn<File> selectedEditSettingImage = Rxn<File>();
   //예약 설정
   RxList<Reservation> reservations = RxList.empty();
   RxInt sortType = 0.obs;
@@ -37,7 +44,13 @@ class ReservationConteroller extends GetxController {
   ];
   RxString selectedDatePickType = "일간".obs;
 
-  List<Rx<DateTime>> selectedDate = [DateTime.now().obs, DateTime.now().obs];
+  List<Rx<DateTime>> selectedDate = [
+    DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
+        .obs, // 오늘 자정 (00:00:00)
+    DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, 23,
+            59, 59)
+        .obs, // 오늘의 마지막 시간 (23:59:59)
+  ];
 
   String baseUrl = 'http://$myPort:3000/reservations'; // API 베이스 URL
   final Dio _dio = Dio(BaseOptions(
@@ -54,7 +67,14 @@ class ReservationConteroller extends GetxController {
     "직접선택",
   ];
   RxString selectedDateItem = "직접선택".obs;
-  List<Rx<DateTime>> selectedResDate = [DateTime.now().obs, DateTime.now().obs];
+  List<Rx<DateTime>> selectedResDate = [
+    DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
+        .obs, // 오늘 자정 (00:00:00)
+    DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, 23,
+            59, 59)
+        .obs, // 오늘의 마지막 시간 (23:59:59)
+  ];
+
   RxList<Reservation> myReservations = RxList.empty();
   Rx<DateTime> selectedReservationDate = DateTime.now().obs;
   RxInt selectedReservationTimeIdx = 0.obs;
@@ -76,7 +96,7 @@ class ReservationConteroller extends GetxController {
       case 1:
         return "PENDING";
       case 2:
-        return "CONFIRM";
+        return "CONFIRMED";
       case 3:
         return "COMPLETED";
       case 4:
@@ -284,15 +304,14 @@ class ReservationConteroller extends GetxController {
 
         if (pickedYear != null) {
           // 선택된 연도를 반영
-          selectedDate[0].value = DateTime(pickedYear);
-          selectedDate[1].value = DateTime(pickedYear, 12, 31);
+          selectedDate[0].value = DateTime(pickedYear, 1, 1);
+          selectedDate[1].value =
+              DateTime(pickedYear, 12, 31, 23, 59, 59); // 연말 마지막 시간
         }
         break;
 
       case "월간":
         // 월 선택
-        final DateTime now = DateTime.now();
-        // initialDate를 항상 현재 월의 첫 번째 날로 설정
         final DateTime initialDate = DateTime(now.year, now.month, 1);
 
         final DateTime? pickedMonth = await showDatePicker(
@@ -309,8 +328,14 @@ class ReservationConteroller extends GetxController {
           // 선택된 월의 시작과 끝 설정
           selectedDate[0].value =
               DateTime(pickedMonth.year, pickedMonth.month, 1);
-          selectedDate[1].value =
-              DateTime(pickedMonth.year, pickedMonth.month + 1, 0);
+          selectedDate[1].value = DateTime(
+            pickedMonth.year,
+            pickedMonth.month + 1,
+            0,
+            23,
+            59,
+            59,
+          ); // 월의 마지막 날 마지막 시간
         }
         break;
 
@@ -327,8 +352,10 @@ class ReservationConteroller extends GetxController {
           // 주의 시작 (월요일)과 끝 (일요일) 계산
           int weekday = pickedWeek.weekday;
           selectedDate[0].value =
-              pickedWeek.subtract(Duration(days: weekday - 1));
-          selectedDate[1].value = pickedWeek.add(Duration(days: 7 - weekday));
+              pickedWeek.subtract(Duration(days: weekday - 1)); // 월요일
+          selectedDate[1].value = pickedWeek
+              .add(Duration(days: 7 - weekday))
+              .add(Duration(hours: 23, minutes: 59, seconds: 59)); // 일요일 마지막 시간
         }
         break;
 
@@ -343,8 +370,16 @@ class ReservationConteroller extends GetxController {
 
         if (pickedDay != null) {
           // 선택된 날짜 설정
-          selectedDate[0].value = pickedDay;
-          selectedDate[1].value = pickedDay;
+          selectedDate[0].value =
+              DateTime(pickedDay.year, pickedDay.month, pickedDay.day);
+          selectedDate[1].value = DateTime(
+            pickedDay.year,
+            pickedDay.month,
+            pickedDay.day,
+            23,
+            59,
+            59,
+          ); // 하루의 마지막 시간
         }
         break;
 
@@ -359,7 +394,14 @@ class ReservationConteroller extends GetxController {
         if (pickedRange != null) {
           // 범위 시작과 끝 설정
           selectedDate[0].value = pickedRange.start;
-          selectedDate[1].value = pickedRange.end;
+          selectedDate[1].value = DateTime(
+            pickedRange.end.year,
+            pickedRange.end.month,
+            pickedRange.end.day,
+            23,
+            59,
+            59,
+          ); // 범위 끝의 마지막 시간
         }
         break;
 
@@ -392,10 +434,9 @@ class ReservationConteroller extends GetxController {
   Future<void> selectReservationDate(BuildContext context) async {
     DateTime now = DateTime.now();
 
-    // 선택 방식에 따라 날짜 선택 형태 결정
     switch (selectedDateItem.value) {
       case "년간":
-        // 년도 선택 (Custom Dialog 사용)
+        // 년도 선택
         final int? pickedYear = await showDialog<int>(
           context: context,
           builder: (BuildContext context) {
@@ -421,9 +462,9 @@ class ReservationConteroller extends GetxController {
         );
 
         if (pickedYear != null) {
-          // 선택된 연도를 반영
           selectedResDate[0].value = DateTime(pickedYear);
-          selectedResDate[1].value = DateTime(pickedYear, 12, 31);
+          selectedResDate[1].value =
+              DateTime(pickedYear, 12, 31, 23, 59, 59); // 연말의 마지막 시간 설정
         }
         break;
 
@@ -440,11 +481,16 @@ class ReservationConteroller extends GetxController {
         );
 
         if (pickedMonth != null) {
-          // 선택된 월의 시작과 끝 설정
           selectedResDate[0].value =
               DateTime(pickedMonth.year, pickedMonth.month);
-          selectedResDate[1].value =
-              DateTime(pickedMonth.year, pickedMonth.month + 1, 0);
+          selectedResDate[1].value = DateTime(
+            pickedMonth.year,
+            pickedMonth.month + 1,
+            0,
+            23,
+            59,
+            59,
+          ); // 월의 마지막 날 마지막 시간 설정
         }
         break;
 
@@ -458,12 +504,13 @@ class ReservationConteroller extends GetxController {
         );
 
         if (pickedWeek != null) {
-          // 주의 시작 (월요일)과 끝 (일요일) 계산
           int weekday = pickedWeek.weekday;
           selectedResDate[0].value =
               pickedWeek.subtract(Duration(days: weekday - 1));
           selectedResDate[1].value =
-              pickedWeek.add(Duration(days: 7 - weekday));
+              pickedWeek.add(Duration(days: 7 - weekday)).subtract(
+                    Duration(seconds: 1),
+                  ); // 일요일 마지막 시간 설정
         }
         break;
 
@@ -477,14 +524,14 @@ class ReservationConteroller extends GetxController {
         );
 
         if (pickedDay != null) {
-          // 선택된 날짜 설정
           selectedResDate[0].value = pickedDay;
-          selectedResDate[1].value = pickedDay;
+          selectedResDate[1].value = DateTime(pickedDay.year, pickedDay.month,
+              pickedDay.day, 23, 59, 59); // 하루의 마지막 시간 설정
         }
         break;
 
       case "직접선택":
-        // 날짜 범위 선택 (RangePicker)
+        // 날짜 범위 선택
         final DateTimeRange? pickedRange = await showDateRangePicker(
           context: context,
           firstDate: DateTime(2000),
@@ -492,14 +539,19 @@ class ReservationConteroller extends GetxController {
         );
 
         if (pickedRange != null) {
-          // 범위 시작과 끝 설정
           selectedResDate[0].value = pickedRange.start;
-          selectedResDate[1].value = pickedRange.end;
+          selectedResDate[1].value = DateTime(
+            pickedRange.end.year,
+            pickedRange.end.month,
+            pickedRange.end.day,
+            23,
+            59,
+            59,
+          ); // 범위 끝의 마지막 시간 설정
         }
         break;
 
       default:
-        // 기본 동작
         break;
     }
   }
@@ -509,9 +561,8 @@ class ReservationConteroller extends GetxController {
     required int partnerId,
   }) async {
     try {
-      final DateFormat formatter = DateFormat('yyyy-MM-dd'); // 원하는 포맷
-      String startDate = formatter.format(selectedResDate[0].value);
-      String endDate = selectedResDate[1].value.toUtc().toIso8601String();
+      String startDate = selectedResDate[0].value.toIso8601String();
+      String endDate = selectedResDate[1].value.toIso8601String();
       final response = await _dio.get(
         baseUrl + "/partner",
         queryParameters: {
@@ -553,6 +604,8 @@ class ReservationConteroller extends GetxController {
             .map((json) => ReservationSetting.fromJson(json))
             .toList();
         reservationSettings.value = origin.reversed.toList();
+        reservationSettingEditModes.value =
+            List.generate(reservationSettings.length, (int index) => false);
         // 콘솔에 출력
         // print('Reservation Settings for Partner ID $partnerId:');
         // for (var setting in reservationSettings) {
@@ -600,8 +653,8 @@ class ReservationConteroller extends GetxController {
         'userId': userId,
         'partnerId': partnerId,
         'settingId': settingId,
-        'reservationStartDate': reservationStartDate.toIso8601String(),
-        'reservationEndDate': reservationEndDate.toIso8601String(),
+        'reservationStartDate': reservationStartDate.toUtc().toIso8601String(),
+        'reservationEndDate': reservationEndDate.toUtc().toIso8601String(),
         'numOfPeople': numOfPeople,
         'request': request,
       };

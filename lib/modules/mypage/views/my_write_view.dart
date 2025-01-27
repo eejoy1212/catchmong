@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -20,6 +21,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:crypto/crypto.dart';
 
 class MyWriteView extends StatelessWidget {
   const MyWriteView({super.key});
@@ -173,7 +175,11 @@ void showEdit(
   }
 
   final stars = getStars(controller.editing.value!.rating);
+  String generateOrderNumber(DateTime createdAt) {
+    return 'ORD-${createdAt.year}${createdAt.month.toString().padLeft(2, '0')}${createdAt.day.toString().padLeft(2, '0')}${createdAt.hour.toString().padLeft(2, '0')}${createdAt.minute.toString().padLeft(2, '0')}${createdAt.second.toString().padLeft(2, '0')}';
+  }
 
+  final orderNum = generateOrderNumber(controller.editing.value!.createdAt);
   showGeneralDialog(
     context: context,
     barrierDismissible: true, // true로 설정했으므로 barrierLabel 필요
@@ -248,7 +254,7 @@ void showEdit(
                         ),
                       ),
                       Text(
-                        "주문번호 2024102212582202",
+                        "주문번호 $orderNum",
                         style: TextStyle(
                           color: CatchmongColors.gray_800,
                           fontWeight: FontWeight.w400,

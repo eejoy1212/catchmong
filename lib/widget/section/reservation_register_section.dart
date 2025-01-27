@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/model/reservation_setting.dart';
 import 'package:catchmong/modules/mypage/views/mypage_view.dart';
 import 'package:catchmong/widget/button/outlined_btn.dart';
 import 'package:catchmong/widget/button/single_img_btn.dart';
@@ -13,6 +14,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ReservationRegisterSection extends StatelessWidget {
+  final bool isEditMode;
   final TextEditingController nameTxtController;
   final Function(String) onChangedName;
   final TextEditingController descriptionTxtController;
@@ -32,6 +34,7 @@ class ReservationRegisterSection extends StatelessWidget {
   final Function(XFile) onImageSelected;
   final void Function() onDeleteImg;
   final File? image;
+  final ReservationSetting? setting;
   const ReservationRegisterSection({
     super.key,
     required this.nameTxtController,
@@ -53,6 +56,8 @@ class ReservationRegisterSection extends StatelessWidget {
     this.image,
     required this.onChangedStartTime,
     required this.onChangedEndTime,
+    required this.isEditMode,
+    this.setting,
   });
 
   @override
@@ -111,10 +116,13 @@ class ReservationRegisterSection extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SingleImgBtn(
-            image: image,
-            onImageSelected: onImageSelected,
-            onDelete: onDeleteImg,
+          IgnorePointer(
+            ignoring: !isEditMode,
+            child: SingleImgBtn(
+              image: image,
+              onImageSelected: onImageSelected,
+              onDelete: onDeleteImg,
+            ),
           ),
           SizedBox(
             width: 12,
