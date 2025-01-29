@@ -206,27 +206,68 @@ void showEdit(
               } else {
                 //수정하기
                 final editing = controller.editing.value!;
-                final res = await controller.updateReview(
-                    reviewId: editing.id,
-                    userId: editing.userId,
-                    rating: editing.rating,
-                    content: editing.content,
-                    removedImages: controller.removeImages,
-                    newImages: editing.images == null
-                        ? []
-                        : editing.images!
-                            .where((path) => !path.contains("uploads"))
-                            .map((el) => File(el))
-                            .toList());
-                if (res) {
-                  if (loginController.user.value != null) {
-                    controller.fetchMyReviews(loginController.user.value!.id);
+                if (editing.images == null) {
+                  Get.snackbar(
+                    "알림",
+                    "이미지를 3개 이상 선택 해 주세요.",
+                    snackPosition: SnackPosition.TOP, // 상단에 표시
+                    backgroundColor: CatchmongColors.yellow_main,
+                    colorText: CatchmongColors.black,
+                    icon:
+                        Icon(Icons.check_circle, color: CatchmongColors.black),
+                    duration: Duration(seconds: 1),
+                    borderRadius: 10,
+                    margin: EdgeInsets.all(10),
+                  );
+                } else if (editing.images!.length < 3) {
+                  Get.snackbar(
+                    "알림",
+                    "이미지를 3개 이상 선택 해 주세요.",
+                    snackPosition: SnackPosition.TOP, // 상단에 표시
+                    backgroundColor: CatchmongColors.yellow_main,
+                    colorText: CatchmongColors.black,
+                    icon:
+                        Icon(Icons.check_circle, color: CatchmongColors.black),
+                    duration: Duration(seconds: 1),
+                    borderRadius: 10,
+                    margin: EdgeInsets.all(10),
+                  );
+                } else {
+                  final res = await controller.updateReview(
+                      reviewId: editing.id,
+                      userId: editing.userId,
+                      rating: editing.rating,
+                      content: editing.content,
+                      removedImages: controller.removeImages,
+                      newImages: editing.images == null
+                          ? []
+                          : editing.images!
+                              .where((path) => !path.contains("uploads"))
+                              .map((el) => File(el))
+                              .toList());
+                  if (res) {
+                    if (loginController.user.value != null) {
+                      controller.fetchMyReviews(loginController.user.value!.id);
+                      controller.removeImages.clear();
+                      Get.back();
+                      Get.snackbar(
+                        "알림",
+                        "내가 쓴 리뷰를 수정 완료했습니다.",
+                        snackPosition: SnackPosition.TOP, // 상단에 표시
+                        backgroundColor: CatchmongColors.yellow_main,
+                        colorText: CatchmongColors.black,
+                        icon: Icon(Icons.check_circle,
+                            color: CatchmongColors.black),
+                        duration: Duration(seconds: 1),
+                        borderRadius: 10,
+                        margin: EdgeInsets.all(10),
+                      );
+                    }
                   }
-                  Get.back();
                 }
               }
             },
-            title: Text(controller.editing.value == null ? "등록하기" : "수정하기ㅇㅇ"),
+            title: Text(controller.editing.value == null ? "등록하기" : "수정하기"),
           ),
         ),
         backgroundColor: CatchmongColors.gray50,
@@ -621,10 +662,14 @@ void showEdit(
                                   isLocal: isLocal, // 로컬 이미지 여부 전달
                                   onDelete: () {
                                     if (controller.editing.value != null) {
-                                      controller.removeImages.add("uploads/" +
-                                          controller
-                                              .editing.value!.images![idx - 1]
-                                              .split("uploads/")[1]);
+                                      if (controller
+                                          .editing.value!.images![idx - 1]
+                                          .contains("uploads/")) {
+                                        controller.removeImages.add(controller
+                                            .editing.value!.images![idx - 1]
+                                            .split("uploads/")[1]);
+                                      }
+
                                       controller.editing.value =
                                           controller.editing.value!.copyWith(
                                         images:
