@@ -30,9 +30,6 @@ class MyWriteView extends StatelessWidget {
   Widget build(BuildContext context) {
     final ReviewController controller = Get.find<ReviewController>();
     final LoginController loginController = Get.find<LoginController>();
-    if (loginController.user.value != null) {
-      controller.fetchMyReviews(loginController.user.value!.id);
-    }
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -151,6 +148,7 @@ class MyWriteView extends StatelessWidget {
 void showEdit(
   BuildContext context,
 ) {
+  final LoginController loginController = Get.find<LoginController>();
   final ReviewController controller = Get.find<ReviewController>();
   double width = MediaQuery.of(context).size.width;
   List<Widget> getStars(double rating) {
@@ -208,22 +206,27 @@ void showEdit(
               } else {
                 //수정하기
                 final editing = controller.editing.value!;
-                await controller.updateReview(
-                  reviewId: editing.id,
-                  userId: editing.userId,
-                  rating: editing.rating,
-                  content: editing.content,
-                  // images: editing.images == null
-                  //     ? []
-                  //     : editing.images!
-                  //         .map((path) => File(!path.contains('uploads')
-                  //             ? path
-                  //             : "${controller.baseUrl}/$path"))
-                  //         .toList()
-                );
+                final res = await controller.updateReview(
+                    reviewId: editing.id,
+                    userId: editing.userId,
+                    rating: editing.rating,
+                    content: editing.content,
+                    removedImages: controller.removeImages,
+                    newImages: editing.images == null
+                        ? []
+                        : editing.images!
+                            .where((path) => !path.contains("uploads"))
+                            .map((el) => File(el))
+                            .toList());
+                if (res) {
+                  if (loginController.user.value != null) {
+                    controller.fetchMyReviews(loginController.user.value!.id);
+                  }
+                  Get.back();
+                }
               }
             },
-            title: Text(controller.editing.value == null ? "등록하기" : "수정하기"),
+            title: Text(controller.editing.value == null ? "등록하기" : "수정하기ㅇㅇ"),
           ),
         ),
         backgroundColor: CatchmongColors.gray50,
@@ -618,6 +621,10 @@ void showEdit(
                                   isLocal: isLocal, // 로컬 이미지 여부 전달
                                   onDelete: () {
                                     if (controller.editing.value != null) {
+                                      controller.removeImages.add("uploads/" +
+                                          controller
+                                              .editing.value!.images![idx - 1]
+                                              .split("uploads/")[1]);
                                       controller.editing.value =
                                           controller.editing.value!.copyWith(
                                         images:

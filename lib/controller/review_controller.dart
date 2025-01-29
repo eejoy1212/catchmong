@@ -18,6 +18,7 @@ class ReviewController extends GetxController {
   List<RxBool> isExpanded = <RxBool>[].obs;
   List<RxBool> isPartnerExpanded = <RxBool>[].obs;
   Rxn<Review> editing = Rxn<Review>(null);
+  RxList<String> removeImages = RxList.empty();
   final String baseUrl = 'http://$myPort:3000';
   final Dio _dio = Dio(BaseOptions(
     baseUrl: 'http://$myPort:3000', // API 베이스 URL
@@ -149,45 +150,91 @@ class ReviewController extends GetxController {
     }
   }
 
-//후기 수정
-  Future<void> updateReview({
+// //후기 수정
+//   Future<void> updateReview({
+//     required int reviewId,
+//     required int userId,
+//     double? rating,
+//     String? content,
+//   }) async {
+//     final String url = '$baseUrl/reviews/update';
+
+//     try {
+//       // 요청 데이터 생성
+//       final Map<String, dynamic> data = {
+//         'reviewId': reviewId,
+//         'userId': userId,
+//         if (rating != null) 'rating': rating,
+//         if (content != null) 'content': content,
+//       };
+
+//       // API 호출
+//       final response = await _dio.put(url, data: data);
+
+//       if (response.statusCode == 200) {
+//         print("[PUT SUCCESS] 내 리뷰 수정 성공: ${response.data}");
+//         final data = response.data;
+//         int nowIdx =
+//             myReviews.indexWhere((review) => review.id == editing.value!.id);
+//         myReviews[nowIdx] = editing.value!;
+//         Get.back();
+//       } else {
+//         print(
+//             "[PUT ERROR] 내 리뷰 수정 실패: ${response.statusCode} - ${response.data}");
+//       }
+//     } on DioError catch (e) {
+//       if (e.response != null) {
+//         print(
+//             "[PUT ERROR] 서버 응답 에러: ${e.response?.statusCode} - ${e.response?.data}");
+//       } else {
+//         print("[PUT ERROR] 요청 중 에러 발생: $e");
+//       }
+//     }
+//   }
+  Future<bool> updateReview({
     required int reviewId,
     required int userId,
     double? rating,
     String? content,
+    List<String>? removedImages, // 삭제할 이미지 (URL)
+    List<File>? newImages, // 새로 추가할 이미지 (파일)
   }) async {
     final String url = '$baseUrl/reviews/update';
 
     try {
-      // 요청 데이터 생성
-      final Map<String, dynamic> data = {
-        'reviewId': reviewId,
-        'userId': userId,
-        if (rating != null) 'rating': rating,
-        if (content != null) 'content': content,
-      };
+      var request = http.MultipartRequest('PUT', Uri.parse(url));
 
-      // API 호출
-      final response = await _dio.put(url, data: data);
+      // 기본 필드 추가
+      request.fields['reviewId'] = reviewId.toString();
+      request.fields['userId'] = userId.toString();
+      if (rating != null) request.fields['rating'] = rating.toString();
+      if (content != null) request.fields['content'] = content;
+
+      // 삭제할 이미지 추가
+      if (removedImages != null && removedImages.isNotEmpty) {
+        request.fields['removedImages'] = jsonEncode(removedImages);
+      }
+
+      // 새로 추가할 이미지 파일 추가
+      if (newImages != null && newImages.isNotEmpty) {
+        for (var image in newImages) {
+          request.files
+              .add(await http.MultipartFile.fromPath('newImages', image.path));
+        }
+      }
+
+      var response = await request.send();
 
       if (response.statusCode == 200) {
-        print("[PUT SUCCESS] 내 리뷰 수정 성공: ${response.data}");
-        final data = response.data;
-        int nowIdx =
-            myReviews.indexWhere((review) => review.id == editing.value!.id);
-        myReviews[nowIdx] = editing.value!;
-        Get.back();
+        print("[PUT SUCCESS] 리뷰 수정 성공");
+        return true;
       } else {
-        print(
-            "[PUT ERROR] 내 리뷰 수정 실패: ${response.statusCode} - ${response.data}");
+        print("[PUT ERROR] 리뷰 수정 실패: ${response.statusCode}");
+        return false;
       }
-    } on DioError catch (e) {
-      if (e.response != null) {
-        print(
-            "[PUT ERROR] 서버 응답 에러: ${e.response?.statusCode} - ${e.response?.data}");
-      } else {
-        print("[PUT ERROR] 요청 중 에러 발생: $e");
-      }
+    } catch (e) {
+      print("[PUT ERROR] 요청 중 에러 발생: $e");
+      return false;
     }
   }
 }

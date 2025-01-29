@@ -47,6 +47,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 class MyPageView extends StatelessWidget {
+  final ReviewController reviewController = Get.find<ReviewController>();
   final LoginController loginController = Get.find<LoginController>();
   final MypageController myPageController = Get.find<MypageController>();
   final ReservationConteroller reservationController =
@@ -302,6 +303,9 @@ class MyPageView extends StatelessWidget {
           ,
           InkWell(
             onTap: () {
+              if (loginController.user.value != null) {
+                reviewController.fetchMyReviews(loginController.user.value!.id);
+              }
               Get.toNamed('/my-write');
             },
             child: Container(
