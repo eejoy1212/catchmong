@@ -18,7 +18,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 class WrittenReservationRegisterSection extends StatelessWidget {
-  final void Function() onEditToggle;
+  final void Function(String name, String description) onEditToggle;
   final TextEditingController nameTxtController;
   final Function(String) onChangedName;
   final TextEditingController descriptionTxtController;
@@ -40,6 +40,7 @@ class WrittenReservationRegisterSection extends StatelessWidget {
   final File? image;
   final ReservationSetting setting;
   final bool isEditMode;
+  final void Function() onDelete;
   const WrittenReservationRegisterSection({
     super.key,
     required this.nameTxtController,
@@ -64,6 +65,7 @@ class WrittenReservationRegisterSection extends StatelessWidget {
     required this.setting,
     required this.isEditMode,
     required this.onEditToggle,
+    required this.onDelete,
   });
 
   @override
@@ -291,8 +293,8 @@ class WrittenReservationRegisterSection extends StatelessWidget {
                                   child: OutlinedBtn(
                                       title: isEditMode
                                           ? selectedStartTime
-                                          : DateFormat('HH:mm')
-                                              .format(setting.startTime),
+                                          : DateFormat('HH:mm').format(
+                                              setting.startTime.toLocal()),
                                       onPress: () {
                                         if (isEditMode) {
                                           showWheelPicker(context,
@@ -338,8 +340,8 @@ class WrittenReservationRegisterSection extends StatelessWidget {
                                   child: OutlinedBtn(
                                       title: isEditMode
                                           ? selectedEndTime
-                                          : DateFormat('HH:mm')
-                                              .format(setting.endTime),
+                                          : DateFormat('HH:mm').format(
+                                              setting.endTime.toLocal()),
                                       onPress: () {
                                         if (isEditMode) {
                                           showWheelPicker(context,
@@ -475,7 +477,10 @@ class WrittenReservationRegisterSection extends StatelessWidget {
               Expanded(
                 child: OutlinedBtn(
                   title: isEditMode ? "수정완료" : "수정",
-                  onPress: onEditToggle,
+                  onPress: () {
+                    onEditToggle(
+                        nameTxtController.text, descriptionTxtController.text);
+                  },
                 ),
               ),
               SizedBox(
@@ -484,7 +489,7 @@ class WrittenReservationRegisterSection extends StatelessWidget {
               Expanded(
                 child: OutlinedBtn(
                   title: "삭제",
-                  onPress: () {},
+                  onPress: onDelete,
                 ),
               ),
             ],

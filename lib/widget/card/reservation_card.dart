@@ -282,6 +282,7 @@ void showReservationPerPartner(
                     );
                     final endDt = startDt.add(Duration(
                         minutes: setting.timeUnit == "THIRTY_MIN" ? 30 : 60));
+
                     final res =
                         await reservationConteroller.postCreateReservation(
                       userId: loginController.user.value!.id,
@@ -294,8 +295,20 @@ void showReservationPerPartner(
                       request:
                           reservationConteroller.reservationReqController.text,
                     );
+
                     if (res) {
+                      Get.back(closeOverlays: true);
+
                       showReservationConfirm(context, setting);
+
+                      // reservationConteroller.selectedReservationDate.value =
+                      //     DateTime.now();
+                      // reservationConteroller.selectedReservationTimeIdx.value =
+                      //     0;
+                      // reservationConteroller
+                      //     .selectedReservationNumOfPeopleIdx.value = 0;
+                      // reservationConteroller.reservationReqController.clear();
+                      // reservationConteroller.agreePrivacy.value = false;
                     } else {
                       Get.snackbar(
                         "알림",
@@ -1282,7 +1295,17 @@ void showReservationPerPartner(
         ),
       );
     },
-  );
+  ).then((_) {
+    // controller.reservationNameController.clear();
+    // controller.reservationDescriptionController.clear();
+    // controller.selectedDayType.value = "평일";
+    // controller.selectedStartTime.value = DateTime.now();
+    // controller.selectedEndTime.value = DateTime.now();
+    // controller.selectedMinuteType.value = "30분";
+    // controller.tableNumTxtController.clear();
+    // controller.selectedNumOfPeople.clear();
+    // controller.selectedSettingImage.value = null;
+  });
 }
 
 void showReservationConfirm(BuildContext context, ReservationSetting setting) {
@@ -1318,7 +1341,17 @@ void showReservationConfirm(BuildContext context, ReservationSetting setting) {
 
       return Scaffold(
         backgroundColor: CatchmongColors.gray50,
-        appBar: CloseAppbar(title: "예약완료"),
+        appBar: CloseAppbar(
+          title: "예약완료",
+          // onClose: () {
+          //   reservationConteroller.selectedReservationDate.value =
+          //       DateTime.now();
+          //   reservationConteroller.selectedReservationTimeIdx.value = 0;
+          //   reservationConteroller.selectedReservationNumOfPeopleIdx.value = 0;
+          //   reservationConteroller.reservationReqController.clear();
+          //   reservationConteroller.agreePrivacy.value = false;
+          // },
+        ),
         body: SafeArea(
           child: SingleChildScrollView(
             child: Column(
@@ -1580,7 +1613,13 @@ void showReservationConfirm(BuildContext context, ReservationSetting setting) {
         ),
       );
     },
-  );
+  ).then((_) {
+    reservationConteroller.selectedReservationDate.value = DateTime.now();
+    reservationConteroller.selectedReservationTimeIdx.value = 0;
+    reservationConteroller.selectedReservationNumOfPeopleIdx.value = 0;
+    reservationConteroller.reservationReqController.clear();
+    reservationConteroller.agreePrivacy.value = false;
+  });
 }
 
 Future<void> _makePhoneCall(String phoneNumber) async {

@@ -361,67 +361,74 @@ void showEdit(
                           SizedBox(
                             height: 8,
                           ),
-                          Text(
-                            "상품명(식사하신 메뉴명)을 입력해주세요.",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 14,
-                              color: CatchmongColors.gray_800,
+                          SizedBox(
+                            width: width - 132,
+                            child: Text(
+                              controller.editing.value!.partner!.description ??
+                                  "",
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              softWrap: true,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w400,
+                                fontSize: 14,
+                                color: CatchmongColors.gray_800,
+                              ),
                             ),
                           ),
                           SizedBox(
                             height: 8,
                           ),
-                          Row(
-                            children: [
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  vertical: 4,
-                                  horizontal: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(
-                                      20,
-                                    )),
-                                    border: Border.all(
-                                      color: CatchmongColors.gray,
-                                    )),
-                                child: Center(
-                                  child: Text(
-                                    "수량",
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w400,
-                                      color: CatchmongColors.gray400,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 4,
-                              ),
-                              Text(
-                                "|",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w400,
-                                  color: CatchmongColors.gray400,
-                                ),
-                              ),
-                              SizedBox(
-                                width: 4,
-                              ),
-                              Text(
-                                "1개",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w400,
-                                  color: CatchmongColors.gray_800,
-                                ),
-                              ),
-                            ],
-                          )
+                          // Row(
+                          //   children: [
+                          //     Container(
+                          //       padding: EdgeInsets.symmetric(
+                          //         vertical: 4,
+                          //         horizontal: 8,
+                          //       ),
+                          //       decoration: BoxDecoration(
+                          //           borderRadius:
+                          //               BorderRadius.all(Radius.circular(
+                          //             20,
+                          //           )),
+                          //           border: Border.all(
+                          //             color: CatchmongColors.gray,
+                          //           )),
+                          //       child: Center(
+                          //         child: Text(
+                          //           "수량",
+                          //           style: TextStyle(
+                          //             fontSize: 10,
+                          //             fontWeight: FontWeight.w400,
+                          //             color: CatchmongColors.gray400,
+                          //           ),
+                          //         ),
+                          //       ),
+                          //     ),
+                          //     SizedBox(
+                          //       width: 4,
+                          //     ),
+                          //     Text(
+                          //       "|",
+                          //       style: TextStyle(
+                          //         fontSize: 12,
+                          //         fontWeight: FontWeight.w400,
+                          //         color: CatchmongColors.gray400,
+                          //       ),
+                          //     ),
+                          //     SizedBox(
+                          //       width: 4,
+                          //     ),
+                          //     Text(
+                          //       "1개",
+                          //       style: TextStyle(
+                          //         fontSize: 12,
+                          //         fontWeight: FontWeight.w400,
+                          //         color: CatchmongColors.gray_800,
+                          //       ),
+                          //     ),
+                          //   ],
+                          // )
                         ],
                       )
                     ],

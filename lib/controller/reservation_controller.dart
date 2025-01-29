@@ -58,6 +58,11 @@ class ReservationConteroller extends GetxController {
     connectTimeout: const Duration(milliseconds: 5000), // 연결 제한 시간
     receiveTimeout: const Duration(milliseconds: 3000), // 응답 제한 시간
   ));
+  final Dio _settingDio = Dio(BaseOptions(
+    baseUrl: 'http://$myPort:3000/reservationsetting', // API 베이스 URL
+    connectTimeout: const Duration(milliseconds: 5000), // 연결 제한 시간
+    receiveTimeout: const Duration(milliseconds: 3000), // 응답 제한 시간
+  ));
   RxString selectedResDatePickType = "일간".obs;
   List<String> dateItems = [
     "년간",
@@ -794,5 +799,97 @@ class ReservationConteroller extends GetxController {
       print('알 수 없는 오류: $e');
       return null;
     }
+  }
+
+  String getAvailabilityType(String value) {
+    switch (value) {
+      case "평일":
+        return "WEEKDAY";
+      case "주말":
+        return "WEEKEND";
+      case "매일":
+        return "DAILY";
+      default:
+        return "DAILY";
+    }
+  }
+
+  String getTimeUnit(String value) {
+    switch (value) {
+      case "30분":
+        return "THIRTY_MIN";
+      case "1시간":
+        return "ONE_HOUR";
+      default:
+        return "THIRTY_MIN";
+    }
+  }
+
+  Future<ReservationSetting?> updateReservationSetting(
+      {required int id, required String name, required String desc}) async {
+    try {
+      // 멀티파트 요청 생성
+      var request = http.MultipartRequest(
+          'PUT', Uri.parse("http://$myPort:3000/reservationsetting/$id"));
+
+      // 필드 추가
+      request.fields['name'] = name;
+      request.fields['description'] = desc;
+      request.fields['availabilityType'] =
+          getAvailabilityType(selectedEditDayType.value);
+      request.fields['startTime'] =
+          selectedEditStartTime.value.toUtc().toIso8601String();
+      request.fields['endTime'] =
+          selectedEditEndTime.value.toUtc().toIso8601String();
+      request.fields['timeUnit'] = getTimeUnit(selectedEditMinuteType.value);
+      request.fields['availableTables'] = tableNumTxtController.text;
+      request.fields['allowedPeople'] = selectedEditNumOfPeople.join(",");
+
+      // 새 이미지 파일 추가 (선택 사항)
+      if (selectedEditSettingImage.value != null &&
+          !selectedEditSettingImage.value!.path.contains("uploads/")) {
+        request.files.add(await http.MultipartFile.fromPath(
+            'reservationImage', selectedEditSettingImage.value!.path));
+      }
+
+      // 요청 전송
+      var response = await request.send();
+
+      // 응답 처리
+      if (response.statusCode == 200) {
+        var responseBody = await response.stream.bytesToString();
+        var responseData = jsonDecode(responseBody);
+
+        print('Reservation setting updated successfully: $responseData');
+        final setting = ReservationSetting.fromJson(responseData);
+        return setting;
+      } else {
+        print('Failed to update reservation setting: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('Error updating reservation setting: $e');
+      return null;
+    }
+  }
+
+  /// 예약 설정 삭제 함수
+  Future<bool> deleteReservationSetting({required int id}) async {
+    try {
+      final response = await _settingDio.delete('/$id');
+
+      if (response.statusCode == 200) {
+        print("Reservation setting deleted successfully");
+        return true;
+      } else if (response.statusCode == 404) {
+        print("Error: Reservation setting not found");
+      } else {
+        print("Error deleting reservation setting: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Exception occurred while deleting reservation setting: $e");
+    }
+
+    return false;
   }
 }

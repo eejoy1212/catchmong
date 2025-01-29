@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 
 class CloseAppbar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
-  const CloseAppbar({super.key, required this.title});
+  final void Function()? onClose;
+  const CloseAppbar({super.key, required this.title, this.onClose});
 
   @override
   Widget build(BuildContext context) {
@@ -14,6 +15,7 @@ class CloseAppbar extends StatelessWidget implements PreferredSizeWidget {
       actions: [
         CloseButton(
           color: CatchmongColors.black,
+          onPressed: onClose,
         )
       ],
       centerTitle: true,

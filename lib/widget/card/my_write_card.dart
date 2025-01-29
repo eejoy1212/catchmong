@@ -434,11 +434,23 @@ void showConfirmDialog(BuildContext context, int reviewId, int userId) {
                     ),
                     Expanded(
                       child: InkWell(
-                        onTap: () {
+                        onTap: () async {
                           // 확인 버튼의 동작 추가
-                          controller.deleteMyReviews(
+                          await controller.deleteMyReviews(
                               reviewId: reviewId, userId: userId);
                           Get.back();
+                          Get.snackbar(
+                            "알림",
+                            "리뷰가 삭제되었습니다.",
+                            snackPosition: SnackPosition.TOP, // 상단에 표시
+                            backgroundColor: CatchmongColors.yellow_main,
+                            colorText: CatchmongColors.black,
+                            icon: Icon(Icons.check_circle,
+                                color: CatchmongColors.black),
+                            duration: Duration(seconds: 1),
+                            borderRadius: 10,
+                            margin: EdgeInsets.all(10),
+                          );
                         },
                         child: Container(
                           alignment: Alignment.center,

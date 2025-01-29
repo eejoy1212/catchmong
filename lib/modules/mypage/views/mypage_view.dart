@@ -4898,104 +4898,109 @@ void showReservationSetting(BuildContext context, int partnerId) {
               onPressed: () async {
                 // await controller.postReservationSetting();
                 // Get.back();
-                if (controller.reservationNameController.text.isEmpty) {
-                  Get.snackbar(
-                    "알림",
-                    "예약 상품명을 입력 해주세요.",
-                    snackPosition: SnackPosition.TOP, // 상단에 표시
-                    backgroundColor: CatchmongColors.yellow_main,
-                    colorText: CatchmongColors.black,
-                    icon:
-                        Icon(Icons.check_circle, color: CatchmongColors.black),
-                    duration: Duration(seconds: 1),
-                    borderRadius: 10,
-                    margin: EdgeInsets.all(10),
-                  );
-                } else if (controller.tableNumTxtController.text.isEmpty) {
-                  Get.snackbar(
-                    "알림",
-                    "테이블 재고를 입력 해주세요.",
-                    snackPosition: SnackPosition.TOP, // 상단에 표시
-                    backgroundColor: CatchmongColors.yellow_main,
-                    colorText: CatchmongColors.black,
-                    icon:
-                        Icon(Icons.check_circle, color: CatchmongColors.black),
-                    duration: Duration(seconds: 1),
-                    borderRadius: 10,
-                    margin: EdgeInsets.all(10),
-                  );
-                } else if (controller.selectedSettingImage.value == null) {
-                  Get.snackbar(
-                    "알림",
-                    "이미지를 선택해주세요.",
-                    snackPosition: SnackPosition.TOP, // 상단에 표시
-                    backgroundColor: CatchmongColors.yellow_main,
-                    colorText: CatchmongColors.black,
-                    icon:
-                        Icon(Icons.check_circle, color: CatchmongColors.black),
-                    duration: Duration(seconds: 1),
-                    borderRadius: 10,
-                    margin: EdgeInsets.all(10),
-                  );
-                } else if (validateDateRange(controller.selectedStartTime.value,
-                    controller.selectedEndTime.value)) {
-                  Get.snackbar(
-                    "알림",
-                    "기간 설정 오류\n시작 날짜가 종료 날짜와 같거나 이후입니다.",
-                    snackPosition: SnackPosition.TOP, // 상단에 표시
-                    backgroundColor: CatchmongColors.yellow_main,
-                    colorText: CatchmongColors.black,
-                    icon:
-                        Icon(Icons.check_circle, color: CatchmongColors.black),
-                    duration: Duration(seconds: 1),
-                    borderRadius: 10,
-                    margin: EdgeInsets.all(10),
-                  );
-                } else {
-                  ReservationSetting reservationSetting = ReservationSetting(
-                    partnerId: partnerId,
-                    name: controller.reservationNameController.text,
-                    description:
-                        controller.reservationDescriptionController.text,
-                    startTime: controller.selectedStartTime.value,
-                    endTime: controller.selectedEndTime.value,
-                    availabilityType:
-                        getAvailabilityType(controller.selectedDayType.value),
-                    timeUnit: getTimeUnit(controller.selectedMinuteType.value),
-                    availableTables:
-                        int.tryParse(controller.tableNumTxtController.text) ??
-                            0,
-                    allowedPeople: controller.selectedNumOfPeople.join(","),
-                    reservationImage:
-                        controller.selectedSettingImage.value == null
-                            ? ""
-                            : controller.selectedSettingImage.value!.path,
-                  );
-                  await controller.postCreateReservationSetting(
-                      reservationSetting: reservationSetting);
-                  controller.reservationNameController.clear();
-                  controller.reservationDescriptionController.clear();
-                  controller.selectedDayType.value = "평일";
-                  controller.selectedStartTime.value = DateTime.now();
-                  controller.selectedEndTime.value = DateTime.now();
-                  controller.selectedMinuteType.value = "30분";
-                  controller.tableNumTxtController.clear();
-                  controller.selectedNumOfPeople.clear();
-                  controller.selectedSettingImage.value = null;
-                  Get.snackbar(
-                    "알림",
-                    "예약이 등록되었습니다",
-                    snackPosition: SnackPosition.TOP, // 상단에 표시
-                    backgroundColor: CatchmongColors.green_line,
-                    colorText: Colors.white,
-                    icon: Icon(
-                      Icons.check_circle,
-                      color: Colors.white,
-                    ),
-                    duration: Duration(seconds: 1),
-                    borderRadius: 10,
-                    margin: EdgeInsets.all(10),
-                  );
+                //예약설정 토글 true일 때 새로 등록하는 것
+                if (controller.isSetting.isTrue) {
+                  if (controller.reservationNameController.text.isEmpty) {
+                    Get.snackbar(
+                      "알림",
+                      "예약 상품명을 입력 해주세요.",
+                      snackPosition: SnackPosition.TOP, // 상단에 표시
+                      backgroundColor: CatchmongColors.yellow_main,
+                      colorText: CatchmongColors.black,
+                      icon: Icon(Icons.check_circle,
+                          color: CatchmongColors.black),
+                      duration: Duration(seconds: 1),
+                      borderRadius: 10,
+                      margin: EdgeInsets.all(10),
+                    );
+                  } else if (controller.tableNumTxtController.text.isEmpty) {
+                    Get.snackbar(
+                      "알림",
+                      "테이블 재고를 입력 해주세요.",
+                      snackPosition: SnackPosition.TOP, // 상단에 표시
+                      backgroundColor: CatchmongColors.yellow_main,
+                      colorText: CatchmongColors.black,
+                      icon: Icon(Icons.check_circle,
+                          color: CatchmongColors.black),
+                      duration: Duration(seconds: 1),
+                      borderRadius: 10,
+                      margin: EdgeInsets.all(10),
+                    );
+                  } else if (controller.selectedSettingImage.value == null) {
+                    Get.snackbar(
+                      "알림",
+                      "이미지를 선택해주세요.",
+                      snackPosition: SnackPosition.TOP, // 상단에 표시
+                      backgroundColor: CatchmongColors.yellow_main,
+                      colorText: CatchmongColors.black,
+                      icon: Icon(Icons.check_circle,
+                          color: CatchmongColors.black),
+                      duration: Duration(seconds: 1),
+                      borderRadius: 10,
+                      margin: EdgeInsets.all(10),
+                    );
+                  } else if (validateDateRange(
+                      controller.selectedStartTime.value,
+                      controller.selectedEndTime.value)) {
+                    Get.snackbar(
+                      "알림",
+                      "기간 설정 오류\n시작 날짜가 종료 날짜와 같거나 이후입니다.",
+                      snackPosition: SnackPosition.TOP, // 상단에 표시
+                      backgroundColor: CatchmongColors.yellow_main,
+                      colorText: CatchmongColors.black,
+                      icon: Icon(Icons.check_circle,
+                          color: CatchmongColors.black),
+                      duration: Duration(seconds: 1),
+                      borderRadius: 10,
+                      margin: EdgeInsets.all(10),
+                    );
+                  } else {
+                    ReservationSetting reservationSetting = ReservationSetting(
+                      partnerId: partnerId,
+                      name: controller.reservationNameController.text,
+                      description:
+                          controller.reservationDescriptionController.text,
+                      startTime: controller.selectedStartTime.value,
+                      endTime: controller.selectedEndTime.value,
+                      availabilityType:
+                          getAvailabilityType(controller.selectedDayType.value),
+                      timeUnit:
+                          getTimeUnit(controller.selectedMinuteType.value),
+                      availableTables:
+                          int.tryParse(controller.tableNumTxtController.text) ??
+                              0,
+                      allowedPeople: controller.selectedNumOfPeople.join(","),
+                      reservationImage:
+                          controller.selectedSettingImage.value == null
+                              ? ""
+                              : controller.selectedSettingImage.value!.path,
+                    );
+                    await controller.postCreateReservationSetting(
+                        reservationSetting: reservationSetting);
+                    controller.reservationNameController.clear();
+                    controller.reservationDescriptionController.clear();
+                    controller.selectedDayType.value = "평일";
+                    controller.selectedStartTime.value = DateTime.now();
+                    controller.selectedEndTime.value = DateTime.now();
+                    controller.selectedMinuteType.value = "30분";
+                    controller.tableNumTxtController.clear();
+                    controller.selectedNumOfPeople.clear();
+                    controller.selectedSettingImage.value = null;
+                    Get.snackbar(
+                      "알림",
+                      "예약이 등록되었습니다",
+                      snackPosition: SnackPosition.TOP, // 상단에 표시
+                      backgroundColor: CatchmongColors.green_line,
+                      colorText: Colors.white,
+                      icon: Icon(
+                        Icons.check_circle,
+                        color: Colors.white,
+                      ),
+                      duration: Duration(seconds: 1),
+                      borderRadius: 10,
+                      margin: EdgeInsets.all(10),
+                    );
+                  }
                 }
               },
               title: Text("등록하기"),
@@ -5156,6 +5161,8 @@ void showReservationSetting(BuildContext context, int partnerId) {
                                           selection: TextSelection.collapsed(
                                               offset: 300),
                                         );
+                                        print(
+                                            "name change>>>${controller.reservationNameController.value.text}");
                                       });
                                     }
                                   },
@@ -5185,9 +5192,11 @@ void showReservationSetting(BuildContext context, int partnerId) {
                                     }
                                   },
                                   selectedStartTime: DateFormat('HH:mm').format(
-                                      controller.selectedEditStartTime.value),
+                                      controller.selectedEditStartTime.value
+                                          .toLocal()),
                                   selectedEndTime: DateFormat('HH:mm').format(
-                                      controller.selectedEditEndTime.value),
+                                      controller.selectedEditEndTime.value
+                                          .toLocal()),
                                   selectedMinuteType:
                                       controller.selectedEditMinuteType.value,
                                   onChangedMinuteType: (String? value) {
@@ -5199,8 +5208,14 @@ void showReservationSetting(BuildContext context, int partnerId) {
                                   selectedNumOfPeople:
                                       controller.selectedEditNumOfPeople,
                                   onChangedNumOfPeople: (String value) {
-                                    controller.selectedEditNumOfPeople
-                                        .add(value);
+                                    if (controller.selectedEditNumOfPeople
+                                        .contains(value)) {
+                                      controller.selectedEditNumOfPeople
+                                          .remove(value);
+                                    } else {
+                                      controller.selectedEditNumOfPeople
+                                          .add(value);
+                                    }
                                   },
                                   tableNumTxtController:
                                       controller.tableNumTxtController,
@@ -5233,12 +5248,30 @@ void showReservationSetting(BuildContext context, int partnerId) {
                                   isEditMode: RxBool(controller
                                           .reservationSettingEditModes[index])
                                       .value,
-                                  onEditToggle: () {
+                                  onEditToggle:
+                                      (String name, String desc) async {
+                                    controller.reservationSettingEditModes[
+                                            index] =
+                                        !controller
+                                            .reservationSettingEditModes[index];
+                                    controller.reservationSettingEditModes
+                                        .refresh();
                                     if (controller
                                         .reservationSettingEditModes[index]) {
-                                      controller.selectedEditSettingImage
-                                          .value = null;
-                                    } else {
+                                      controller
+                                              .reservationNameController.text =
+                                          controller
+                                              .reservationSettings[index].name;
+                                      controller
+                                          .reservationDescriptionController
+                                          .text = controller
+                                              .reservationSettings[index]
+                                              .description ??
+                                          "";
+                                      controller.tableNumTxtController.text =
+                                          controller.reservationSettings[index]
+                                              .availableTables
+                                              .toString();
                                       controller.selectedEditSettingImage
                                           .value = File(controller
                                               .reservationSettings[index]
@@ -5271,14 +5304,92 @@ void showReservationSetting(BuildContext context, int partnerId) {
                                           controller.reservationSettings[index]
                                               .allowedPeople
                                               .split(",");
-                                    }
 
-                                    controller.reservationSettingEditModes[
-                                            index] =
-                                        !controller
-                                            .reservationSettingEditModes[index];
-                                    controller.reservationSettingEditModes
-                                        .refresh();
+                                      // controller.selectedEditSettingImage
+                                      //     .value = null;
+                                    } else {
+                                      final id = controller
+                                          .reservationSettings[index].id;
+                                      if (id != null) {
+                                        final res = await controller
+                                            .updateReservationSetting(
+                                                id: id, name: name, desc: desc);
+                                        if (res != null) {
+                                          final newIdx = controller
+                                              .reservationSettings
+                                              .indexWhere(
+                                                  (el) => el.id == res.id);
+                                          print("new idx>>>$newIdx");
+                                          controller
+                                                  .reservationSettings[newIdx] =
+                                              res;
+                                          controller.reservationSettings
+                                              .refresh();
+                                          controller.reservationNameController
+                                              .clear();
+                                          controller
+                                              .reservationDescriptionController
+                                              .clear();
+                                          controller.selectedDayType.value =
+                                              "평일";
+                                          controller.selectedStartTime.value =
+                                              DateTime.now();
+                                          controller.selectedEndTime.value =
+                                              DateTime.now();
+                                          controller.selectedMinuteType.value =
+                                              "30분";
+                                          controller.tableNumTxtController
+                                              .clear();
+                                          controller.selectedNumOfPeople
+                                              .clear();
+                                          controller.selectedSettingImage
+                                              .value = null;
+                                          Get.snackbar(
+                                            "알림",
+                                            "예약 설정 수정을 완료했습니다.",
+                                            snackPosition:
+                                                SnackPosition.TOP, // 상단에 표시
+                                            backgroundColor:
+                                                CatchmongColors.yellow_main,
+                                            colorText: CatchmongColors.black,
+                                            icon: Icon(Icons.check_circle,
+                                                color: CatchmongColors.black),
+                                            duration: Duration(seconds: 1),
+                                            borderRadius: 10,
+                                            margin: EdgeInsets.all(10),
+                                          );
+                                        }
+                                      }
+                                    }
+                                  },
+                                  onDelete: () async {
+                                    final deleteId = controller
+                                        .reservationSettings[index].id;
+                                    if (deleteId != null) {
+                                      final res = await controller
+                                          .deleteReservationSetting(
+                                              id: deleteId);
+                                      if (res) {
+                                        controller.reservationSettings
+                                            .removeAt(index);
+                                        controller.reservationSettingEditModes
+                                            .removeAt(index);
+                                        Get.snackbar(
+                                          "알림",
+                                          "예약 설정을 삭제했습니다.",
+                                          snackPosition:
+                                              SnackPosition.TOP, // 상단에 표시
+                                          backgroundColor:
+                                              CatchmongColors.yellow_main,
+                                          colorText: CatchmongColors.black,
+                                          icon: Icon(Icons.check_circle,
+                                              color: CatchmongColors.black),
+                                          duration: Duration(seconds: 1),
+                                          borderRadius: 10,
+                                          margin: EdgeInsets.all(10),
+                                        );
+                                      }
+                                    }
                                   },
                                 ))
                       ],
