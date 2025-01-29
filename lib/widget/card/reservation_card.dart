@@ -55,11 +55,28 @@ class ReservationCard extends StatelessWidget {
 
     return InkWell(
       onTap: () async {
-        await controller.fetchFullyBookedTimes(settingId: setting.id!);
+        List<DateTime> timeSlots = controller.getTimeSlots(
+            setting.startTime, setting.endTime, setting.timeUnit);
+        final startDt = DateTime(
+          controller.selectedReservationDate.value.year, // 연도
+          controller.selectedReservationDate.value.month, // 월
+          controller.selectedReservationDate.value.day, // 일
+          timeSlots[controller.selectedReservationTimeIdx.value].hour, // 시간
+          timeSlots[controller.selectedReservationTimeIdx.value].minute, // 분
+          timeSlots[controller.selectedReservationTimeIdx.value]
+              .second, // 초 (선택적)
+          timeSlots[controller.selectedReservationTimeIdx.value]
+              .millisecond, // 밀리초 (선택적)
+          timeSlots[controller.selectedReservationTimeIdx.value]
+              .microsecond, // 마이크로초 (선택적)
+        );
+        await controller.fetchFullyBookedTimes(
+            settingId: setting.id!, startDt: startDt);
         final partner =
             await partnerController.fetchPartnerPhone(setting.partnerId!);
+
         if (partner != null) {
-          showReservationPerPartner(context, setting, partner);
+          showReservationPerPartner(context, setting, partner, timeSlots);
         }
       },
       child: Container(
@@ -154,8 +171,8 @@ class ReservationCard extends StatelessWidget {
   }
 }
 
-void showReservationPerPartner(
-    BuildContext context, ReservationSetting setting, Partner partner) {
+void showReservationPerPartner(BuildContext context, ReservationSetting setting,
+    Partner partner, List<DateTime> timeSlots) {
   double width = MediaQuery.of(context).size.width;
   final Partner2Controller controller = Get.find<Partner2Controller>();
   final ReservationConteroller reservationConteroller =
@@ -201,6 +218,23 @@ void showReservationPerPartner(
         return '$formattedDate ($weekday) $formattedTime'.obs;
       }
 
+      final startDt = DateTime(
+        reservationConteroller.selectedReservationDate.value.year, // 연도
+        reservationConteroller.selectedReservationDate.value.month, // 월
+        reservationConteroller.selectedReservationDate.value.day, // 일
+        timeSlots[reservationConteroller.selectedReservationTimeIdx.value]
+            .hour, // 시간
+        timeSlots[reservationConteroller.selectedReservationTimeIdx.value]
+            .minute, // 분
+        timeSlots[reservationConteroller.selectedReservationTimeIdx.value]
+            .second, // 초 (선택적)
+        timeSlots[reservationConteroller.selectedReservationTimeIdx.value]
+            .millisecond, // 밀리초 (선택적)
+        timeSlots[reservationConteroller.selectedReservationTimeIdx.value]
+            .microsecond, // 마이크로초 (선택적)
+      );
+
+      print("date>>>${startDt.toUtc().toIso8601String()}");
       return Scaffold(
         bottomNavigationBar: Container(
           height: 68,
@@ -516,9 +550,44 @@ void showReservationPerPartner(
                                             await reservationConteroller
                                                 .pickPartnerRervationDate(
                                                     context);
+                                            final changedDt = DateTime(
+                                              reservationConteroller
+                                                  .selectedReservationDate
+                                                  .value
+                                                  .year, // 연도
+                                              reservationConteroller
+                                                  .selectedReservationDate
+                                                  .value
+                                                  .month, // 월
+                                              reservationConteroller
+                                                  .selectedReservationDate
+                                                  .value
+                                                  .day, // 일
+                                              timeSlots[reservationConteroller
+                                                      .selectedReservationTimeIdx
+                                                      .value]
+                                                  .hour, // 시간
+                                              timeSlots[reservationConteroller
+                                                      .selectedReservationTimeIdx
+                                                      .value]
+                                                  .minute, // 분
+                                              timeSlots[reservationConteroller
+                                                      .selectedReservationTimeIdx
+                                                      .value]
+                                                  .second, // 초 (선택적)
+                                              timeSlots[reservationConteroller
+                                                      .selectedReservationTimeIdx
+                                                      .value]
+                                                  .millisecond, // 밀리초 (선택적)
+                                              timeSlots[reservationConteroller
+                                                      .selectedReservationTimeIdx
+                                                      .value]
+                                                  .microsecond, // 마이크로초 (선택적)
+                                            );
                                             await reservationConteroller
                                                 .fetchFullyBookedTimes(
-                                                    settingId: setting.id!);
+                                                    settingId: setting.id!,
+                                                    startDt: changedDt);
                                           }),
                                     )
                                     //예약 일자 시간 버튼들

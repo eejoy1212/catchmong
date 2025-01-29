@@ -688,11 +688,11 @@ class ReservationConteroller extends GetxController {
     }
   }
 
-  Future<void> fetchFullyBookedTimes({required int settingId}) async {
+  Future<void> fetchFullyBookedTimes(
+      {required int settingId, required DateTime startDt}) async {
     try {
       // GET 요청 보내기
-      final String formattedDate =
-          selectedReservationDate.value.toIso8601String();
+      final String formattedDate = startDt.toUtc().toIso8601String();
       final response = await http.get(
         Uri.parse(
             '$baseUrl/fully-booked?selectedDate=${formattedDate}&settingId=$settingId'),
@@ -705,7 +705,7 @@ class ReservationConteroller extends GetxController {
 
         // String 형태의 날짜 데이터를 DateTime으로 변환
         final List<DateTime> fullyBookedTimes = responseData
-            .map((timeString) => DateTime.parse(timeString as String))
+            .map((timeString) => DateTime.parse(timeString as String).toLocal())
             .toList();
         print('예약 꽉찬거 가져오기 성공: ${fullyBookedTimes}');
         fullyDt.value = fullyBookedTimes;
