@@ -5,11 +5,13 @@ import 'package:catchmong/const/constant.dart';
 import 'package:catchmong/controller/partner_controller.dart';
 import 'package:catchmong/controller/reservation_controller.dart';
 import 'package:catchmong/controller/review_controller.dart';
+import 'package:catchmong/controller/view_controller.dart';
 import 'package:catchmong/model/catchmong_user.dart';
 import 'package:catchmong/model/menu.dart';
 import 'package:catchmong/model/partner.dart';
 import 'package:catchmong/model/reservation.dart';
 import 'package:catchmong/model/reservation_setting.dart';
+import 'package:catchmong/model/temp_closure.dart';
 import 'package:catchmong/modules/location/scrap/views/scrap_view.dart';
 import 'package:catchmong/modules/location/views/location_search_view.dart';
 import 'package:catchmong/modules/login/controllers/login_controller.dart';
@@ -1279,15 +1281,15 @@ void showStoreInfo(BuildContext context, Partner store) {
   double width = MediaQuery.of(context).size.width;
   Color color = Color(0xFFFFCFCF);
   Color color2 = Color(0xFFFF6161);
-  final data = [
-    [30, 70], // 10대
-    [50, 50], // 20대
-    [20, 80], // 30대
-    [40, 60], // 40대
-    [60, 40], // 50대
-    [70, 30], // 60대
-    [10, 90], // 70대
-  ];
+  // final data = [
+  //   [30, 70], // 10대
+  //   [50, 50], // 20대
+  //   [20, 80], // 30대
+  //   [40, 60], // 40대
+  //   [60, 40], // 50대
+  //   [70, 30], // 60대
+  //   [10, 90], // 70대
+  // ];
 
   final labels = ["10대", "20대", "30대", "40대", "50대", "60대", "70대 이상"];
   final colors = [
@@ -1296,10 +1298,12 @@ void showStoreInfo(BuildContext context, Partner store) {
   ];
   final Partner2Controller controller = Get.find<Partner2Controller>();
   final LoginController loginController = Get.find<LoginController>();
+  final ViewController viewController = Get.find<ViewController>();
   final ReservationConteroller reservationController =
       Get.find<ReservationConteroller>();
   final ReviewController reviewController = Get.find<ReviewController>();
   final dateFormatter = DateFormat('yyyy.MM.dd');
+
   showGeneralDialog(
     context: context,
     barrierDismissible: true,
@@ -1368,24 +1372,26 @@ void showStoreInfo(BuildContext context, Partner store) {
                                   children: [
                                     //날짜 드롭박스
                                     Container(
-                                        padding:
-                                            EdgeInsets.symmetric(horizontal: 8),
-                                        height: 48,
-                                        width: 100,
-                                        decoration: BoxDecoration(
-                                          border: Border.all(
-                                            color: Colors.grey.shade300,
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(8),
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: 8),
+                                      height: 48,
+                                      width: 96,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: Colors.grey.shade300,
                                         ),
-                                        child: Obx(
-                                          () => DropdownButton<String>(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Obx(() => DropdownButton<String>(
+                                            icon: Icon(
+                                              Icons.keyboard_arrow_down_rounded,
+                                              color: CatchmongColors.black,
+                                            ),
                                             isExpanded: true,
-                                            underline: const SizedBox(),
-                                            value: controller
-                                                .selectedStatisticsItem.value,
-                                            items: controller.statisticsItems
+                                            underline: SizedBox(),
+                                            value: viewController
+                                                .selectedDatePickType.value,
+                                            items: viewController.datepickType
                                                 .map((String value) =>
                                                     DropdownMenuItem<String>(
                                                       value: value,
@@ -1402,23 +1408,36 @@ void showStoreInfo(BuildContext context, Partner store) {
                                                 .toList(),
                                             onChanged: (String? newValue) {
                                               if (newValue != null) {
-                                                controller
-                                                    .selectedStatisticsItem
+                                                viewController
+                                                    .selectedDatePickType
                                                     .value = newValue;
                                               }
                                             },
-                                          ),
-                                        )),
+                                          )),
+                                    ),
                                     SizedBox(
                                       width: 10,
                                     ),
                                     //연도
                                     Expanded(
-                                      child: OutlinedBtn(
-                                          height: 48,
-                                          title: "2024",
-                                          onPress: () {}),
-                                    )
+                                        child: Obx(() => DatePickBtn(
+                                            startDate: viewController
+                                                .selectedDate[0].value,
+                                            endDate: viewController
+                                                .selectedDate[1].value,
+                                            onPress: () async {
+                                              await viewController
+                                                  .selectStatisticsDate(
+                                                      context);
+                                              await viewController
+                                                  .fetchWeekdayStats(
+                                                      partnerId: store.id!);
+                                              await viewController
+                                                  .getUserDemographics(
+                                                      partnerId: store.id!);
+                                              // await loginController.fetchReservations(
+                                              //     loginController.user.value!.id);
+                                            }))),
                                   ],
                                 ),
                               ),
@@ -1461,116 +1480,154 @@ void showStoreInfo(BuildContext context, Partner store) {
                                       height: 200,
                                       child: Padding(
                                         padding: const EdgeInsets.all(16.0),
-                                        child: BarChart(
-                                          BarChartData(
-                                            alignment:
-                                                BarChartAlignment.spaceAround,
-                                            maxY: 10,
-                                            titlesData: FlTitlesData(
-                                              leftTitles: AxisTitles(
-                                                sideTitles: SideTitles(
-                                                  showTitles: true,
-                                                  interval: 2,
-                                                  getTitlesWidget:
-                                                      (value, meta) => Text(
-                                                    value.toInt().toString(),
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 12,
+                                        child: Obx(() => BarChart(
+                                              BarChartData(
+                                                alignment: BarChartAlignment
+                                                    .spaceAround,
+                                                maxY: 100,
+                                                titlesData: FlTitlesData(
+                                                  leftTitles: AxisTitles(
+                                                    sideTitles: SideTitles(
+                                                      showTitles: true,
+                                                      interval: 20,
+                                                      getTitlesWidget:
+                                                          (value, meta) => Text(
+                                                        value
+                                                            .toInt()
+                                                            .toString(),
+                                                        style: TextStyle(
+                                                          color: Colors.black,
+                                                          fontSize: 9,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  topTitles: AxisTitles(
+                                                      sideTitles: SideTitles(
+                                                    showTitles: false,
+                                                  )),
+                                                  rightTitles: AxisTitles(
+                                                      sideTitles: SideTitles(
+                                                    showTitles: false,
+                                                  )),
+                                                  bottomTitles: AxisTitles(
+                                                    sideTitles: SideTitles(
+                                                      showTitles: true,
+                                                      getTitlesWidget:
+                                                          (value, meta) {
+                                                        const days = [
+                                                          '일',
+                                                          '월',
+                                                          '화',
+                                                          '수',
+                                                          '목',
+                                                          '금',
+                                                          '토'
+                                                        ];
+                                                        return Text(
+                                                          days[value.toInt()],
+                                                          style: TextStyle(
+                                                            color: Colors.black,
+                                                            fontSize: 12,
+                                                          ),
+                                                        );
+                                                      },
+                                                      interval: 1,
                                                     ),
                                                   ),
                                                 ),
-                                              ),
-                                              topTitles: AxisTitles(
-                                                  sideTitles: SideTitles(
-                                                showTitles: false,
-                                              )),
-                                              rightTitles: AxisTitles(
-                                                  sideTitles: SideTitles(
-                                                showTitles: false,
-                                              )),
-                                              bottomTitles: AxisTitles(
-                                                sideTitles: SideTitles(
-                                                  showTitles: true,
-                                                  getTitlesWidget:
-                                                      (value, meta) {
-                                                    const days = [
-                                                      '일',
-                                                      '월',
-                                                      '화',
-                                                      '수',
-                                                      '목',
-                                                      '금',
-                                                      '토'
-                                                    ];
-                                                    return Text(
-                                                      days[value.toInt()],
-                                                      style: TextStyle(
-                                                        color: Colors.black,
-                                                        fontSize: 12,
-                                                      ),
-                                                    );
-                                                  },
-                                                  interval: 1,
-                                                ),
-                                              ),
-                                            ),
-                                            barGroups: [
-                                              BarChartGroupData(
-                                                x: 0,
-                                                barRods: [
-                                                  BarChartRodData(
-                                                      toY: 4, color: color2)
+                                                barGroups: [
+                                                  BarChartGroupData(
+                                                    x: 0,
+                                                    barRods: [
+                                                      BarChartRodData(
+                                                          toY: (viewController
+                                                                          .weekStats[
+                                                                      "일"] ??
+                                                                  0)
+                                                              .toDouble(),
+                                                          color: color2)
+                                                    ],
+                                                  ),
+                                                  BarChartGroupData(
+                                                    x: 1,
+                                                    barRods: [
+                                                      BarChartRodData(
+                                                          toY: (viewController
+                                                                          .weekStats[
+                                                                      "월"] ??
+                                                                  0)
+                                                              .toDouble(),
+                                                          color: color2)
+                                                    ],
+                                                  ),
+                                                  BarChartGroupData(
+                                                    x: 2,
+                                                    barRods: [
+                                                      BarChartRodData(
+                                                          toY: (viewController
+                                                                          .weekStats[
+                                                                      "화"] ??
+                                                                  0)
+                                                              .toDouble(),
+                                                          color: color2)
+                                                    ],
+                                                  ),
+                                                  BarChartGroupData(
+                                                    x: 3,
+                                                    barRods: [
+                                                      BarChartRodData(
+                                                          toY: (viewController
+                                                                          .weekStats[
+                                                                      "수"] ??
+                                                                  0)
+                                                              .toDouble(),
+                                                          color: color2)
+                                                    ],
+                                                  ),
+                                                  BarChartGroupData(
+                                                    x: 4,
+                                                    barRods: [
+                                                      BarChartRodData(
+                                                          toY: (viewController
+                                                                          .weekStats[
+                                                                      "목"] ??
+                                                                  0)
+                                                              .toDouble(),
+                                                          color: color2)
+                                                    ],
+                                                  ),
+                                                  BarChartGroupData(
+                                                    x: 5,
+                                                    barRods: [
+                                                      BarChartRodData(
+                                                          toY: (viewController
+                                                                          .weekStats[
+                                                                      "금"] ??
+                                                                  0)
+                                                              .toDouble(),
+                                                          color: color2)
+                                                    ],
+                                                  ),
+                                                  BarChartGroupData(
+                                                    x: 6,
+                                                    barRods: [
+                                                      BarChartRodData(
+                                                          toY: (viewController
+                                                                          .weekStats[
+                                                                      "토"] ??
+                                                                  0)
+                                                              .toDouble(),
+                                                          color: color2)
+                                                    ],
+                                                  ),
                                                 ],
+                                                gridData:
+                                                    FlGridData(show: false),
+                                                borderData:
+                                                    FlBorderData(show: false),
                                               ),
-                                              BarChartGroupData(
-                                                x: 1,
-                                                barRods: [
-                                                  BarChartRodData(
-                                                      toY: 6, color: color2)
-                                                ],
-                                              ),
-                                              BarChartGroupData(
-                                                x: 2,
-                                                barRods: [
-                                                  BarChartRodData(
-                                                      toY: 5, color: color2)
-                                                ],
-                                              ),
-                                              BarChartGroupData(
-                                                x: 3,
-                                                barRods: [
-                                                  BarChartRodData(
-                                                      toY: 7, color: color2)
-                                                ],
-                                              ),
-                                              BarChartGroupData(
-                                                x: 4,
-                                                barRods: [
-                                                  BarChartRodData(
-                                                      toY: 8, color: color2)
-                                                ],
-                                              ),
-                                              BarChartGroupData(
-                                                x: 5,
-                                                barRods: [
-                                                  BarChartRodData(
-                                                      toY: 6, color: color2)
-                                                ],
-                                              ),
-                                              BarChartGroupData(
-                                                x: 6,
-                                                barRods: [
-                                                  BarChartRodData(
-                                                      toY: 5, color: color2)
-                                                ],
-                                              ),
-                                            ],
-                                            gridData: FlGridData(show: false),
-                                            borderData:
-                                                FlBorderData(show: false),
-                                          ),
-                                        ),
+                                            )),
                                       ),
                                     ),
                                   ],
@@ -1615,40 +1672,69 @@ void showStoreInfo(BuildContext context, Partner store) {
                                             ],
                                           ),
                                           Container(
-                                            // width: 130,
-                                            height: 26,
-                                            child: ToggleButtons(
-                                              isSelected: [
-                                                true,
-                                                false
-                                              ], // 선택 상태
-                                              onPressed: (int index) {},
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              selectedColor: Colors.white,
-                                              fillColor:
-                                                  CatchmongColors.yellow_main,
-                                              color: CatchmongColors.gray400,
-                                              selectedBorderColor:
-                                                  CatchmongColors.yellow_main,
-                                              borderColor:
-                                                  CatchmongColors.yellow_main,
-                                              children: [
-                                                Padding(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      horizontal: 16.0),
-                                                  child: Text("온라인"),
+                                              // width: 130,
+                                              height: 30,
+                                              child: Obx(
+                                                () => ToggleButtons(
+                                                  isSelected: viewController
+                                                      .isOnline, // 선택 상태
+                                                  onPressed: (int index) async {
+                                                    if (index == 0) {
+                                                      viewController
+                                                          .isOnline.value = [
+                                                        true,
+                                                        false
+                                                      ];
+                                                    } else {
+                                                      viewController
+                                                          .isOnline.value = [
+                                                        false,
+                                                        true
+                                                      ];
+                                                    }
+
+                                                    viewController.isOnline
+                                                        .refresh();
+
+                                                    await viewController
+                                                        .fetchWeekdayStats(
+                                                            partnerId:
+                                                                store.id!);
+                                                    await viewController
+                                                        .getUserDemographics(
+                                                            partnerId:
+                                                                store.id!);
+                                                    print(
+                                                        "$index 선택>>>${viewController.isOnline}");
+                                                  },
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  selectedColor: Colors.white,
+                                                  fillColor: CatchmongColors
+                                                      .yellow_main,
+                                                  color:
+                                                      CatchmongColors.gray400,
+                                                  selectedBorderColor:
+                                                      CatchmongColors
+                                                          .yellow_main,
+                                                  borderColor: CatchmongColors
+                                                      .yellow_main,
+                                                  children: [
+                                                    Padding(
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                          horizontal: 8),
+                                                      child: Text("온라인"),
+                                                    ),
+                                                    Padding(
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                          horizontal: 8),
+                                                      child: Text("오프라인"),
+                                                    ),
+                                                  ],
                                                 ),
-                                                Padding(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      horizontal: 16.0),
-                                                  child: Text("오프라인"),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
+                                              )),
                                         ],
                                       ),
                                     ),
@@ -1698,12 +1784,36 @@ void showStoreInfo(BuildContext context, Partner store) {
                                                     fit: BoxFit
                                                         .contain, // 부모 컨테이너에 맞게 조정
                                                     child: SizedBox(
-                                                      height:
-                                                          80, // PieChart의 기본 크기를 지정
-                                                      width:
-                                                          80, // PieChart의 기본 크기를 지정
-                                                      child: HalfPieChart(),
-                                                    ),
+                                                        height:
+                                                            80, // PieChart의 기본 크기를 지정
+                                                        width:
+                                                            80, // PieChart의 기본 크기를 지정
+                                                        child: Obx(
+                                                          () => HalfPieChart(
+                                                            value1: viewController
+                                                                            .userStats["genderStats"]
+                                                                        [
+                                                                        "MAN"] ==
+                                                                    null
+                                                                ? 0.0
+                                                                : double.tryParse(
+                                                                        viewController.userStats["genderStats"]
+                                                                            [
+                                                                            "MAN"]) ??
+                                                                    0.0,
+                                                            value2: viewController
+                                                                            .userStats["genderStats"]
+                                                                        [
+                                                                        "WOMAN"] ==
+                                                                    null
+                                                                ? 0.0
+                                                                : double.tryParse(
+                                                                        viewController.userStats["genderStats"]
+                                                                            [
+                                                                            "WOMAN"]) ??
+                                                                    0.0,
+                                                          ),
+                                                        )),
                                                   ),
                                                 ),
                                               ],
@@ -1722,16 +1832,22 @@ void showStoreInfo(BuildContext context, Partner store) {
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.end,
                                                   children: [
-                                                    Text(
-                                                      "58%",
-                                                      style: TextStyle(
-                                                        color: CatchmongColors
-                                                            .gray_800,
-                                                        fontSize: 24,
-                                                        fontWeight:
-                                                            FontWeight.w700,
-                                                      ),
-                                                    ),
+                                                    Obx(() => Text(
+                                                          viewController.userStats[
+                                                                          "genderStats"]
+                                                                      ["MAN"] ==
+                                                                  null
+                                                              ? "0%"
+                                                              : "${(double.tryParse(viewController.userStats["genderStats"]["MAN"]) ?? 0.0).round()}%",
+                                                          style: TextStyle(
+                                                            color:
+                                                                CatchmongColors
+                                                                    .gray_800,
+                                                            fontSize: 18,
+                                                            fontWeight:
+                                                                FontWeight.w700,
+                                                          ),
+                                                        )),
                                                     SizedBox(
                                                       height: 12,
                                                     ),
@@ -1762,14 +1878,21 @@ void showStoreInfo(BuildContext context, Partner store) {
                                                   mainAxisAlignment:
                                                       MainAxisAlignment.center,
                                                   children: [
-                                                    Text(
-                                                      "42%",
-                                                      style: TextStyle(
-                                                        color: CatchmongColors
-                                                            .gray_800,
-                                                        fontSize: 24,
-                                                        fontWeight:
-                                                            FontWeight.w700,
+                                                    Obx(
+                                                      () => Text(
+                                                        viewController.userStats[
+                                                                        "genderStats"]
+                                                                    ["WOMAN"] ==
+                                                                null
+                                                            ? "0%"
+                                                            : "${(double.tryParse(viewController.userStats["genderStats"]["WOMAN"]) ?? 0.0).round()}%",
+                                                        style: TextStyle(
+                                                          color: CatchmongColors
+                                                              .gray_800,
+                                                          fontSize: 18,
+                                                          fontWeight:
+                                                              FontWeight.w700,
+                                                        ),
                                                       ),
                                                     ),
                                                     SizedBox(
@@ -1803,10 +1926,12 @@ void showStoreInfo(BuildContext context, Partner store) {
                                     ),
                                     Container(
                                         width: width,
-                                        child: HorizontalStackedBarChart(
-                                            data: data,
-                                            labels: labels,
-                                            colors: colors))
+                                        child: Obx(() =>
+                                            HorizontalStackedBarChart(
+                                                data: viewController
+                                                    .ageGroupStats.value,
+                                                labels: labels,
+                                                colors: colors)))
                                   ],
                                 ),
                               ),
@@ -2356,10 +2481,12 @@ void showStoreInfo(BuildContext context, Partner store) {
                                   ),
                                 ),
                                 InkWell(
-                                  onTap: () {
+                                  onTap: () async {
                                     if (store.id != null) {
+                                      final tempClosure = await controller
+                                          .fetchTempClosure(store.id!);
                                       showStoreVacationAndTime(
-                                          context, store.id!);
+                                          context, store.id!, tempClosure);
                                     }
                                   },
                                   child: Container(
@@ -2941,6 +3068,7 @@ void showReplyWrite(BuildContext context) {
 void showStoreManage(BuildContext context) {
   final Partner2Controller controller = Get.find<Partner2Controller>();
   final LoginController loginController = Get.find<LoginController>();
+  final ViewController viewController = Get.find<ViewController>();
   showGeneralDialog(
     context: context,
     barrierDismissible: true,
@@ -2971,8 +3099,15 @@ void showStoreManage(BuildContext context) {
                   final store = storeList[index];
                   print("유저의 가게들 ${store.name}");
                   return InkWell(
-                    onTap: () {
-                      showStoreInfo(context, store);
+                    onTap: () async {
+                      if (store.id != null) {
+                        await viewController.fetchWeekdayStats(
+                            partnerId: store.id!);
+                        await viewController.getUserDemographics(
+                            partnerId: store.id!);
+                        showStoreInfo(context, store);
+                      }
+
                       // showStoreInfo(context, store['id']); // 가게 정보 상세보기
                     },
                     child: Container(
@@ -4557,12 +4692,42 @@ void showShareConfirmDialog(BuildContext context) {
 }
 
 //임시 휴무 / 영업 시간
-void showStoreVacationAndTime(BuildContext context, int partnerId) {
+void showStoreVacationAndTime(
+    BuildContext context, int partnerId, TempClosure? tempClosure) {
   double width = MediaQuery.of(context).size.width;
   String selectedBusinessType = "선택"; // 업태 기본값
   String selectedCategory = "선택"; // 카테고리 기본값
   String selectedDay = "매 주"; // 정기 휴무일 기본값
   final Partner2Controller partnerController = Get.find<Partner2Controller>();
+  String getTempTypeToValue(String txt) {
+    switch (txt) {
+      case "BUSINESS_HOUR_CHANGE":
+        return "영업 시간 변경";
+      case "AWAY":
+        return "자리 비움";
+      case "TEMPORARY_CLOSURE":
+        return "임시 휴무";
+      default:
+        return "";
+    }
+  }
+
+  if (tempClosure != null) {
+    partnerController.selectedTempCategory.value =
+        getTempTypeToValue(tempClosure.type);
+    partnerController.tempStartDate.value = tempClosure.startDate.toLocal();
+    partnerController.tempEndDate.value = tempClosure.endDate.toLocal();
+    if (tempClosure.startBusinessTime != null) {
+      partnerController.tempStartBusinessTime.value =
+          tempClosure.startBusinessTime!;
+    }
+    if (tempClosure.endBusinessTime != null) {
+      partnerController.tempEndBusinessTime.value =
+          tempClosure.endBusinessTime!;
+    }
+    partnerController.isTempClose.value = tempClosure.isClose;
+  }
+
   showGeneralDialog(
     context: context,
     barrierDismissible: true, // true로 설정했으므로 barrierLabel 필요
@@ -4844,7 +5009,14 @@ void showStoreVacationAndTime(BuildContext context, int partnerId) {
                 : Container())
           ]))));
     },
-  );
+  ).then((_) {
+    partnerController.selectedTempCategory.value = "영업 시간 변경";
+    partnerController.tempStartDate.value = DateTime.now();
+    partnerController.tempEndDate.value = DateTime.now();
+    partnerController.tempStartBusinessTime.value = "00:00";
+    partnerController.tempEndBusinessTime.value = "24:00";
+    partnerController.isTempClose.value = false;
+  });
 }
 
 //메뉴 등록

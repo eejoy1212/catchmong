@@ -18,10 +18,16 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart' as kakao;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:web_socket_channel/status.dart' as status;
 
 class LoginController extends GetxController {
   // 이미지 표시 여부를 관리하는 반응형 변수
   final UserService userService = UserService();
+  // late WebSocketChannel _channel;
+  final channel = WebSocketChannel.connect(Uri.parse("ws://$myPort:4000"));
+  RxList<int> onlineUsers = <int>[].obs; // 온라인 유저 목록 (RxList)
+  RxBool isOnline = false.obs; // 현재 유저의 온라인 상태
   var showLatestLoginImage = true.obs;
   var users = <dynamic>[].obs;
   var isLoading = false.obs;
@@ -55,6 +61,7 @@ class LoginController extends GetxController {
   RxBool isVerified = false.obs; // 인증 성공 여부
   RxBool isBankVertified = false.obs;
   RxInt generatedCode = RxInt(0); // 서버에서 생성된 인증번호 저장
+
   final Dio _dio = Dio(BaseOptions(
     baseUrl: 'http://$myPort:3000', // API 베이스 URL
     connectTimeout: const Duration(milliseconds: 5000), // 연결 제한 시간
@@ -62,13 +69,13 @@ class LoginController extends GetxController {
   ));
 
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
     // temp();
     // kakaoLogoutTest();
     loadBackEndCheck();
     checkAutoLogin();
-
+    await connect();
     print("now user>>> ${user.value?.email}");
 
     // 5초 후에 이미지 표시를 중단합니다.
@@ -947,6 +954,10 @@ class LoginController extends GetxController {
           // 자동 로그인 성공: 메인 화면으로 이동
           if (bySubResponse != null) {
             user.value = User.fromJson(bySubResponse);
+            if (user.value != null) {
+              setUserOnline(user.value!.id);
+            }
+
             nicknameController.text = user.value!.nickname;
             phoneController.text = user.value!.phone;
             gender.value = user.value!.gender;
@@ -1114,5 +1125,79 @@ class LoginController extends GetxController {
   void onClose() {
     super.onClose();
     stopTimer(); // 컨트롤러 종료 시 타이머 중단
+    if (user.value != null) {
+      // 컨트롤러가 제거될 때 WebSocket 연결 해제
+      disconnect(user.value!.id);
+    }
+  }
+  //////////////////////////
+
+  // WebSocket 서버에 연결
+  Future<void> connect() async {
+    // 서버로부터 메시지 수신
+    print("_channel>>>$channel");
+    await channel.ready;
+    channel.stream.listen((message) {
+      final data = jsonDecode(message);
+
+      // 온라인 유저 목록 업데이트
+      if (data['isOnline'] == true) {
+        onlineUsers.assignAll(List<int>.from(data['users']));
+        print("온라인 유저 목록 업데이트: ${onlineUsers}");
+      }
+    }, onError: (error) {
+      print("WebSocket 에러 발생: $error");
+      isOnline.value = false; // 연결 실패 시 상태 변경
+    }, onDone: () {
+      print("WebSocket 연결 종료");
+      isOnline.value = false; // 연결 종료 시 상태 변경
+    });
+  }
+
+  void setUserOnline(int userId) {
+    try {
+      final message = jsonEncode({
+        "type": "setOnline", // 명시적으로 상태 변경 타입 지정
+        "isOnline": true,
+        "userId": userId,
+      });
+
+      // 서버로 메시지 전송
+      channel.sink.add(message);
+
+      // 현재 유저의 온라인 상태 로컬 업데이트
+      isOnline.value = true;
+      print("유저 $userId 온라인 상태로 전환됨");
+    } catch (e) {
+      print("유저 $userId 온라인 상태 전환 중 오류 발생: $e");
+    }
+  }
+
+  void setUserOffline(int userId) {
+    try {
+      final message = jsonEncode({
+        "type": "setStatus", // 명시적으로 상태 변경 타입 지정
+        "isOnline": false,
+        "userId": userId,
+      });
+
+      // 서버로 메시지 전송
+      channel.sink.add(message);
+
+      // 현재 유저의 오프라인 상태 로컬 업데이트
+      isOnline.value = false;
+      print("유저 $userId 오프라인 상태로 전환됨");
+    } catch (e) {
+      print("유저 $userId 오프라인 상태 전환 중 오류 발생: $e");
+    }
+  }
+
+  // WebSocket 연결 해제
+  void disconnect(int userId) {
+    if (isOnline.value) {
+      // 연결 해제 전에 유저를 오프라인 상태로 설정
+      setUserOffline(userId); // yourUserId를 실제 유저 ID로 대체
+    }
+    channel.sink.close(status.goingAway);
   }
 }

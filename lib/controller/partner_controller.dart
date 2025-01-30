@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:catchmong/controller/view_controller.dart';
 import 'package:catchmong/model/menu.dart';
 import 'package:catchmong/model/temp_closure.dart';
+import 'package:catchmong/modules/login/controllers/login_controller.dart';
 import 'package:http/http.dart' as http;
 import 'package:catchmong/const/constant.dart';
 import 'package:catchmong/model/partner.dart';
@@ -181,6 +183,7 @@ class Partner2Controller extends GetxController {
   ];
   RxString selectedStatisticsItem = "직접선택".obs;
   RxList<int> deleteMenuIds = RxList.empty();
+  //임시 휴무 / 영업 시간
   List<String> tempCategory = [
     "영업 시간 변경",
     "자리 비움",
@@ -192,6 +195,7 @@ class Partner2Controller extends GetxController {
   RxString tempStartBusinessTime = "00:00".obs;
   RxString tempEndBusinessTime = "24:00".obs;
   RxBool isTempClose = false.obs;
+  //임시 휴무 / 영업 시간
   //마이페이지
   @override
   void onInit() {
@@ -593,6 +597,13 @@ class Partner2Controller extends GetxController {
   void showSelectedPartner(BuildContext context, Partner partner,
       String businessStatus, double rating, String replyCount) {
     double width = MediaQuery.of(context).size.width;
+    final ViewController viewController = Get.find<ViewController>();
+    final LoginController loginController = Get.find<LoginController>();
+    if (partner.id != null && loginController.user.value != null) {
+      viewController.createPostView(
+          partnerId: partner.id!, userId: loginController.user.value!.id);
+    }
+
     showGeneralDialog(
       context: context,
       barrierDismissible: true, // true로 설정했으므로 barrierLabel 필요
@@ -1038,6 +1049,36 @@ class Partner2Controller extends GetxController {
     } catch (e) {
       print('Error creating temporary closure: $e');
       return false;
+    }
+  }
+
+// 특정 partnerId의 tempClosure를 조회하는 함수
+  Future<TempClosure?> fetchTempClosure(int partnerId) async {
+    final String url = '$baseUrl/tempClosure/$partnerId';
+
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      );
+
+      // 응답 처리
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        print('TempClosure fetched successfully: $data');
+        return TempClosure.fromJson(data);
+      } else if (response.statusCode == 404) {
+        print('TempClosure not found for this partner.');
+        return null;
+      } else {
+        print('Failed to fetch tempClosure: ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching tempClosure: $e');
+      return null;
     }
   }
 }

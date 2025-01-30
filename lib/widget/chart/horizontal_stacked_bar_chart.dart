@@ -15,14 +15,11 @@ class HorizontalStackedBarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: List.generate(data.length, (index) {
-        final total = data[index].reduce((a, b) => a + b);
-        final percentages = data[index]
-            .map((value) => (value / total * 100).toStringAsFixed(1))
-            .toList();
-
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Row(
@@ -39,25 +36,24 @@ class HorizontalStackedBarChart extends StatelessWidget {
                   ),
                 ),
               ),
+              SizedBox(width: 8),
+              // CustomPaint가 제대로 보이도록 높이(height) 지정
               SizedBox(
-                width: 8,
-              ),
-              Expanded(
+                width: width - 170,
+                height: 20, // CustomPaint가 보이도록 명시적인 높이 지정
                 child: CustomPaint(
-                  size: Size(double.infinity, 20),
+                  size: Size(width - 170, 20),
                   painter: _StackedBarPainter(data[index], colors),
                 ),
               ),
-              SizedBox(
-                width: 16,
-              ),
+              SizedBox(width: 16),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: List.generate(data[index].length, (i) {
+                children: List.generate(data[index].length, (int i) {
                   return Padding(
                     padding: const EdgeInsets.only(right: 8.0),
                     child: Text(
-                      "${percentages[i]}%",
+                      "${data[index][i]}%",
                       style: TextStyle(
                         color: colors[i],
                         fontSize: 12,
@@ -84,34 +80,36 @@ class _StackedBarPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint();
-    final total = values.reduce((a, b) => a + b);
+    final total = values.isNotEmpty ? values.reduce((a, b) => a + b) : 0;
 
-    // 클리핑을 위한 RRect 생성
-    final clipRect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      Radius.circular(2), // 전체 스택을 감싸는 둥근 직사각형
-    );
+    // total이 0일 경우 아무것도 그리지 않음
+    if (total == 0) return;
 
-    // 클리핑 적용
-    canvas.clipRRect(clipRect);
-
-    // 배경 둥근 직사각형 그리기
+    // 배경 색상 먼저 그리기
     paint.color = Colors.grey[300]!;
-    canvas.drawRRect(clipRect, paint);
+    final backgroundRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      Radius.circular(4), // 더 부드러운 둥근 모서리
+    );
+    canvas.drawRRect(backgroundRect, paint);
 
     // 스택 막대 그리기
     double startX = 0;
     for (int i = 0; i < values.length; i++) {
       paint.color = colors[i];
       final barWidth = (values[i] / total) * size.width;
-      canvas.drawRect(
-        Rect.fromLTWH(startX, 0, barWidth, size.height),
-        paint,
-      );
-      startX += barWidth;
+
+      // width가 0 이상일 때만 그리기
+      if (barWidth > 0) {
+        canvas.drawRect(
+          Rect.fromLTWH(startX, 0, barWidth, size.height),
+          paint,
+        );
+        startX += barWidth;
+      }
     }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
