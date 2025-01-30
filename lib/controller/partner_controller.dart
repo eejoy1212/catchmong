@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:catchmong/model/menu.dart';
+import 'package:catchmong/model/temp_closure.dart';
 import 'package:http/http.dart' as http;
 import 'package:catchmong/const/constant.dart';
 import 'package:catchmong/model/partner.dart';
@@ -180,6 +181,17 @@ class Partner2Controller extends GetxController {
   ];
   RxString selectedStatisticsItem = "직접선택".obs;
   RxList<int> deleteMenuIds = RxList.empty();
+  List<String> tempCategory = [
+    "영업 시간 변경",
+    "자리 비움",
+    "임시 휴무",
+  ];
+  RxString selectedTempCategory = "영업 시간 변경".obs;
+  Rx<DateTime> tempStartDate = DateTime.now().obs;
+  Rx<DateTime> tempEndDate = DateTime.now().obs;
+  RxString tempStartBusinessTime = "00:00".obs;
+  RxString tempEndBusinessTime = "24:00".obs;
+  RxBool isTempClose = false.obs;
   //마이페이지
   @override
   void onInit() {
@@ -192,6 +204,42 @@ class Partner2Controller extends GetxController {
     connectTimeout: const Duration(milliseconds: 5000), // 연결 제한 시간
     receiveTimeout: const Duration(milliseconds: 3000), // 응답 제한 시간
   ));
+  String formatTempDate(DateTime dateTime) {
+    // 요일 이름 맵핑
+    const weekDays = ['월', '화', '수', '목', '금', '토', '일'];
+
+    // 날짜와 요일 가져오기
+    String year = dateTime.year.toString();
+    String month = dateTime.month.toString().padLeft(2, '0');
+    String day = dateTime.day.toString().padLeft(2, '0');
+    String weekDay = weekDays[dateTime.weekday - 1];
+
+    // 결과 반환
+    return '$year-$month-$day ($weekDay)';
+  }
+
+  Future<void> selectTempDate(BuildContext context, String type) async {
+    DateTime now = DateTime.now();
+    // 기본 날짜 선택
+    final DateTime? pickedDay = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+
+    if (pickedDay != null) {
+      if (type == "START") {
+        // 선택된 날짜 설정
+        tempStartDate.value =
+            DateTime(pickedDay.year, pickedDay.month, pickedDay.day);
+      } else {
+        tempEndDate.value =
+            DateTime(pickedDay.year, pickedDay.month, pickedDay.day);
+      }
+    }
+  }
+
   // 요일을 숫자로 변환
   int _getDayOfWeek(String day) {
     switch (day) {
@@ -919,5 +967,77 @@ class Partner2Controller extends GetxController {
       menuImg.value = File(pickedFile.path);
     }
     // return null;
+  }
+
+  String getTempType(String txt) {
+    switch (txt) {
+      case "영업 시간 변경":
+        return "BUSINESS_HOUR_CHANGE";
+      case "자리 비움":
+        return "AWAY";
+      case "임시 휴무":
+        return "TEMPORARY_CLOSURE";
+      default:
+        return "";
+    }
+  }
+
+  Future<bool> createPostTempClosure({
+    required int partnerId,
+  }) async {
+    final String url = '$baseUrl/tempClosure/$partnerId';
+
+    try {
+      final type = getTempType(selectedTempCategory.value);
+      final DateTime adjustedStartDate = DateTime(
+        tempStartDate.value.year,
+        tempStartDate.value.month,
+        tempStartDate.value.day,
+        0,
+        0,
+        0,
+        0,
+      );
+
+      final DateTime adjustedEndDate = DateTime(
+        tempEndDate.value.year,
+        tempEndDate.value.month,
+        tempEndDate.value.day,
+        23,
+        59,
+        59,
+        999,
+      );
+      // 요청 데이터 생성
+      final Map<String, dynamic> requestData = {
+        'type': type,
+        'startDate': adjustedStartDate.toUtc().toIso8601String(),
+        'endDate': adjustedEndDate.toUtc().toIso8601String(),
+        'startBusinessTime': tempStartBusinessTime.value,
+        'endBusinessTime': tempEndBusinessTime.value,
+        'isClose': isTempClose.value,
+      };
+
+      // POST 요청 전송
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(requestData),
+      );
+
+      // 응답 처리
+      if (response.statusCode == 201) {
+        print('Temporary closure created successfully: ${response.body}');
+        return true;
+      } else {
+        print('Failed to create temporary closure: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('Error creating temporary closure: $e');
+      return false;
+    }
   }
 }

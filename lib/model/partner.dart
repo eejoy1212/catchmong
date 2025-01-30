@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:catchmong/model/temp_closure.dart';
+
 import 'review.dart'; // Review 클래스가 정의된 파일 경로를 import
 import 'menu.dart'; // Menu 클래스가 정의된 파일 경로를 import
 
@@ -28,6 +30,7 @@ class Partner {
   final List<Review>? reviews; // 리뷰 리스트
   final List<Menu>? menus; // 메뉴 리스트
   final int? reviewCount; // 리뷰 개수
+  final TempClosure? tempClosure; // 임시 휴무 정보 추가
   Partner({
     this.id,
     required this.name,
@@ -53,6 +56,7 @@ class Partner {
     this.reviews, // 리뷰 리스트 초기화
     this.menus, // 메뉴 리스트 초기화
     this.reviewCount, // 리뷰 개수 초기화
+    this.tempClosure, // TempClosure 추가
   });
   factory Partner.fromJson(Map<String, dynamic> json) {
     print("storePhotos type>>> ${json["storePhotos"].runtimeType}");
@@ -85,6 +89,9 @@ class Partner {
           ?.map((e) => Menu.fromJson(e as Map<String, dynamic>))
           .toList(),
       reviewCount: json['reviewCount'] as int?,
+      tempClosure: json['tempClosure'] != null
+          ? TempClosure.fromJson(json['tempClosure'])
+          : null, // TempClosure 처리
     );
   }
   static List<String>? _autoConvertToListOfString(dynamic field) {
@@ -152,6 +159,7 @@ class Partner {
       'reviews': reviews?.map((e) => e.toJson()).toList(), // 리뷰 리스트 처리
       'menus': menus?.map((e) => e.toJson()).toList(), // 메뉴 리스트 처리
       'reviewCount': reviewCount, // 리뷰 개수 처리
+      'tempClosure': tempClosure?.toJson(), // TempClosure JSON 변환
     };
   }
 }

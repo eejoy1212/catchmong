@@ -2357,7 +2357,10 @@ void showStoreInfo(BuildContext context, Partner store) {
                                 ),
                                 InkWell(
                                   onTap: () {
-                                    showStoreVacationAndTime(context);
+                                    if (store.id != null) {
+                                      showStoreVacationAndTime(
+                                          context, store.id!);
+                                    }
                                   },
                                   child: Container(
                                     padding: EdgeInsets.symmetric(
@@ -4554,12 +4557,12 @@ void showShareConfirmDialog(BuildContext context) {
 }
 
 //임시 휴무 / 영업 시간
-void showStoreVacationAndTime(BuildContext context) {
+void showStoreVacationAndTime(BuildContext context, int partnerId) {
   double width = MediaQuery.of(context).size.width;
   String selectedBusinessType = "선택"; // 업태 기본값
   String selectedCategory = "선택"; // 카테고리 기본값
   String selectedDay = "매 주"; // 정기 휴무일 기본값
-
+  final Partner2Controller partnerController = Get.find<Partner2Controller>();
   showGeneralDialog(
     context: context,
     barrierDismissible: true, // true로 설정했으므로 barrierLabel 필요
@@ -4582,7 +4585,41 @@ void showStoreVacationAndTime(BuildContext context) {
               vertical: 8,
             ),
             child: YellowElevationBtn(
-              onPressed: () {},
+              onPressed: () async {
+                final res = await partnerController.createPostTempClosure(
+                    partnerId: partnerId);
+                if (res) {
+                  Get.snackbar(
+                    "알림",
+                    "임시 휴무/영업 시간이 저장되었습니다.",
+                    snackPosition: SnackPosition.TOP, // 상단에 표시
+                    backgroundColor: CatchmongColors.green_line,
+                    colorText: Colors.white,
+                    icon: Icon(
+                      Icons.check_circle,
+                      color: Colors.white,
+                    ),
+                    duration: Duration(seconds: 1),
+                    borderRadius: 10,
+                    margin: EdgeInsets.all(10),
+                  );
+                } else {
+                  Get.snackbar(
+                    "알림",
+                    "임시 휴무/영업 시간 저장을 실패했습니다.",
+                    snackPosition: SnackPosition.TOP, // 상단에 표시
+                    backgroundColor: CatchmongColors.red,
+                    colorText: Colors.white,
+                    icon: Icon(
+                      Icons.check_circle,
+                      color: Colors.white,
+                    ),
+                    duration: Duration(seconds: 1),
+                    borderRadius: 10,
+                    margin: EdgeInsets.all(10),
+                  );
+                }
+              },
               title: Text("등록하기"),
             ),
           ),
@@ -4622,19 +4659,20 @@ void showStoreVacationAndTime(BuildContext context) {
                       runSpacing: 4,
                       spacing: 4,
                       children: [
-                        ...[
-                          "영업 시간 변경",
-                          "자리 비움",
-                          "임시 휴무",
-                        ].map((data) {
-                          return YellowToggleBtn(
-                            width: data == "영업 시간 변경"
-                                ? 121
-                                : MediaQuery.of(context).size.width / 3.8,
-                            title: data,
-                            isSelected: data == "영업 시간 변경" ? true : false,
-                            onTap: () {},
-                          );
+                        ...partnerController.tempCategory.map((data) {
+                          return Obx(() => YellowToggleBtn(
+                                width: data == "영업 시간 변경"
+                                    ? 121
+                                    : MediaQuery.of(context).size.width / 3.8,
+                                title: data,
+                                isSelected: data ==
+                                    partnerController
+                                        .selectedTempCategory.value,
+                                onTap: () {
+                                  partnerController.selectedTempCategory.value =
+                                      data;
+                                },
+                              ));
                         }).toList(),
                       ],
                     ),
@@ -4653,43 +4691,42 @@ void showStoreVacationAndTime(BuildContext context) {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "날짜 설정",
-                    style: TextStyle(
-                      color: CatchmongColors.gray_800,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                  Obx(() => Text(
+                        partnerController.selectedTempCategory.value == "자리 비움"
+                            ? "휴게 시간 설정"
+                            : "날짜 설정",
+                        style: TextStyle(
+                          color: CatchmongColors.gray_800,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      )),
                   SizedBox(height: 8),
                   Row(
                     children: [
                       Expanded(
-                        child: Container(
-                          height: 48, // TextField의 높이 명시적으로 설정
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: CatchmongColors.gray100,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: TextField(
-                            decoration: InputDecoration(
-                              hintText: "2024-11-19 (화)",
-                              border: InputBorder.none, // 기본 border 제거
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
-                              ), // 여백 설정
-                            ),
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: CatchmongColors.gray_800,
-                            ),
-                          ),
-                        ),
-                      ),
+                          child: Obx(() => OutlinedBtn(
+                                title: partnerController
+                                            .selectedTempCategory.value ==
+                                        "자리 비움"
+                                    ? partnerController
+                                        .tempStartBusinessTime.value
+                                    : partnerController.formatTempDate(
+                                        partnerController.tempStartDate.value),
+                                onPress: () {
+                                  if (partnerController
+                                          .selectedTempCategory.value ==
+                                      "자리 비움") {
+                                    showWheelPicker(context, (String time) {
+                                      partnerController
+                                          .tempStartBusinessTime.value = time;
+                                    });
+                                  } else {
+                                    partnerController.selectTempDate(
+                                        context, "START");
+                                  }
+                                },
+                              ))),
                       SizedBox(
                         width: 10,
                       ),
@@ -4703,132 +4740,108 @@ void showStoreVacationAndTime(BuildContext context) {
                         width: 10,
                       ),
                       Expanded(
-                        child: Container(
-                          height: 48, // TextField의 높이 명시적으로 설정
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: CatchmongColors.gray100,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: TextField(
-                            decoration: InputDecoration(
-                              hintText: "2024-11-20 (수)",
-                              border: InputBorder.none, // 기본 border 제거
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
-                              ), // 여백 설정
-                            ),
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: CatchmongColors.gray_800,
-                            ),
-                          ),
-                        ),
-                      ),
+                          child: Obx(() => OutlinedBtn(
+                                title: partnerController
+                                            .selectedTempCategory.value ==
+                                        "자리 비움"
+                                    ? partnerController
+                                        .tempEndBusinessTime.value
+                                    : partnerController.formatTempDate(
+                                        partnerController.tempEndDate.value),
+                                onPress: () {
+                                  if (partnerController
+                                          .selectedTempCategory.value ==
+                                      "자리 비움") {
+                                    showWheelPicker(context, (String time) {
+                                      partnerController
+                                          .tempEndBusinessTime.value = time;
+                                    });
+                                  } else {
+                                    partnerController.selectTempDate(
+                                        context, "END");
+                                  }
+                                },
+                              ))),
                     ],
                   ),
                 ],
               ),
             ),
             //영업 시간 설정
-            Container(
-              padding: EdgeInsets.only(
-                left: 20,
-                top: 16,
-                right: 20,
-                bottom: 20,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "영업 시간 설정",
-                    style: TextStyle(
-                      color: CatchmongColors.gray_800,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
+            Obx(() => partnerController.selectedTempCategory.value == "영업 시간 변경"
+                ? Container(
+                    padding: EdgeInsets.only(
+                      left: 20,
+                      top: 16,
+                      right: 20,
+                      bottom: 20,
                     ),
-                  ),
-                  SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          height: 48, // TextField의 높이 명시적으로 설정
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: CatchmongColors.gray100,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: TextField(
-                            decoration: InputDecoration(
-                              hintText: "09:00",
-                              border: InputBorder.none, // 기본 border 제거
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
-                              ), // 여백 설정
-                            ),
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: CatchmongColors.gray_800,
-                            ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "영업 시간 설정",
+                          style: TextStyle(
+                            color: CatchmongColors.gray_800,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Text(
-                        "-",
-                        style: TextStyle(
-                          fontSize: 20,
+                        SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                                child: Obx(() => OutlinedBtn(
+                                    title: partnerController
+                                        .tempStartBusinessTime.value,
+                                    onPress: () {
+                                      showWheelPicker(context, (String time) {
+                                        partnerController
+                                            .tempStartBusinessTime.value = time;
+                                      });
+                                    }))),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Text(
+                              "-",
+                              style: TextStyle(
+                                fontSize: 20,
+                              ),
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Expanded(
+                                child: Obx(() => OutlinedBtn(
+                                    title: partnerController
+                                        .tempEndBusinessTime.value,
+                                    onPress: () {
+                                      showWheelPicker(context, (String time) {
+                                        partnerController
+                                            .tempEndBusinessTime.value = time;
+                                      });
+                                    }))),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Obx(() => YellowToggleBtn(
+                                  width: 121,
+                                  height: 52,
+                                  title: "지금 영업 종료",
+                                  isSelected:
+                                      partnerController.isTempClose.value,
+                                  onTap: () {
+                                    partnerController.isTempClose.value =
+                                        !partnerController.isTempClose.value;
+                                  },
+                                ))
+                          ],
                         ),
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Expanded(
-                        child: Container(
-                          height: 48, // TextField의 높이 명시적으로 설정
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: CatchmongColors.gray100,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: TextField(
-                            decoration: InputDecoration(
-                              hintText: "11:00",
-                              border: InputBorder.none, // 기본 border 제거
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
-                              ), // 여백 설정
-                            ),
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: CatchmongColors.gray_800,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      YellowToggleBtn(
-                          width: 121, title: "지금 영업 종료", isSelected: false)
-                    ],
-                  ),
-                ],
-              ),
-            ),
+                      ],
+                    ),
+                  )
+                : Container())
           ]))));
     },
   );
