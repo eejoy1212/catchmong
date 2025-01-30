@@ -179,6 +179,7 @@ class Partner2Controller extends GetxController {
     "직접선택",
   ];
   RxString selectedStatisticsItem = "직접선택".obs;
+  RxList<int> deleteMenuIds = RxList.empty();
   //마이페이지
   @override
   void onInit() {
@@ -849,60 +850,62 @@ class Partner2Controller extends GetxController {
 
   // 메뉴 등록 함수
 
-  Future<void> postRegisterMenus({
+  Future<bool> postRegisterMenus({
     required int partnerId,
-    // required List<File> imageFiles, // 이미지 파일 리스트
+    // required List<Menu> newMenus, // 새 메뉴 리스트
+    // required List<int> deleteMenuIds, // 삭제할 메뉴 ID 리스트
   }) async {
-    final url = '$baseUrl/partners/$partnerId/menus';
+    final String url = "$baseUrl/partners/$partnerId/menus";
 
     try {
-      // MultipartRequest 생성
       var request = http.MultipartRequest('POST', Uri.parse(url));
 
-      // menus 리스트를 JSON으로 변환하여 추가
-      request.fields['menus'] =
-          jsonEncode(newMenus.map((menu) => menu.toJson()).toList());
-      final List<File> imageFiles =
-          newMenus.map((file) => File(file.image)).toList();
-      // 이미지 파일 추가
-      for (int i = 0; i < imageFiles.length; i++) {
-        try {
-          var stream = http.ByteStream(imageFiles[i].openRead());
-          var length = await imageFiles[i].length();
-          var multipartFile = http.MultipartFile(
-            'images', // 백엔드에서 기대하는 필드 이름
-            stream,
-            length,
-            filename: imageFiles[i].path.split('/').last,
-          );
-          request.files.add(multipartFile);
-        } catch (e) {
-          print("이미지 파일 처리 중 오류 발생: $e");
-          return;
+      // 1. 새 메뉴 JSON 데이터 추가
+      final filtered = newMenus.where((el) => !el.image.contains("uploads/"));
+      if (newMenus.isNotEmpty) {
+        request.fields["newMenus"] =
+            jsonEncode(filtered.map((menu) => menu.toJson()).toList());
+      }
+
+      // 2. 삭제할 메뉴 ID 리스트 추가
+      if (deleteMenuIds.isNotEmpty) {
+        request.fields["deleteMenuIds"] = jsonEncode(deleteMenuIds);
+      }
+
+      // 3. 이미지 파일 추가
+      for (var menu in newMenus) {
+        if (!menu.image.contains("uploads/")) {
+          File file = File(menu.image);
+          request.files.add(await http.MultipartFile.fromPath(
+            'images',
+            file.path,
+            filename: file.path.split('/').last,
+          ));
         }
       }
 
-      // 요청 보내기
+      // 4. 요청 보내기
       var streamedResponse = await request.send();
-
-      // 응답 처리
       var response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 201) {
-        print("메뉴 등록 성공: ${response.body}");
-        final List<dynamic> data = jsonDecode(response.body)['menus'];
-        print("메뉴 등록 성공: $data");
+        print("메뉴 등록 및 삭제 성공: ${response.body}");
 
-        // JSON 데이터를 모델로 변환
-        final registeredMenus = data
-            .map((menu) => Menu.fromJson(menu as Map<String, dynamic>))
-            .toList();
-        newMenus.value = registeredMenus;
+        // JSON 데이터를 모델로 변환하여 UI 업데이트 가능
+        final List<dynamic> data = jsonDecode(response.body)['createdMenus'];
+        final registeredMenus =
+            data.map((menu) => Menu.fromJson(menu)).toList();
+
+        // newMenus.addAll(registeredMenus);
+        deleteMenuIds.clear();
+        return true;
       } else {
-        print("메뉴 등록 실패: ${response.body}");
+        print("메뉴 등록 및 삭제 실패: ${response.statusCode} - ${response.body}");
+        return false;
       }
     } catch (error) {
       print("서버 요청 중 오류 발생: $error");
+      return false;
     }
   }
 

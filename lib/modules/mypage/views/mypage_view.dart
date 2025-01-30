@@ -5443,21 +5443,39 @@ void showMenuAdd(BuildContext context, Partner partner) {
             child: YellowElevationBtn(
               onPressed: () async {
                 if (partner.id != null) {
-                  await controller.postRegisterMenus(partnerId: partner.id!);
-                  Get.snackbar(
-                    "알림",
-                    "성공적으로 저장되었습니다.",
-                    snackPosition: SnackPosition.TOP, // 상단에 표시
-                    backgroundColor: CatchmongColors.green_line,
-                    colorText: Colors.white,
-                    icon: Icon(
-                      Icons.check_circle,
-                      color: Colors.white,
-                    ),
-                    duration: Duration(seconds: 1),
-                    borderRadius: 10,
-                    margin: EdgeInsets.all(10),
-                  );
+                  final res = await controller.postRegisterMenus(
+                      partnerId: partner.id!);
+                  if (res) {
+                    Get.snackbar(
+                      "알림",
+                      "성공적으로 저장되었습니다.",
+                      snackPosition: SnackPosition.TOP, // 상단에 표시
+                      backgroundColor: CatchmongColors.green_line,
+                      colorText: Colors.white,
+                      icon: Icon(
+                        Icons.check_circle,
+                        color: Colors.white,
+                      ),
+                      duration: Duration(seconds: 1),
+                      borderRadius: 10,
+                      margin: EdgeInsets.all(10),
+                    );
+                  } else {
+                    Get.snackbar(
+                      "알림",
+                      "저장을 실패했습니다.",
+                      snackPosition: SnackPosition.TOP, // 상단에 표시
+                      backgroundColor: CatchmongColors.red,
+                      colorText: Colors.white,
+                      icon: Icon(
+                        Icons.check_circle,
+                        color: Colors.white,
+                      ),
+                      duration: Duration(seconds: 1),
+                      borderRadius: 10,
+                      margin: EdgeInsets.all(10),
+                    );
+                  }
                 }
               },
               title: Text("저장하기"),
@@ -5916,7 +5934,12 @@ void showMenuAdd(BuildContext context, Partner partner) {
                                     ),
                                     InkWell(
                                         onTap: () {
-                                          controller.newMenus.removeAt(idx);
+                                          final id =
+                                              controller.newMenus[idx].id;
+                                          if (id != null) {
+                                            controller.deleteMenuIds.add(id);
+                                            controller.newMenus.removeAt(idx);
+                                          }
                                         },
                                         child: SvgPicture.asset(
                                             'assets/images/trash.svg'))
