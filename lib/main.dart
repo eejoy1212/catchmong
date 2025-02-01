@@ -13,6 +13,7 @@ import 'package:catchmong/modules/partner/controllers/partner-controller.dart';
 import 'package:catchmong/routes/app_pages.dart';
 import 'package:catchmong/widget/content/payback_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:get/get.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -52,6 +53,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
           useMaterial3: false,
           scaffoldBackgroundColor: Colors.white,
+          // pageTransitionsTheme: PageTransitionsTheme(builders: {
+          //   TargetPlatform.android: NoTransitionsBuilder(),
+          //   TargetPlatform.iOS: NoTransitionsBuilder(),
+          // }),
           appBarTheme: AppBarTheme(color: Colors.white, elevation: 0),
           dialogTheme: DialogTheme(
             shape: RoundedRectangleBorder(
@@ -69,5 +74,17 @@ class MyApp extends StatelessWidget {
       initialRoute: AppPages.INITIAL,
       getPages: AppPages.routes,
     );
+  }
+}
+
+class NoTransitionsBuilder extends PageTransitionsBuilder {
+  @override
+  Widget buildTransitions<T>(
+      PageRoute<T> route,
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+      Widget child) {
+    return child; // 애니메이션 없이 바로 화면 변경
   }
 }

@@ -4,7 +4,6 @@ import 'package:catchmong/controller/review_controller.dart';
 import 'package:catchmong/modules/bottom_nav/bottom_nav_controller.dart';
 import 'package:catchmong/modules/login/controllers/login_controller.dart';
 import 'package:catchmong/modules/mypage/views/mypage_view.dart';
-import 'package:catchmong/modules/partner/views/partner-show-view.dart';
 import 'package:catchmong/widget/bar/mainview_appbar.dart';
 import 'package:catchmong/widget/bar/map_appbar.dart';
 import 'package:catchmong/widget/bar/mypage_appbar.dart';
@@ -21,6 +20,7 @@ import 'package:catchmong/widget/content/payback_content.dart';
 import 'package:catchmong/widget/content/qr_camera_content.dart';
 import 'package:catchmong/widget/content/scrap_partner_content.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
@@ -28,107 +28,163 @@ class MainScreen extends StatelessWidget {
   final BottomNavController bottomNavController =
       Get.find<BottomNavController>();
 
+  DateTime? _lastPressedAt; // 마지막으로 뒤로가기 버튼을 누른 시간 저장
+
+  Future<bool> _onWillPop(BuildContext context) async {
+    final now = DateTime.now();
+
+    // 2초 내에 다시 뒤로가기를 누르면 앱 종료
+    if (_lastPressedAt == null ||
+        now.difference(_lastPressedAt!) > Duration(seconds: 2)) {
+      _lastPressedAt = now;
+
+      // 스낵바 표시
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("뒤로가기 버튼을 한 번 더 누르면 종료됩니다."),
+          duration: Duration(seconds: 2),
+        ),
+      );
+
+      return false; // 앱 종료 방지
+    }
+
+    return true; // 앱 종료
+  }
+
+  DateTime? backPressedTime;
   @override
   Widget build(BuildContext context) {
     return Obx(() {
       int currentIndex = bottomNavController.selectedIndex.value;
-      return Scaffold(
-        floatingActionButtonAnimator: FloatingActionButtonAnimator.noAnimation,
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        bottomSheet: currentIndex == 2
-            ? InkWell(
-                onTap: () {
-                  showQrScanner(context);
-                },
-                child: Container(
-                    // padding: EdgeInsets.only(bottom: 20),
-                    width: MediaQuery.of(context).size.width,
-                    height: 48,
-                    decoration: BoxDecoration(
-                        color: CatchmongColors.yellow_main,
-                        borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(8),
-                            topRight: Radius.circular(8))),
-                    child: Center(
-                        child: Text(
-                      "결제하고 돌려받기",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ))),
-              )
-            : null,
-        appBar: _getAppBar(currentIndex), // 선택된 인덱스에 따라 AppBar 변경
-        body: _getBody(currentIndex), // 선택된 인덱스에 따라 Body 변경
-        bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: CatchmongColors.black,
-          currentIndex: currentIndex,
-          onTap: bottomNavController.onItemTapped,
-          items: [
-            BottomNavigationBarItem(
-              icon: SvgPicture.asset(
-                'assets/images/bottom-home.svg',
-                colorFilter: ColorFilter.mode(
-                  currentIndex == 0
-                      ? CatchmongColors.black
-                      : CatchmongColors.gray400,
-                  BlendMode.srcIn,
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (bool didPop, Object? result) {
+          if (didPop) {
+            return;
+          }
+
+          DateTime nowTime = DateTime.now();
+          if (backPressedTime == null ||
+              nowTime.difference(backPressedTime!) >
+                  const Duration(seconds: 2)) {
+            backPressedTime = nowTime;
+            Get.snackbar(
+              "알림",
+              '한 번 더 누르시면 종료됩니다.',
+              snackPosition: SnackPosition.TOP, // 상단에 표시
+              backgroundColor: CatchmongColors.yellow_main,
+              colorText: CatchmongColors.black,
+              icon: Icon(Icons.check_circle, color: CatchmongColors.black),
+              duration: Duration(seconds: 1),
+              borderRadius: 10,
+              margin: EdgeInsets.all(10),
+            );
+          } else {
+            SystemNavigator.pop(); // 앱 종료
+          }
+        },
+        // canPop: () => _onWillPop(context),
+        child: Scaffold(
+          floatingActionButtonAnimator:
+              FloatingActionButtonAnimator.noAnimation,
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerFloat,
+          bottomSheet: currentIndex == 2
+              ? InkWell(
+                  onTap: () {
+                    showQrScanner(context);
+                  },
+                  child: Container(
+                      // padding: EdgeInsets.only(bottom: 20),
+                      width: MediaQuery.of(context).size.width,
+                      height: 48,
+                      decoration: BoxDecoration(
+                          color: CatchmongColors.yellow_main,
+                          borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(8),
+                              topRight: Radius.circular(8))),
+                      child: Center(
+                          child: Text(
+                        "결제하고 돌려받기",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ))),
+                )
+              : null,
+          appBar: _getAppBar(currentIndex), // 선택된 인덱스에 따라 AppBar 변경
+          body: _getBody(currentIndex), // 선택된 인덱스에 따라 Body 변경
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            selectedItemColor: CatchmongColors.black,
+            currentIndex: currentIndex,
+            onTap: bottomNavController.onItemTapped,
+            items: [
+              BottomNavigationBarItem(
+                icon: SvgPicture.asset(
+                  'assets/images/bottom-home.svg',
+                  colorFilter: ColorFilter.mode(
+                    currentIndex == 0
+                        ? CatchmongColors.black
+                        : CatchmongColors.gray400,
+                    BlendMode.srcIn,
+                  ),
                 ),
+                label: '홈',
               ),
-              label: '홈',
-            ),
-            BottomNavigationBarItem(
-              icon: SvgPicture.asset(
-                'assets/images/bottom-search.svg',
-                colorFilter: ColorFilter.mode(
-                  currentIndex == 1
-                      ? CatchmongColors.black
-                      : CatchmongColors.gray400,
-                  BlendMode.srcIn,
+              BottomNavigationBarItem(
+                icon: SvgPicture.asset(
+                  'assets/images/bottom-search.svg',
+                  colorFilter: ColorFilter.mode(
+                    currentIndex == 1
+                        ? CatchmongColors.black
+                        : CatchmongColors.gray400,
+                    BlendMode.srcIn,
+                  ),
                 ),
+                label: '검색',
               ),
-              label: '검색',
-            ),
-            BottomNavigationBarItem(
-              icon: SvgPicture.asset(
-                'assets/images/bottom-payback.svg',
-                colorFilter: ColorFilter.mode(
-                  currentIndex == 2
-                      ? CatchmongColors.black
-                      : CatchmongColors.gray400,
-                  BlendMode.srcIn,
+              BottomNavigationBarItem(
+                icon: SvgPicture.asset(
+                  'assets/images/bottom-payback.svg',
+                  colorFilter: ColorFilter.mode(
+                    currentIndex == 2
+                        ? CatchmongColors.black
+                        : CatchmongColors.gray400,
+                    BlendMode.srcIn,
+                  ),
                 ),
+                label: '페이백',
               ),
-              label: '페이백',
-            ),
-            BottomNavigationBarItem(
-              icon: SvgPicture.asset(
-                'assets/images/bottom-pin.svg',
-                colorFilter: ColorFilter.mode(
-                  currentIndex == 3
-                      ? CatchmongColors.black
-                      : CatchmongColors.gray400,
-                  BlendMode.srcIn,
+              BottomNavigationBarItem(
+                icon: SvgPicture.asset(
+                  'assets/images/bottom-pin.svg',
+                  colorFilter: ColorFilter.mode(
+                    currentIndex == 3
+                        ? CatchmongColors.black
+                        : CatchmongColors.gray400,
+                    BlendMode.srcIn,
+                  ),
                 ),
+                label: '지도',
               ),
-              label: '지도',
-            ),
-            BottomNavigationBarItem(
-              icon: SvgPicture.asset(
-                'assets/images/bottom-my.svg',
-                colorFilter: ColorFilter.mode(
-                  currentIndex == 4
-                      ? CatchmongColors.black
-                      : CatchmongColors.gray400,
-                  BlendMode.srcIn,
+              BottomNavigationBarItem(
+                icon: SvgPicture.asset(
+                  'assets/images/bottom-my.svg',
+                  colorFilter: ColorFilter.mode(
+                    currentIndex == 4
+                        ? CatchmongColors.black
+                        : CatchmongColors.gray400,
+                    BlendMode.srcIn,
+                  ),
                 ),
+                label: '마이페이지',
               ),
-              label: '마이페이지',
-            ),
-          ],
+            ],
+          ),
         ),
       );
     });
