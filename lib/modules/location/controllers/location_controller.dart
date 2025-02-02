@@ -57,67 +57,67 @@ class LocationController extends GetxController {
   //     print('요청 중 오류 발생: $e');
   //   }
   // }
-  Future<List<NCircleOverlay>> getNearbyPartners() async {
-    try {
-      final partners = await fetchNearbyPartners(
-        latitude: 37.504198,
-        longitude: 127.047967,
-        radius: radius.value,
-      );
-      print("내가 설정한 반경 내 파트너>>>${partners}//${partners.length}");
+  // Future<List<NCircleOverlay>> getNearbyPartners() async {
+  //   try {
+  //     final partners = await fetchNearbyPartners(
+  //       latitude: 37.504198,
+  //       longitude: 127.047967,
+  //       radius: radius.value,
+  //     );
+  //     print("내가 설정한 반경 내 파트너>>>${partners}//${partners.length}");
 
-      // 마커 데이터 추가
-      final newMarkers = partners.map((p) {
-        return NCircleOverlay(
-          id: p['id'].toString(),
-          center: NLatLng(p['latitude'], p['longitude']),
-          radius: 16,
-          color: CatchmongColors.green_line,
-        );
-      }).toList();
+  //     // 마커 데이터 추가
+  //     final newMarkers = partners.map((p) {
+  //       return NCircleOverlay(
+  //         id: p['id'].toString(),
+  //         center: NLatLng(p['latitude'], p['longitude']),
+  //         radius: 16,
+  //         color: CatchmongColors.green_line,
+  //       );
+  //     }).toList();
 
-      // 기존 마커 초기화 후 새 마커 추가
-      markers.clear();
-      markers.addAll(newMarkers);
-      update();
-      print("추가된 마커>>>${markers.length}");
-      return newMarkers;
-    } catch (e) {
-      print("파트너 데이터를 가져오는 중 오류 발생: $e");
-      return [];
-    }
-  }
+  //     // 기존 마커 초기화 후 새 마커 추가
+  //     markers.clear();
+  //     markers.addAll(newMarkers);
+  //     update();
+  //     print("추가된 마커>>>${markers.length}");
+  //     return newMarkers;
+  //   } catch (e) {
+  //     print("파트너 데이터를 가져오는 중 오류 발생: $e");
+  //     return [];
+  //   }
+  // }
 
-  Future<List<dynamic>> fetchNearbyPartners({
-    required double latitude,
-    required double longitude,
-    required double radius,
-  }) async {
-    final url = Uri.parse(
-      '$baseUrl/partners/nearby?latitude=$latitude&longitude=$longitude&radius=$radius',
-    );
+  // Future<List<dynamic>> fetchNearbyPartners({
+  //   required double latitude,
+  //   required double longitude,
+  //   required double radius,
+  // }) async {
+  //   final url = Uri.parse(
+  //     '$baseUrl/partners/nearby?latitude=$latitude&longitude=$longitude&radius=$radius',
+  //   );
 
-    try {
-      // HTTP GET 요청
-      final response = await http.get(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      );
+  //   try {
+  //     // HTTP GET 요청
+  //     final response = await http.get(
+  //       url,
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //     );
 
-      if (response.statusCode == 200) {
-        // 응답 데이터를 JSON 디코딩 후 반환
-        return jsonDecode(response.body) as List<dynamic>;
-      } else {
-        throw Exception('Failed to fetch nearby partners: ${response.body}');
-      }
-    } catch (e) {
-      // 오류 처리
-      print('Error fetching partners: $e');
-      rethrow;
-    }
-  }
+  //     if (response.statusCode == 200) {
+  //       // 응답 데이터를 JSON 디코딩 후 반환
+  //       return jsonDecode(response.body) as List<dynamic>;
+  //     } else {
+  //       throw Exception('Failed to fetch nearby partners: ${response.body}');
+  //     }
+  //   } catch (e) {
+  //     // 오류 처리
+  //     print('Error fetching partners: $e');
+  //     rethrow;
+  //   }
+  // }
 
   Future<void> fetchRegions() async {
     final url = Uri.parse('${baseUrl}/api/regions');

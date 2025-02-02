@@ -3,11 +3,12 @@ import 'package:catchmong/modules/location/controllers/location_controller.dart'
 import 'package:catchmong/modules/location/views/location_search_view.dart';
 import 'package:daum_postcode_search/daum_postcode_search.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
 
 class LocationBar extends StatelessWidget {
   final double opacity;
-  final void Function(DataModel) onSearch;
+  final void Function(DataModel, double, double) onSearch;
   final String? nowAddress;
   const LocationBar({
     super.key,
@@ -48,7 +49,11 @@ class LocationBar extends StatelessWidget {
               DataModel model = await Get.to(
                 () => LocationSearchView(),
               );
-              onSearch(model);
+              List<Location> locations =
+                  await locationFromAddress(model.address);
+              double latitude = locations[0].latitude;
+              double longitude = locations[0].longitude;
+              onSearch(model, latitude, longitude);
               print("주소 검색 결과>>> ${model.address}");
             },
             child: Text(

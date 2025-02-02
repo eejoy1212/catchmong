@@ -1,3 +1,4 @@
+import 'package:catchmong/controller/partner_controller.dart';
 import 'package:catchmong/widget/button/TxtBtn.dart';
 import 'package:catchmong/widget/button/YellowElevationBtn.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,8 @@ class LocationView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Partner2Controller partnercontroller = Get.find<Partner2Controller>();
+    // partnercontroller.saveLocation();
     return Scaffold(
       body: Center(
         child: Column(
@@ -39,9 +42,10 @@ class LocationView extends StatelessWidget {
                         fontSize: 16,
                       ), // 텍스트 색상 설정
                     ),
-                    onPressed: () async {
+                    onPressed: () {
                       // 라우팅 수행
-                      await Get.toNamed('/location-setting');
+                      partnercontroller.isAll.value = false;
+                      Get.toNamed('/location-setting');
                     },
                   ),
                 ),

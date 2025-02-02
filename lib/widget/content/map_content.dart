@@ -212,6 +212,7 @@
 //   );
 // }
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/controller/partner_controller.dart';
 import 'package:catchmong/modules/bottom_nav/bottom_nav_controller.dart';
 import 'package:catchmong/modules/location/controllers/location_controller.dart';
 import 'package:catchmong/widget/bar/map_searchbar.dart';
@@ -227,32 +228,36 @@ import 'package:get/get.dart';
 class MapContent extends StatelessWidget {
   MapContent({super.key});
 
-  final LocationController locationController = Get.find<LocationController>();
+  // final LocationController locationController = Get.find<LocationController>();
+  final Partner2Controller partnercontroller = Get.find<Partner2Controller>();
   final NaverMapController? _mapController = null;
   final BottomNavController bottomNavController =
       Get.find<BottomNavController>();
 
   Future<NLatLng> _getCurrentPosition() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error('Location services are disabled.');
-    }
+    // bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    // if (!serviceEnabled) {
+    //   return Future.error('Location services are disabled.');
+    // }
 
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error('Location permissions are denied');
-      }
-    }
+    // LocationPermission permission = await Geolocator.checkPermission();
+    // if (permission == LocationPermission.denied) {
+    //   permission = await Geolocator.requestPermission();
+    //   if (permission == LocationPermission.denied) {
+    //     return Future.error('Location permissions are denied');
+    //   }
+    // }
 
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
-    }
+    // if (permission == LocationPermission.deniedForever) {
+    //   return Future.error(
+    //       'Location permissions are permanently denied, we cannot request permissions.');
+    // }
 
-    Position position = await Geolocator.getCurrentPosition();
-    return NLatLng(position.latitude, position.longitude);
+    // Position position = await Geolocator.getCurrentPosition();
+    // print("my position>>>(${position.latitude},${position.longitude})");
+    final pos = partnercontroller.nowPosition.value;
+    // await partnercontroller.fetchNearbyPartners(position: position);
+    return pos;
   }
 
   @override
@@ -293,7 +298,18 @@ class MapContent extends StatelessWidget {
                       ),
                     ),
                     Expanded(
-                      child: CustomMap(currentPosition: currentPosition),
+                      child: CustomMap(
+                        currentPosition: currentPosition,
+                        onMapReady: (naverMapController) async {
+                          // naverMapController.clearOverlays();
+
+                          // List<NMarker> markers = await partnerController.fetchNearbyPartners();
+                          // naverMapController.addOverlayAll(markers.toSet());
+                        },
+                        options: NaverMapViewOptions(),
+                        onCameraChange: (NCameraUpdateReason, bool) {},
+                        onCameraIdle: () {},
+                      ),
                     ),
                   ],
                 ),

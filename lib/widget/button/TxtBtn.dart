@@ -1,4 +1,5 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/controller/partner_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -32,6 +33,7 @@ class TxtBtn extends StatelessWidget {
 }
 
 void showFirstLookDialog(BuildContext context) {
+  final Partner2Controller partnerController = Get.find<Partner2Controller>();
   showDialog(
     context: context,
     barrierDismissible: false,
@@ -95,6 +97,7 @@ void showFirstLookDialog(BuildContext context) {
                       child: InkWell(
                         onTap: () {
                           // 확인 버튼의 동작 추가
+                          partnerController.isAll.value = true;
                           Get.toNamed('/main');
                         },
                         child: Container(

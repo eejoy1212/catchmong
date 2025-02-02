@@ -5,12 +5,15 @@ class LocationSlider extends StatelessWidget {
   final double currentValue;
   final void Function(double) onChange;
   final void Function(double) onChangeEnd;
-
+  final String nowAddress;
+  final bool isAll;
   const LocationSlider({
     super.key,
     required this.currentValue,
     required this.onChange,
     required this.onChangeEnd,
+    required this.nowAddress,
+    required this.isAll,
   });
 
   @override
@@ -20,7 +23,7 @@ class LocationSlider extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            '${currentValue.toInt()} m', // 정수로 출력
+            '100 m', // 정수로 출력
             style: TextStyle(color: CatchmongColors.sub_gray, fontSize: 14),
           ),
           Expanded(
@@ -28,7 +31,7 @@ class LocationSlider extends StatelessWidget {
               value: currentValue,
               min: 100,
               max: 100000,
-              divisions: 99900, // 최소값과 최대값 사이를 1m 단위로 나눔
+              divisions: (100000 - 100).toInt(), // 최소값과 최대값 사이를 1m 단위로 나눔
               label: '${currentValue.toInt()} m', // 슬라이더의 레이블도 정수로 표시
               onChanged: onChange,
               onChangeEnd: onChangeEnd,

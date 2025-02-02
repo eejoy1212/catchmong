@@ -1,9 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/controller/view_controller.dart';
 import 'package:catchmong/model/menu.dart';
 import 'package:catchmong/model/temp_closure.dart';
 import 'package:catchmong/modules/login/controllers/login_controller.dart';
+import 'package:flutter_naver_map/flutter_naver_map.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:catchmong/const/constant.dart';
 import 'package:catchmong/model/partner.dart';
@@ -18,6 +22,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class Partner2Controller extends GetxController {
   //메뉴등록
+  final RxBool isAll = false.obs;
+  final Rx<NaverMapController?> naverMapController =
+      Rx<NaverMapController?>(null);
+
+  final Rx<NLatLng> nowPosition = NLatLng(37.5665, 126.9780).obs;
+  final RxDouble nowRadius = 20000.0.obs;
+  final RxString nowAddress = "대한민국 서울특별시 중구 세종대로 110, 중구, , 04524, 대한민국".obs;
+  RxList<NMarker> markers = RxList.empty();
+  RxInt markerNum = 0.obs;
+  // final Map<String, dynamic> nowLocation = Map({
+  //   "longitude": 37.5665,
+  //   "langitude": 126.9780,
+  //   "address": "대한민국 서울특별시 중구 세종대로 110, 중구, , 04524, 대한민국",
+  // });
   Rxn<File> menuImg = Rxn();
   RxString selectedMenuCategory = "메인메뉴".obs;
   List<String> menuCaregories = [
@@ -195,11 +213,15 @@ class Partner2Controller extends GetxController {
   RxString tempStartBusinessTime = "00:00".obs;
   RxString tempEndBusinessTime = "24:00".obs;
   RxBool isTempClose = false.obs;
+  RxBool isRadiusDialog = true.obs;
+  RxBool isRadiusBottomSheet = true.obs;
   //임시 휴무 / 영업 시간
   //마이페이지
   @override
   void onInit() {
     _loadRecentSearches();
+    getLocationFromStorage();
+    isAll.value = true;
     super.onInit();
   }
 
@@ -208,6 +230,25 @@ class Partner2Controller extends GetxController {
     connectTimeout: const Duration(milliseconds: 5000), // 연결 제한 시간
     receiveTimeout: const Duration(milliseconds: 3000), // 응답 제한 시간
   ));
+  double getZoomLevelByRadius(double radius) {
+    if (radius <= 2) return 21;
+    if (radius <= 5) return 20;
+    if (radius <= 10) return 19;
+    if (radius <= 25) return 18;
+    if (radius <= 50) return 17;
+    if (radius <= 100) return 16;
+    if (radius <= 250) return 15;
+    if (radius <= 500) return 14;
+    if (radius <= 1000) return 13;
+    if (radius <= 2000) return 12;
+    if (radius <= 5000) return 11;
+    if (radius <= 10000) return 10;
+    if (radius <= 25000) return 9;
+    if (radius <= 50000) return 8;
+    if (radius <= 100000) return 7;
+    return 6; // 최대 줌 아웃 (100km 이상)
+  }
+
   String formatTempDate(DateTime dateTime) {
     // 요일 이름 맵핑
     const weekDays = ['월', '화', '수', '목', '금', '토', '일'];
@@ -1080,5 +1121,219 @@ class Partner2Controller extends GetxController {
       print('Error fetching tempClosure: $e');
       return null;
     }
+  }
+
+  // 현재 위치 기반으로 반경 100m 내의 파트너 조회
+  Future<List<NMarker>> fetchNearbyPartners(
+      double latitude, double longitude) async {
+    try {
+      markers.clear();
+      // Position position = await _determinePosition();
+      // double latitude = position.latitude;
+      // double longitude = position.longitude;
+
+      print("fetchNearbyPartners 📍 현재 위치: 위도: $latitude, 경도: $longitude");
+
+      final response = await _dio.get(
+        "/partners/nearby",
+        queryParameters: {
+          "latitude": latitude,
+          "longitude": longitude,
+          "radius": nowRadius.value
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print("fetchNearbyPartners data>>>${response.data}//");
+        print("fetchNearbyPartners data length>>>${response.data.length}//");
+        // 마커 데이터 추가
+        // List<NMarker> markers = [];
+        final List<dynamic> data = response.data;
+        final nowPartners = data
+            .map((json) => Partner.fromJson(json as Map<String, dynamic>))
+            .toList();
+        for (var partner in nowPartners) {
+          NMarker marker = NMarker(
+              id: partner.id.toString(),
+              position:
+                  NLatLng(partner.latitude ?? 0.0, partner.longitude ?? 0.0),
+              caption: NOverlayCaption(text: partner.name),
+              captionAligns: const [NAlign.top]
+
+              // captionText: partner["name"], // 🔹 마커 위에 이름 표시
+              // captionColor: Colors.black,
+              // captionTextSize: 12,
+              );
+          // 🔹 마커 클릭 시 동작 추가
+          marker.setOnTapListener((overlay) {
+            print("Clicked on marker: ${partner.name}");
+          });
+
+          markers.add(marker);
+          markerNum.value = markers.length;
+        }
+
+        return markers;
+      } else {
+        return [];
+      }
+    } catch (e) {
+      return [];
+    }
+  } // Future<List<NCircleOverlay>> fetchNearbyPartners() async {
+  //   try {
+  // Position position = await _determinePosition();
+  // double latitude = position.latitude;
+  // double longitude = position.longitude;
+
+  // print("fetchNearbyPartners 📍 현재 위치: 위도: $latitude, 경도: $longitude");
+
+  // final response = await _dio.get(
+  //   "/partners/nearby",
+  //   queryParameters: {
+  //     "latitude": latitude,
+  //     "longitude": longitude,
+  //   },
+  // );
+
+  // if (response.statusCode == 200) {
+  //   print("fetchNearbyPartners data>>>${response.data}//");
+  //   print("fetchNearbyPartners data length>>>${response.data.length}//");
+  //   // 마커 데이터 추가
+  //   final List<dynamic> data = response.data;
+  //   final nowPartners = data
+  //       .map((json) => Partner.fromJson(json as Map<String, dynamic>))
+  //       .toList();
+  //   final newMarkers = nowPartners.map((p) {
+  //     return NCircleOverlay(
+  //       id: p.id.toString(),
+  //       center: NLatLng(p.latitude ?? 0.0, p.longitude ?? 0.0),
+  //       radius: 16,
+  //       color: CatchmongColors.green_line,
+  //     );
+  //   }).toList();
+  //   // setState(() {
+  //   //   partners = response.data;
+  //   //   isLoading = false;
+  //   // });
+  //   return newMarkers;
+  //     } else {
+  //       print("fetchNearbyPartners ❌ 서버 오류: ${response.statusCode}");
+  //       return [];
+  //       // setState(() => isLoading = false);
+  //     }
+  //   } catch (e) {
+  //     print("fetchNearbyPartners ⚠️ 오류 발생: $e");
+  //     return [];
+  //     // setState(() => isLoading = false);
+  //   }
+  // }
+  Future<void> getLocationFromStorage() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    double? latitude = prefs.getDouble('latitude');
+    double? longitude = prefs.getDouble('longitude');
+    String? address = prefs.getString('address');
+
+    print("저장된 위치: $latitude, $longitude, $address");
+    nowPosition.value = NLatLng(latitude ?? 37.5665, longitude ?? 126.9780);
+    nowAddress.value = address ?? "대한민국 서울특별시 중구 세종대로 110, 중구, , 04524, 대한민국";
+  }
+
+  Future<String> _getAddressFromCoordinates(
+      double latitude, double longitude) async {
+    try {
+      // Geocoding으로 위도/경도 -> 주소 변환
+      // double latitude = 37.5665; // 예: 서울시청
+      // double longitude = 126.9780;
+      List<Placemark> placemarks =
+          await placemarkFromCoordinates(latitude, longitude);
+      Placemark place = placemarks[0];
+      print("place>>>>>>>>$place");
+      print("placemarks>>>>>>>>$placemarks");
+
+      // 주소 구성
+      String address =
+          "${place.street}, ${place.subLocality}, ${place.locality}, ${place.postalCode}, ${place.country}";
+      return address;
+    } catch (e) {
+      print("주소 변환 오류: $e");
+      return "주소 정보를 가져올 수 없습니다.";
+    }
+  }
+
+  double getRadiusByZoom(double zoom) {
+    // 네이버 지도 줌 레벨을 반경(m)으로 변환하는 기준값 (실제 네이버 API 스케일 기반)
+    return {
+          21: 2, // 2m
+          20: 5, // 5m
+          19: 10, // 10m
+          18: 25, // 25m
+          17: 50, // 50m
+          16: 100, // 100m
+          15: 250, // 250m
+          14: 500, // 500m
+          13: 1000, // 1km
+          12: 2000, // 2km
+          11: 5000, // 5km
+          10: 10000, // 10km
+          9: 25000, // 25km
+          8: 50000, // 50km
+          7: 100000, // 100km
+        }[zoom.round()]
+            ?.toDouble() ??
+        5000.0; // 기본값 (줌 11~12 사이)
+  }
+
+  // 위치를 로컬 스토리지에 저장
+  Future<void> saveLocation() async {
+    try {
+      final position = await _determinePosition();
+
+      // 위도와 경도 가져오기
+      double latitude = position.latitude;
+      double longitude = position.longitude;
+
+      // 위도/경도를 주소로 변환
+      String address = await _getAddressFromCoordinates(latitude, longitude);
+
+      // 로컬 스토리지에 저장
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setDouble('latitude', latitude);
+      await prefs.setDouble('longitude', longitude);
+      await prefs.setString('address', address);
+      // nowLocation["latitude"] = latitude;
+      // nowLocation["longitude"] = longitude;
+      // nowLocation["address"] = address;
+      // nowLocation.refresh();
+      nowPosition.value = NLatLng(latitude, longitude);
+      nowAddress.value = address;
+      print("위치 저장 완료: $latitude, $longitude, $address");
+    } catch (e) {
+      print("위치 정보를 가져오는 중 오류 발생: $e");
+    }
+  }
+
+  Future<Position> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      throw Exception("위치 서비스가 비활성화되어 있습니다.");
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        throw Exception("위치 권한이 거부되었습니다.");
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      throw Exception("위치 권한이 영구적으로 거부되었습니다.");
+    }
+
+    return await Geolocator.getCurrentPosition();
   }
 }

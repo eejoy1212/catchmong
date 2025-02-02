@@ -1,4 +1,5 @@
 import 'package:catchmong/const/catchmong_colors.dart';
+import 'package:catchmong/controller/partner_controller.dart';
 import 'package:catchmong/modules/bottom_nav/bottom_nav_controller.dart';
 import 'package:catchmong/widget/button/AlarmBtn.dart';
 import 'package:catchmong/widget/button/AppbarBackBtn.dart';
@@ -12,6 +13,7 @@ class MainViewAppbar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Partner2Controller partnerController = Get.find<Partner2Controller>();
     return AppBar(
       automaticallyImplyLeading: false,
       title: InkWell(
@@ -22,13 +24,19 @@ class MainViewAppbar extends StatelessWidget implements PreferredSizeWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Text(
-              "모든지역",
-              style: TextStyle(
-                  color: CatchmongColors.black,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600),
-            ),
+            Obx(() => SizedBox(
+                  width: 150,
+                  child: Text(
+                    overflow: TextOverflow.ellipsis,
+                    partnerController.isAll.isTrue
+                        ? "모든지역"
+                        : partnerController.nowAddress.value,
+                    style: TextStyle(
+                        color: CatchmongColors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600),
+                  ),
+                )),
             SizedBox(
               width: 6,
             ),

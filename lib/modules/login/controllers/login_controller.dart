@@ -24,6 +24,7 @@ import 'package:web_socket_channel/status.dart' as status;
 class LoginController extends GetxController {
   // 이미지 표시 여부를 관리하는 반응형 변수
   final UserService userService = UserService();
+
   // late WebSocketChannel _channel;
   final channel = WebSocketChannel.connect(Uri.parse("ws://$myPort:4000"));
   RxList<int> onlineUsers = <int>[].obs; // 온라인 유저 목록 (RxList)
@@ -836,7 +837,7 @@ class LoginController extends GetxController {
 
           // 3. 서버에 사용자 정보 전달
 
-          Get.offAndToNamed('/main');
+          Get.offAndToNamed('/location');
         } else if (response['path'] == '/signup') {
           // 신규 회원: 추가 정보 입력 페이지 이동
           Get.offAndToNamed('/signup', arguments: {
@@ -964,7 +965,7 @@ class LoginController extends GetxController {
             ageGroup.value = getAgeTypeByBe(user.value!.ageGroup);
             paybackMethod.value = user.value!.paybackMethod;
             referrerNicknameController.text = user.value!.referrerId.toString();
-            Get.offAndToNamed('/main');
+            Get.offAndToNamed('/location');
           }
         } else {
           print("자동 로그인 실패: 사용자 정보가 일치하지 않습니다.");
