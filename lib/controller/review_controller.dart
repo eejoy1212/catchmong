@@ -27,7 +27,6 @@ class ReviewController extends GetxController {
   ));
   @override
   void onInit() {
-    fetchFavoriteReviews();
     super.onInit();
   }
 
@@ -37,26 +36,48 @@ class ReviewController extends GetxController {
   }
 
   //인기 매장 top 10
-  Future<void> fetchFavoriteReviews() async {
+  Future<void> fetchFavoriteReviews(
+      {bool isAll = true,
+      double? latitude,
+      double? longitude,
+      double? radius}) async {
     try {
+      print(
+          "in fetchFavoriteReviews>>>$isAll / $latitude / $longitude / $radius");
+      // 요청할 쿼리 파라미터 설정
+      final queryParams = {
+        'isAll': isAll.toString(),
+      };
+
+      if (!isAll) {
+        if (latitude == null || longitude == null || radius == null) {
+          throw Exception('위도, 경도, 반경 값이 필요합니다.');
+        }
+        queryParams.addAll({
+          'latitude': latitude.toString(),
+          'longitude': longitude.toString(),
+          'radius': radius.toString(),
+        });
+      }
+
       // GET 요청 보내기
       final response = await _dio.get(
         '/reviews/top-rated',
+        queryParameters: queryParams,
       );
 
-      // 성공적인 응답 처리
       if (response.statusCode == 200) {
         List<dynamic> data = response.data;
         favoriteReviews.value = data
             .map((json) => Review.fromJson(json as Map<String, dynamic>))
             .toList();
-        print('[GET SUCCESS]인기 리뷰 : $favoriteReviews');
+        print('[GET SUCCESS] 인기 리뷰: $favoriteReviews');
       } else {
-        throw Exception('[GET ERROR]인기 리뷰 에러:  ${response.statusCode}');
+        throw Exception('[GET ERROR] 인기 리뷰 에러: ${response.statusCode}');
       }
     } catch (e) {
-      print('[GET ERROR]인기 리뷰 에러: $e');
-      throw Exception('[GET ERROR]인기 리뷰 에러: $e');
+      print('[GET ERROR] 인기 리뷰 에러: $e');
+      throw Exception('[GET ERROR] 인기 리뷰 에러: $e');
     }
   }
 

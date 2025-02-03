@@ -9,6 +9,7 @@ import 'package:catchmong/widget/bar/map_appbar.dart';
 import 'package:catchmong/widget/bar/mypage_appbar.dart';
 import 'package:catchmong/widget/bar/qr_appbar.dart';
 import 'package:catchmong/widget/bar/search_appbar.dart';
+import 'package:catchmong/widget/bottom_sheet/filter_bottomsheet.dart';
 import 'package:catchmong/widget/card/MainCard.dart';
 import 'package:catchmong/widget/card/ReviewCard.dart';
 import 'package:catchmong/widget/card/hot-type-card.dart';
@@ -90,31 +91,7 @@ class MainScreen extends StatelessWidget {
               FloatingActionButtonAnimator.noAnimation,
           floatingActionButtonLocation:
               FloatingActionButtonLocation.centerFloat,
-          bottomSheet: currentIndex == 2
-              ? InkWell(
-                  onTap: () {
-                    showQrScanner(context);
-                  },
-                  child: Container(
-                      // padding: EdgeInsets.only(bottom: 20),
-                      width: MediaQuery.of(context).size.width,
-                      height: 48,
-                      decoration: BoxDecoration(
-                          color: CatchmongColors.yellow_main,
-                          borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(8),
-                              topRight: Radius.circular(8))),
-                      child: Center(
-                          child: Text(
-                        "결제하고 돌려받기",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ))),
-                )
-              : null,
+          bottomSheet: _getBottomSheet(currentIndex, context),
           appBar: _getAppBar(currentIndex), // 선택된 인덱스에 따라 AppBar 변경
           body: _getBody(currentIndex), // 선택된 인덱스에 따라 Body 변경
           bottomNavigationBar: BottomNavigationBar(
@@ -190,6 +167,36 @@ class MainScreen extends StatelessWidget {
     });
   }
 
+  StatelessWidget? _getBottomSheet(int currentIndex, BuildContext context) {
+    return currentIndex == 2
+        ? InkWell(
+            onTap: () {
+              showQrScanner(context);
+            },
+            child: Container(
+                // padding: EdgeInsets.only(bottom: 20),
+                width: MediaQuery.of(context).size.width,
+                height: 48,
+                decoration: BoxDecoration(
+                    color: CatchmongColors.yellow_main,
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(8),
+                        topRight: Radius.circular(8))),
+                child: Center(
+                    child: Text(
+                  "결제하고 돌려받기",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ))),
+          )
+        : currentIndex == 3
+            ? FilterBottomSheet()
+            : null;
+  }
+
   // 선택된 페이지 반환
   Widget _getBody(int index) {
     switch (index) {
@@ -249,6 +256,13 @@ class MainView extends StatelessWidget {
     final LoginController loginController = Get.find<LoginController>();
     final BottomNavController bottomNavController =
         Get.find<BottomNavController>();
+    controller.fetchFavoriteReviews(
+      latitude: partnerController.nowPosition.value.latitude,
+      longitude: partnerController.nowPosition.value.longitude,
+      radius: partnerController.nowRadius.value,
+      isAll: partnerController.isAll.value,
+    );
+
     return SafeArea(
       child: SingleChildScrollView(
         child: Column(
@@ -412,40 +426,52 @@ class MainView extends StatelessWidget {
                           fontSize: 14),
                     ),
                     SizedBox(
-                      height: 436, // 카드의 높이와 동일하게 설정
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal, // 가로로 스크롤되도록 설정
-                        itemCount: controller.favoriteReviews.length, // 카드의 개수
-                        itemBuilder: (context, index) {
-                          final review = controller.favoriteReviews[index];
-                          final partner = review.partner!;
-                          final businessStatus =
-                              partnerController.getBusinessStatus(
-                            partner.businessTime ?? "",
-                            partner.breakTime,
-                            partner.regularHoliday,
-                          );
-                          final rating = partnerController.getRating(partner);
-                          final replyCount = partnerController
-                              .getReplyCount(partner.reviews?.length ?? 0);
-                          bool isScraped = loginController
-                                  .user.value!.scrapPartners
-                                  .firstWhereOrNull(
-                                      (el) => el.id == partner.id) !=
-                              null;
-                          return InkWell(
-                            onTap: () {
-                              partnerController.showSelectedPartner(context,
-                                  partner, businessStatus, rating, replyCount);
-                            },
-                            child: ReviewCard(
-                              review: review,
-                              isScraped: isScraped,
-                            ),
-                          ); // ReviewCard를 리스트에 삽입
-                        },
-                      ),
-                    ),
+                        height: 436, // 카드의 높이와 동일하게 설정
+                        child: Obx(
+                          () => controller.favoriteReviews.isEmpty
+                              ? Center(child: Text("인기 리뷰가 없습니다."))
+                              : ListView.builder(
+                                  scrollDirection:
+                                      Axis.horizontal, // 가로로 스크롤되도록 설정
+                                  itemCount: controller
+                                      .favoriteReviews.length, // 카드의 개수
+                                  itemBuilder: (context, index) {
+                                    final review =
+                                        controller.favoriteReviews[index];
+                                    final partner = review.partner!;
+                                    final businessStatus =
+                                        partnerController.getBusinessStatus(
+                                      partner.businessTime ?? "",
+                                      partner.breakTime,
+                                      partner.regularHoliday,
+                                    );
+                                    final rating =
+                                        partnerController.getRating(partner);
+                                    final replyCount =
+                                        partnerController.getReplyCount(
+                                            partner.reviews?.length ?? 0);
+                                    bool isScraped = loginController
+                                            .user.value!.scrapPartners
+                                            .firstWhereOrNull(
+                                                (el) => el.id == partner.id) !=
+                                        null;
+                                    return InkWell(
+                                      onTap: () {
+                                        partnerController.showSelectedPartner(
+                                            context,
+                                            partner,
+                                            businessStatus,
+                                            rating,
+                                            replyCount);
+                                      },
+                                      child: ReviewCard(
+                                        review: review,
+                                        isScraped: isScraped,
+                                      ),
+                                    ); // ReviewCard를 리스트에 삽입
+                                  },
+                                ),
+                        )),
                   ],
                 ),
               ),
@@ -587,6 +613,18 @@ void showQrScanner(BuildContext context) {
     barrierColor: Colors.black54, // 배경 색상
     pageBuilder: (context, animation, secondaryAnimation) {
       return QrCameraContent();
+    },
+  );
+}
+
+void showFilterBottomSheet(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    isDismissible: true,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (BuildContext context) {
+      return const FilterBottomSheet();
     },
   );
 }

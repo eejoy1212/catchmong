@@ -92,7 +92,13 @@ class HotTypeCard extends StatelessWidget {
                           print('category>>>$category');
                           partner2Controller.searchKeyword.value = category;
                           partner2Controller.addSearchTerm(category);
-                          await partner2Controller.fetchPartnersByKeyword();
+                          await partner2Controller.fetchPartnersByKeyword(
+                              isAll: partner2Controller.isAll.value,
+                              latitude:
+                                  partner2Controller.nowPosition.value.latitude,
+                              longitude: partner2Controller
+                                  .nowPosition.value.longitude,
+                              radius: partner2Controller.nowRadius.value);
                           bottomNavController.selectedIndex.value = 1;
                         },
                         child: Column(

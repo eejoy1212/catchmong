@@ -25,8 +25,18 @@ class PartnerContent extends StatelessWidget {
     print(
         "유저의 현재 위치: ${loginController.user.value?.regionId}"); //이게 null이면 모든지역 인거임.
     // bool isAllRegion = loginController.user.value?.regionId == null;
-    partnerController.fetchPartnersByIds();
-    partnerController.fetchFavoritePartners();
+    //최근 본 매장
+    partnerController.fetchPartnersByIds(
+        isAll: partnerController.isAll.value,
+        latitude: partnerController.nowPosition.value.latitude,
+        longitude: partnerController.nowPosition.value.longitude,
+        radius: partnerController.nowRadius.value);
+    //인기 매장
+    partnerController.fetchFavoritePartners(
+        isAll: partnerController.isAll.value,
+        latitude: partnerController.nowPosition.value.latitude,
+        longitude: partnerController.nowPosition.value.longitude,
+        radius: partnerController.nowRadius.value);
     List<Partner> displayedRecent = partnerController.recentPartners.length > 5
         ? partnerController.recentPartners.sublist(0, 5)
         : partnerController.recentPartners;
@@ -57,9 +67,23 @@ class PartnerContent extends StatelessWidget {
                                     partnerController.searchKeyword.value,
                                 onSubmitted: (String value) {
                                   partnerController.searchKeyword.value = value;
-                                  partnerController.fetchPartnersByKeyword();
+                                  partnerController.fetchPartnersByKeyword(
+                                      isAll: partnerController.isAll.value,
+                                      latitude: partnerController
+                                          .nowPosition.value.latitude,
+                                      longitude: partnerController
+                                          .nowPosition.value.longitude,
+                                      radius:
+                                          partnerController.nowRadius.value);
                                   partnerController.addSearchTerm(value);
-                                  partnerController.fetchPartnersByIds();
+                                  partnerController.fetchPartnersByIds(
+                                      isAll: partnerController.isAll.value,
+                                      latitude: partnerController
+                                          .nowPosition.value.latitude,
+                                      longitude: partnerController
+                                          .nowPosition.value.longitude,
+                                      radius:
+                                          partnerController.nowRadius.value);
                                 },
                                 onClear: () {
                                   partnerController.searchKeyword.value = "";
@@ -146,7 +170,19 @@ class PartnerContent extends StatelessWidget {
                                                 partnerController
                                                     .recentSearches[index];
                                             partnerController
-                                                .fetchPartnersByKeyword();
+                                                .fetchPartnersByKeyword(
+                                                    isAll: partnerController
+                                                        .isAll.value,
+                                                    latitude: partnerController
+                                                        .nowPosition
+                                                        .value
+                                                        .latitude,
+                                                    longitude: partnerController
+                                                        .nowPosition
+                                                        .value
+                                                        .longitude,
+                                                    radius: partnerController
+                                                        .nowRadius.value);
                                           },
                                           child: Container(
                                             margin: const EdgeInsets.only(

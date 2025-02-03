@@ -221,7 +221,7 @@ class Partner2Controller extends GetxController {
   void onInit() {
     _loadRecentSearches();
     getLocationFromStorage();
-    isAll.value = true;
+    // isAll.value = true;
     super.onInit();
   }
 
@@ -784,16 +784,37 @@ class Partner2Controller extends GetxController {
     }
   }
 
-  Future<void> fetchPartnersByKeyword() async {
+  Future<void> fetchPartnersByKeyword({
+    required bool isAll,
+    required double latitude,
+    required double longitude,
+    required double radius,
+  }) async {
     try {
       isLoading.value = true; // 로딩 시작
+
+      // 요청할 쿼리 파라미터 설정
+      final queryParams = {
+        'keyword': searchKeyword.value,
+        'isAll': isAll.toString(),
+      };
+
+      // 위치 필터링이 필요한 경우 추가
+      if (!isAll) {
+        queryParams.addAll({
+          'latitude': latitude.toString(),
+          'longitude': longitude.toString(),
+          'radius': radius.toString(),
+        });
+      }
+
+      // GET 요청 보내기
       final response = await _dio.get(
         '/partners/search',
-        queryParameters: {'keyword': searchKeyword.value},
+        queryParameters: queryParams,
       );
 
       if (response.statusCode == 200) {
-        // 응답 데이터가 JSON 배열인지 확인 후 처리
         final List<dynamic> data = response.data;
         print("파트너 dynamic 데이터 조회: ${data}");
 
@@ -824,20 +845,39 @@ class Partner2Controller extends GetxController {
 
 //최근 본 매장 가져오기
   // 파트너 ID 리스트로 데이터 가져오기
-  Future<void> fetchPartnersByIds() async {
+  Future<void> fetchPartnersByIds({
+    required bool isAll,
+    required double latitude,
+    required double longitude,
+    required double radius,
+  }) async {
     try {
       if (recentLatestPartnerIds.isEmpty) {
         return;
       }
+
       // ID 리스트를 쉼표로 연결된 문자열로 변환
       String idListParam = recentLatestPartnerIds.join(',');
+
+      // 요청할 쿼리 파라미터 설정
+      final queryParams = {
+        'idList': idListParam,
+        'isAll': isAll.toString(), // isAll 여부 추가
+      };
+
+      // 위치 필터링이 필요한 경우 추가
+      if (!isAll) {
+        queryParams.addAll({
+          'latitude': latitude.toString(),
+          'longitude': longitude.toString(),
+          'radius': radius.toString(),
+        });
+      }
 
       // GET 요청 보내기
       final response = await _dio.get(
         '/partners/byIds',
-        queryParameters: {
-          'idList': idListParam, // 쿼리 파라미터 추가
-        },
+        queryParameters: queryParams,
       );
 
       // 성공적인 응답 처리
@@ -871,16 +911,35 @@ class Partner2Controller extends GetxController {
     return rating;
   }
 
-//인기 매장 top 10
-  Future<void> fetchFavoritePartners() async {
+//인기 매장 10
+  Future<void> fetchFavoritePartners({
+    required bool isAll,
+    double? latitude,
+    double? longitude,
+    double? radius,
+  }) async {
     try {
-      if (recentLatestPartnerIds.isEmpty) {
-        return;
+      // 요청할 쿼리 파라미터 설정
+      final queryParams = {
+        'isAll': isAll.toString(),
+      };
+
+      // 위치 필터링이 필요한 경우 추가
+      if (!isAll) {
+        if (latitude == null || longitude == null || radius == null) {
+          throw Exception('위도, 경도, 반경 값이 필요합니다.');
+        }
+        queryParams.addAll({
+          'latitude': latitude.toString(),
+          'longitude': longitude.toString(),
+          'radius': radius.toString(),
+        });
       }
 
       // GET 요청 보내기
       final response = await _dio.get(
         '/partners/top-rated',
+        queryParameters: queryParams,
       );
 
       // 성공적인 응답 처리
@@ -1234,7 +1293,7 @@ class Partner2Controller extends GetxController {
     double? longitude = prefs.getDouble('longitude');
     String? address = prefs.getString('address');
 
-    print("저장된 위치: $latitude, $longitude, $address");
+    print("로컬스토리지에 저장된 위치: $latitude, $longitude, $address");
     nowPosition.value = NLatLng(latitude ?? 37.5665, longitude ?? 126.9780);
     nowAddress.value = address ?? "대한민국 서울특별시 중구 세종대로 110, 중구, , 04524, 대한민국";
   }

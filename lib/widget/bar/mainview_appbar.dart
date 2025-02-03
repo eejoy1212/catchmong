@@ -25,7 +25,7 @@ class MainViewAppbar extends StatelessWidget implements PreferredSizeWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Obx(() => SizedBox(
-                  width: 150,
+                  width: partnerController.isAll.isTrue ? null : 150,
                   child: Text(
                     overflow: TextOverflow.ellipsis,
                     partnerController.isAll.isTrue

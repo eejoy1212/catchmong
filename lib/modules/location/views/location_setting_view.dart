@@ -262,17 +262,28 @@ class LocationSettingView extends StatelessWidget {
                         Obx(() => LocationBar(
                             nowAddress: partnerController.nowAddress.value,
                             onSearch: (DataModel newData, double latitude,
-                                double longitude) {
-                              // controller.setLocation(newData);
-                              // final langitude = newData.l
+                                double longitude) async {
                               final address =
                                   "${newData.roadAddress},${newData.sigungu},${newData.sido},${newData.zonecode}";
                               partnerController.nowPosition.value =
                                   NLatLng(latitude, longitude);
+
                               partnerController.nowAddress.value = address;
-                              // controller.fetchCoordinates(newData.roadAddress ??
-                              //     newData.jibunAddress ??
-                              //     "");
+
+                              ///마커추가
+                              final markers = await partnerController
+                                  .fetchNearbyPartners(latitude, longitude);
+                              partnerController.naverMapController.value
+                                  ?.addOverlayAll(markers.toSet());
+                              if (partnerController.nowRadius.value >= 100000.0)
+                                return;
+                              final cameraUpdate = NCameraUpdate.withParams(
+                                target: NLatLng(latitude, longitude),
+                                zoomBy: -2,
+                                bearing: 180,
+                              );
+                              partnerController.naverMapController.value
+                                  ?.updateCamera(cameraUpdate);
                             })),
                       ],
                     ),
@@ -575,6 +586,8 @@ class LocationSettingView extends StatelessWidget {
               YellowElevationBtn(
                 onPressed: () {
                   // Get.back();
+                  partnerController.isAll.value = false;
+
                   Get.toNamed('/main');
                 },
                 title: const Text(
