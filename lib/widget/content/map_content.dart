@@ -68,7 +68,31 @@ class MapContent extends StatelessWidget {
                       margin: EdgeInsets.symmetric(
                         horizontal: 20,
                       ),
-                      child: MapSearchbar()),
+                      child: MapSearchbar(
+                        onSearch: () async {
+                          //여기서 지도 변경
+                          // await partnerController.filterMarkers();
+                        },
+                        onChange: (String value) {
+                          partnerController.storeNameSearchKeyword.value =
+                              value;
+                          if (partnerController
+                                  .storeNameTxtController.text.length >
+                              300) {
+                            Future.microtask(() {
+                              partnerController.storeNameTxtController.value =
+                                  TextEditingValue(
+                                text: value.substring(0, 300),
+                                selection: TextSelection.collapsed(offset: 300),
+                              );
+                            });
+                          }
+                        },
+                        onSubmitted: (String value) {
+                          partnerController.storeNameSearchKeyword.value =
+                              value;
+                        },
+                      )),
                   SizedBox(
                     height: 16,
                   ),
@@ -148,10 +172,18 @@ class MapContent extends StatelessWidget {
                         // partnerController.naverMapController.value!
                         //     .clearOverlays();
                         // 📌 지도 이동이 끝난 후에만 마커 추가
-                        // final markers = await partnerController
-                        //     .fetchNearbyPartners(latitude, longitude);
-                        partnerController.naverMapController.value
-                            ?.addOverlayAll(partnerController.markers.toSet());
+                        // if (partnerController.isFilter.isFalse) return;
+
+                        final markers = await partnerController.filterMarkers(
+                            storeName:
+                                partnerController.storeNameSearchKeyword.value);
+                        if (markers != null) {
+                          partnerController.naverMapController.value
+                              ?.clearOverlays();
+                          partnerController.naverMapController.value
+                              ?.addOverlayAll(markers.toSet());
+                        }
+
                         // await partnerController.filterMarkers();
                       }
                     },

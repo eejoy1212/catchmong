@@ -31,6 +31,8 @@ class Partner2Controller extends GetxController {
   RxBool isMini = false.obs;
   RxBool isFilter = false.obs;
   RxList<Partner> nearbyPartners = RxList.empty();
+  RxString storeNameSearchKeyword = "".obs;
+  final TextEditingController storeNameTxtController = TextEditingController();
   //지도 탭
   //메뉴등록
   final RxBool isAll = false.obs;
@@ -266,90 +268,164 @@ class Partner2Controller extends GetxController {
         return "";
     }
   }
+//클라이언트에서 처리
+  // Future<void> filterMarkers() async {
+  //   try {
+  //     if (naverMapController.value == null) return;
+  //     naverMapController.value?.clearOverlays();
 
-  Future<void> filterMarkers() async {
+  //     markers.clear();
+  //     // 1. 근처 파트너들 필터링
+  //     final filtered = nearbyPartners.where((el) {
+  //       // 음식 타입이 일치하는지 확인
+  //       final matchesFoodType =
+  //           foodType.isEmpty || el.foodType == foodType.value;
+
+  //       // 서비스 타입이 빈 문자열이거나 일치하는지 확인
+  //       final matchesAmenities = serviceType.value.isEmpty ||
+  //           (el.amenities?.contains(_getKorAmenity(serviceType.value)) == true);
+  //       final nowBusinessStatus = getBusinessStatus(
+  //         el.businessTime ?? "",
+  //         el.breakTime,
+  //         el.regularHoliday,
+  //         el.hasHoliday,
+  //       );
+  //       print("${el.name}의 영업시간>>>$nowBusinessStatus");
+  //       // 영업 상태가 빈 문자열이거나 일치하는지 확인
+  //       final matchesBusinessStatus = timeType.value.isEmpty ||
+  //           nowBusinessStatus.isEmpty ||
+  //           nowBusinessStatus == getKorTimeType(timeType.value);
+
+  //       return matchesFoodType && matchesAmenities && matchesBusinessStatus;
+  //     }).toList(); // 결과를 즉시 평가
+
+  //     for (var i = 0; i < filtered.length; i++) {
+  //       final partner = filtered[i];
+  //       NMarker marker = NMarker(
+  //           id: partner.id.toString(),
+  //           position:
+  //               NLatLng(partner.latitude ?? 0.0, partner.longitude ?? 0.0),
+  //           caption: NOverlayCaption(text: partner.name),
+  //           captionAligns: const [NAlign.top]
+
+  //           // captionText: partner["name"], // 🔹 마커 위에 이름 표시
+  //           // captionColor: Colors.black,
+  //           // captionTextSize: 12,
+  //           );
+  //       // 🔹 마커 클릭 시 동작 추가
+  //       marker.setOnTapListener((overlay) {
+  //         print("Clicked on marker: ${partner.name}");
+  //       });
+  //       markers.add(marker);
+
+  //       print("마커 몇개 ${markerNum.value}");
+
+  //       // naverMapController.value?.addOverlayAll(markers.toSet());
+  //       // update();
+  //       print("filtered partners>>> ${filtered}");
+  //       print("filtered markers>>> ${markers}");
+  //     }
+  //     markerNum.value = markers.length;
+  //   } catch (e) {
+  //     print("Error in filterMarkers: $e");
+  //   }
+  // }
+  /// 필터링된 파트너 데이터를 가져오는 함수
+  Future<List<dynamic>> fetchFilteredPartners({
+    required double latitude,
+    required double longitude,
+    required double radius, // 반경 (미터 단위)
+    String foodType = "",
+    String serviceType = "",
+    String timeType = "",
+    String storeName = "",
+  }) async {
     try {
-      if (naverMapController.value == null) return;
-      naverMapController.value?.clearOverlays();
+      final url = Uri.parse('$baseUrl/partners/filter'); // 서버 API URL
 
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "storeName": storeName,
+          "foodType": foodType,
+          "serviceType": _getKorAmenity(serviceType),
+          "timeType": getKorTimeType(timeType),
+          "latitude": latitude,
+          "longitude": longitude,
+          "radius": radius,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data;
+      } else {
+        throw Exception('서버에서 데이터를 가져오지 못했습니다. 상태 코드: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('🚨 API 호출 오류: $e');
+      return [];
+    }
+  }
+
+  Future<List<NMarker>?> filterMarkers({String? storeName}) async {
+    try {
+      // if (naverMapController.value == null) return;
+      // 기존 마커 삭제
+      // naverMapController.value?.clearOverlays();
       markers.clear();
-      // 1. 근처 파트너들 필터링
-      final filtered = nearbyPartners.where((el) {
-        // 음식 타입이 일치하는지 확인
-        final matchesFoodType =
-            foodType.isEmpty || el.foodType == foodType.value;
 
-        // 서비스 타입이 빈 문자열이거나 일치하는지 확인
-        final matchesAmenities = serviceType.value.isEmpty ||
-            (el.amenities?.contains(_getKorAmenity(serviceType.value)) == true);
-        final nowBusinessStatus = getBusinessStatus(
-          el.businessTime ?? "",
-          el.breakTime,
-          el.regularHoliday,
-          el.hasHoliday,
-        );
-        print("${el.name}의 영업시간>>>$nowBusinessStatus");
-        // 영업 상태가 빈 문자열이거나 일치하는지 확인
-        final matchesBusinessStatus = timeType.value.isEmpty ||
-            nowBusinessStatus.isEmpty ||
-            nowBusinessStatus == getKorTimeType(timeType.value);
+      // 🌎 현재 위치 설정 (예: 서울 시청)
+      // double userLatitude = 37.5665;
+      // double userLongitude = 126.9780;
+      // int searchRadius = 5000; // 5km 반경 내 검색
 
-        return matchesFoodType && matchesAmenities && matchesBusinessStatus;
-      }).toList(); // 결과를 즉시 평가
+      // 🛎️ 서버에서 필터링된 파트너 데이터 가져오기
+      final filtered = await fetchFilteredPartners(
+        latitude: nowPosition.value.latitude,
+        longitude: nowPosition.value.longitude,
+        radius: nowRadius.value,
+        foodType: foodType.value,
+        serviceType: serviceType.value,
+        timeType: timeType.value,
+        storeName: storeName ?? "",
+      );
 
       if (filtered.isEmpty) {
-        for (var i = 0; i < nearbyPartners.length; i++) {
-          final partner = nearbyPartners[i];
-          NMarker marker = NMarker(
-              id: partner.id.toString(),
-              position:
-                  NLatLng(partner.latitude ?? 0.0, partner.longitude ?? 0.0),
-              caption: NOverlayCaption(text: partner.name),
-              captionAligns: const [NAlign.top]
-
-              // captionText: partner["name"], // 🔹 마커 위에 이름 표시
-              // captionColor: Colors.black,
-              // captionTextSize: 12,
-              );
-          // 🔹 마커 클릭 시 동작 추가
-          marker.setOnTapListener((overlay) {
-            print("Clicked on marker: ${partner.name}");
-          });
-          markers.add(marker);
-
-          print("마커 몇개 ${markerNum.value}");
-        }
-      } else {
-        for (var i = 0; i < filtered.length; i++) {
-          final partner = filtered[i];
-          NMarker marker = NMarker(
-              id: partner.id.toString(),
-              position:
-                  NLatLng(partner.latitude ?? 0.0, partner.longitude ?? 0.0),
-              caption: NOverlayCaption(text: partner.name),
-              captionAligns: const [NAlign.top]
-
-              // captionText: partner["name"], // 🔹 마커 위에 이름 표시
-              // captionColor: Colors.black,
-              // captionTextSize: 12,
-              );
-          // 🔹 마커 클릭 시 동작 추가
-          marker.setOnTapListener((overlay) {
-            print("Clicked on marker: ${partner.name}");
-          });
-          markers.add(marker);
-
-          print("마커 몇개 ${markerNum.value}");
-        }
-
-        // naverMapController.value?.addOverlayAll(markers.toSet());
-        // update();
-        print("filtered partners>>> ${filtered}");
-        print("filtered markers>>> ${markers}");
+        print("❗️ 필터링된 파트너가 없습니다.");
+        return [];
       }
-      markerNum.value = markers.length;
+      List<NMarker> newMarkers = [];
+      // 🗺️ 마커 추가
+      for (var partner in filtered) {
+        if (partner['latitude'] == null || partner['longitude'] == null) {
+          print("⚠️ ${partner['name']} 위치 정보 없음 (ID: ${partner['id']})");
+          continue; // 위치 정보 없는 파트너 제외
+        }
+
+        final marker = NMarker(
+          id: partner['id'].toString(),
+          position: NLatLng(partner['latitude'], partner['longitude']),
+          caption: NOverlayCaption(text: partner['name']),
+          captionAligns: const [NAlign.top],
+        );
+
+        // 🏷️ 마커 클릭 시 이벤트 추가
+        marker.setOnTapListener((overlay) {
+          print("📍 마커 클릭됨: ${partner['name']}");
+        });
+
+        newMarkers.add(marker);
+      }
+
+      // 마커 개수 업데이트
+      markerNum.value = newMarkers.length;
+      return newMarkers;
+      // update();
     } catch (e) {
-      print("Error in filterMarkers: $e");
+      print("🚨 filterMarkers 오류: $e");
+      return null;
     }
   }
 

@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 
 class MapSearchbar extends StatelessWidget {
-  const MapSearchbar({super.key});
+  final void Function(String) onChange;
+  final void Function(String) onSubmitted;
+  final void Function() onSearch;
+  const MapSearchbar(
+      {super.key,
+      required this.onSearch,
+      required this.onChange,
+      required this.onSubmitted});
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +27,9 @@ class MapSearchbar extends StatelessWidget {
           SizedBox(width: 8.0),
           Expanded(
             child: TextField(
+              onChanged: onChange,
+              onEditingComplete: onSearch,
+              onSubmitted: onSubmitted,
               decoration: InputDecoration(
                 hintText: '지역, 매장명을 검색해 주세요.',
                 border: InputBorder.none, // 입력창의 기본 테두리 제거

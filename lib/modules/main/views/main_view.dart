@@ -290,8 +290,39 @@ class MainScreen extends StatelessWidget {
                 onFilter: () async {
                   partnerController.isFilter.value =
                       !partnerController.isFilter.value;
+                  if (partnerController.isFilter.isTrue) {
+                    await partnerController.filterMarkers();
+                  } else {
+                    // if (partnerController.isMini.isTrue &&
+                    //     partnerController.isFilter.isFalse) return;
 
-                  await partnerController.filterMarkers();
+                    partnerController.sortType.value = "";
+                    partnerController.timeType.value = "";
+                    partnerController.eatType.value = "";
+                    partnerController.foodType.value = "";
+                    partnerController.serviceType.value = "";
+                    partnerController.markers.clear();
+                    for (var partner in partnerController.nearbyPartners) {
+                      NMarker marker = NMarker(
+                          id: partner.id.toString(),
+                          position: NLatLng(partner.latitude ?? 0.0,
+                              partner.longitude ?? 0.0),
+                          caption: NOverlayCaption(text: partner.name),
+                          captionAligns: const [NAlign.top]
+
+                          // captionText: partner["name"], // 🔹 마커 위에 이름 표시
+                          // captionColor: Colors.black,
+                          // captionTextSize: 12,
+                          );
+                      // 🔹 마커 클릭 시 동작 추가
+                      marker.setOnTapListener((overlay) {
+                        print("Clicked on marker: ${partner.name}");
+                      });
+                      partnerController.markers.add(marker);
+                    }
+                    partnerController.markerNum.value =
+                        partnerController.markers.length;
+                  }
                 },
                 sortType: partnerController.sortType.value,
                 timeType: partnerController.timeType.value,
