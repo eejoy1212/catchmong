@@ -148,10 +148,11 @@ class MapContent extends StatelessWidget {
                         // partnerController.naverMapController.value!
                         //     .clearOverlays();
                         // 📌 지도 이동이 끝난 후에만 마커 추가
-                        final markers = await partnerController
-                            .fetchNearbyPartners(latitude, longitude);
+                        // final markers = await partnerController
+                        //     .fetchNearbyPartners(latitude, longitude);
                         partnerController.naverMapController.value
-                            ?.addOverlayAll(markers.toSet());
+                            ?.addOverlayAll(partnerController.markers.toSet());
+                        // await partnerController.filterMarkers();
                       }
                     },
                   )),

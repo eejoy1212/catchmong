@@ -9,6 +9,8 @@ class MapChip extends StatelessWidget {
   final bool useLeadingIcon;
   final double fontSize;
   final double verticalPadding;
+  final Color? activeColor;
+  final Color? activeTxtColor;
   final void Function()? onTap;
   const MapChip({
     super.key,
@@ -20,6 +22,8 @@ class MapChip extends StatelessWidget {
     this.fontSize = 14,
     this.verticalPadding = 8,
     this.onTap,
+    this.activeColor = CatchmongColors.yellow_main,
+    this.activeTxtColor = Colors.white,
   });
 
   @override
@@ -35,13 +39,14 @@ class MapChip extends StatelessWidget {
           right: 8,
         ),
         decoration: BoxDecoration(
-            color: isActive ? CatchmongColors.yellow_main : Colors.white,
+            color: isActive ? activeColor : Colors.white,
             border: Border.all(
                 color: isActive
                     ? CatchmongColors.yellow_main
                     : CatchmongColors.gray),
             borderRadius: BorderRadius.all(Radius.circular(20))),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             useLeadingIcon ? leadingIcon : Container(),
             useLeadingIcon
@@ -52,7 +57,7 @@ class MapChip extends StatelessWidget {
             Text(
               title,
               style: TextStyle(
-                color: isActive ? Colors.white : CatchmongColors.sub_gray,
+                color: isActive ? activeTxtColor : CatchmongColors.sub_gray,
                 fontSize: fontSize,
               ),
             ),

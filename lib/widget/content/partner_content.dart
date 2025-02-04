@@ -300,6 +300,7 @@ class PartnerContent extends StatelessWidget {
                                                 partner.businessTime ?? "",
                                                 partner.breakTime,
                                                 partner.regularHoliday,
+                                                partner.hasHoliday,
                                               );
                                               final rating = partnerController
                                                   .getRating(partner);
@@ -451,6 +452,7 @@ class PartnerContent extends StatelessWidget {
                                           partner.businessTime ?? "",
                                           partner.breakTime,
                                           partner.regularHoliday,
+                                          partner.hasHoliday,
                                         );
                                         final rating = partnerController
                                             .getRating(partner);

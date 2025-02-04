@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 import 'package:catchmong/const/catchmong_colors.dart';
 import 'package:catchmong/controller/view_controller.dart';
@@ -21,6 +22,16 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Partner2Controller extends GetxController {
+  //지도 탭
+  RxString sortType = "".obs; //favorite,latest,review
+  RxString timeType = "".obs; //open,every
+  RxString eatType = "".obs; //reservation,pickup
+  RxString foodType = "".obs; //reservation,pickup
+  RxString serviceType = "".obs; //parking,coupon,baby,pet
+  RxBool isMini = false.obs;
+  RxBool isFilter = false.obs;
+  RxList<Partner> nearbyPartners = RxList.empty();
+  //지도 탭
   //메뉴등록
   final RxBool isAll = false.obs;
   final Rx<NaverMapController?> naverMapController =
@@ -230,6 +241,118 @@ class Partner2Controller extends GetxController {
     connectTimeout: const Duration(milliseconds: 5000), // 연결 제한 시간
     receiveTimeout: const Duration(milliseconds: 3000), // 응답 제한 시간
   ));
+  String _getKorAmenity(String amenity) {
+    switch (amenity) {
+      case "baby":
+        return "아기의자";
+      case "coupon":
+        return "쿠폰";
+      case "parking":
+        return "주차";
+      case "애견동반":
+        return "pet";
+      default:
+        return "";
+    }
+  }
+
+  String getKorTimeType(String type) {
+    switch (type) {
+      case "open":
+        return "영업중";
+      case "every":
+        return "24시간 영업";
+      default:
+        return "";
+    }
+  }
+
+  Future<void> filterMarkers() async {
+    try {
+      if (naverMapController.value == null) return;
+      naverMapController.value?.clearOverlays();
+
+      markers.clear();
+      // 1. 근처 파트너들 필터링
+      final filtered = nearbyPartners.where((el) {
+        // 음식 타입이 일치하는지 확인
+        final matchesFoodType =
+            foodType.isEmpty || el.foodType == foodType.value;
+
+        // 서비스 타입이 빈 문자열이거나 일치하는지 확인
+        final matchesAmenities = serviceType.value.isEmpty ||
+            (el.amenities?.contains(_getKorAmenity(serviceType.value)) == true);
+        final nowBusinessStatus = getBusinessStatus(
+          el.businessTime ?? "",
+          el.breakTime,
+          el.regularHoliday,
+          el.hasHoliday,
+        );
+        print("${el.name}의 영업시간>>>$nowBusinessStatus");
+        // 영업 상태가 빈 문자열이거나 일치하는지 확인
+        final matchesBusinessStatus = timeType.value.isEmpty ||
+            nowBusinessStatus.isEmpty ||
+            nowBusinessStatus == getKorTimeType(timeType.value);
+
+        return matchesFoodType && matchesAmenities && matchesBusinessStatus;
+      }).toList(); // 결과를 즉시 평가
+
+      if (filtered.isEmpty) {
+        for (var i = 0; i < nearbyPartners.length; i++) {
+          final partner = nearbyPartners[i];
+          NMarker marker = NMarker(
+              id: partner.id.toString(),
+              position:
+                  NLatLng(partner.latitude ?? 0.0, partner.longitude ?? 0.0),
+              caption: NOverlayCaption(text: partner.name),
+              captionAligns: const [NAlign.top]
+
+              // captionText: partner["name"], // 🔹 마커 위에 이름 표시
+              // captionColor: Colors.black,
+              // captionTextSize: 12,
+              );
+          // 🔹 마커 클릭 시 동작 추가
+          marker.setOnTapListener((overlay) {
+            print("Clicked on marker: ${partner.name}");
+          });
+          markers.add(marker);
+
+          print("마커 몇개 ${markerNum.value}");
+        }
+      } else {
+        for (var i = 0; i < filtered.length; i++) {
+          final partner = filtered[i];
+          NMarker marker = NMarker(
+              id: partner.id.toString(),
+              position:
+                  NLatLng(partner.latitude ?? 0.0, partner.longitude ?? 0.0),
+              caption: NOverlayCaption(text: partner.name),
+              captionAligns: const [NAlign.top]
+
+              // captionText: partner["name"], // 🔹 마커 위에 이름 표시
+              // captionColor: Colors.black,
+              // captionTextSize: 12,
+              );
+          // 🔹 마커 클릭 시 동작 추가
+          marker.setOnTapListener((overlay) {
+            print("Clicked on marker: ${partner.name}");
+          });
+          markers.add(marker);
+
+          print("마커 몇개 ${markerNum.value}");
+        }
+
+        // naverMapController.value?.addOverlayAll(markers.toSet());
+        // update();
+        print("filtered partners>>> ${filtered}");
+        print("filtered markers>>> ${markers}");
+      }
+      markerNum.value = markers.length;
+    } catch (e) {
+      print("Error in filterMarkers: $e");
+    }
+  }
+
   double getZoomLevelByRadius(double radius) {
     if (radius <= 2) return 21;
     if (radius <= 5) return 20;
@@ -431,51 +554,55 @@ class Partner2Controller extends GetxController {
     }
   }
 
-  String getBusinessStatus(
-      String businessTime, String? breakTime, String? regularHoliday) {
+  String getBusinessStatus(String businessTime, String? breakTime,
+      String? regularHoliday, bool hasHoliday) {
     try {
       // 현재 시간 가져오기
       final now = DateTime.now();
       final currentTime = DateFormat("HH:mm").format(now);
 
+      // 데이터 필드 파싱
+      // final hasHoliday = data['hasHoliday'] as bool? ?? false;
+      // final regularHoliday = data['regularHoliday'] as String?;
+      // final businessTime = data['businessTime'] as String?;
+      // final breakTime = data['breakTime'] as String?;
+
+      // 영업 시간이 없는 경우 "마감"
+      if (businessTime.isEmpty) return "마감";
+
       // 시작 시간과 종료 시간 분리
       final times = businessTime.split('~');
       if (times.length != 2) return "마감";
-      final startTime = times[0].trim();
-      final endTime = times[1].trim();
+      final startTime = _convertTo24Hour(times[0].trim());
+      final endTime = _convertTo24Hour(times[1].trim());
+
+      // 24시간 영업인지 확인
+      if ((startTime == "00:00" && endTime == "24:00") ||
+          (startTime == "00:00" && endTime == "00:00")) {
+        return "24시간 영업";
+      }
 
       // 정규 휴일 처리
-      if (regularHoliday != null) {
-        final holidays = regularHoliday.split(',');
-        for (var holiday in holidays) {
-          holiday = holiday.trim();
-          if (holiday.contains("매주")) {
-            final holidayDay =
-                _getDayOfWeek(holiday.replaceAll("매주", "").trim());
-            if (now.weekday == holidayDay) {
-              return "마감";
-            }
-          } else if (holiday.contains("첫째주") ||
-              holiday.contains("둘째주") ||
-              holiday.contains("셋째주") ||
-              holiday.contains("넷째주")) {
-            final weekOfMonth = (now.day - 1) ~/ 7 + 1;
-            final holidayWeek = _getWeekOfMonth(holiday);
-            final holidayDay = _getDayOfWeek(holiday.split(' ').last.trim());
+      if (hasHoliday && regularHoliday != null) {
+        final holidayTimes = regularHoliday.split('~');
+        if (holidayTimes.length == 2) {
+          final holidayStart = _convertTo24Hour(holidayTimes[0].trim());
+          final holidayEnd = _convertTo24Hour(holidayTimes[1].trim());
 
-            if (weekOfMonth == holidayWeek && now.weekday == holidayDay) {
-              return "마감";
-            }
+          // 현재 시간이 정규 휴일 시간 범위에 속하면 "마감"
+          if (currentTime.compareTo(holidayStart) >= 0 &&
+              currentTime.compareTo(holidayEnd) <= 0) {
+            return "마감";
           }
         }
       }
 
       // 브레이크타임 처리
-      if (breakTime != null) {
+      if (breakTime != null && breakTime.isNotEmpty) {
         final breakTimes = breakTime.split('~');
         if (breakTimes.length == 2) {
-          final breakStart = breakTimes[0].trim();
-          final breakEnd = breakTimes[1].trim();
+          final breakStart = _convertTo24Hour(breakTimes[0].trim());
+          final breakEnd = _convertTo24Hour(breakTimes[1].trim());
 
           // 현재 시간이 브레이크타임 범위에 속하면 "브레이크타임" 반환
           if (currentTime.compareTo(breakStart) >= 0 &&
@@ -486,18 +613,98 @@ class Partner2Controller extends GetxController {
       }
 
       // 현재 시간이 영업 시간 내에 있으면 "영업중" 반환
-      if (currentTime.compareTo(startTime) >= 0 &&
-          currentTime.compareTo(endTime) <= 0) {
-        return "영업중";
+      // 현재 시간이 영업 시간 내에 있는지 확인
+      if (currentTime.compareTo(startTime) >= 0) {
+        if (endTime == "00:00") {
+          // "00:00"은 자정을 의미하므로 현재 시간이 시작 시간 이후라면 "영업중"
+          return "영업중";
+        }
+        if (currentTime.compareTo(endTime) <= 0) {
+          return "영업중";
+        }
       }
 
       // 위 조건에 해당하지 않으면 "마감" 반환
       return "마감";
     } catch (e) {
-      print("Error parsing businessTime: $e");
+      print("Error parsing business data: $e");
       return "마감";
     }
   }
+
+// 시간 변환 함수 (오전/오후 형식을 24시간 형식으로 변환)
+  String _convertTo24Hour(String time) {
+    final dateTime = DateFormat("a h:mm", "ko").parseLoose(time);
+    return DateFormat("HH:mm").format(dateTime);
+  }
+
+  // String getBusinessStatus(
+  //     String businessTime, String? breakTime, String? regularHoliday) {
+  //   try {
+  //     // 현재 시간 가져오기
+  //     final now = DateTime.now();
+  //     final currentTime = DateFormat("HH:mm").format(now);
+
+  //     // 시작 시간과 종료 시간 분리
+  //     final times = businessTime.split('~');
+  //     if (times.length != 2) return "마감";
+  //     final startTime = times[0].trim();
+  //     final endTime = times[1].trim();
+
+  //     // 정규 휴일 처리
+  //     if (regularHoliday != null) {
+  //       final holidays = regularHoliday.split(',');
+  //       for (var holiday in holidays) {
+  //         holiday = holiday.trim();
+  //         if (holiday.contains("매주")) {
+  //           final holidayDay =
+  //               _getDayOfWeek(holiday.replaceAll("매주", "").trim());
+  //           if (now.weekday == holidayDay) {
+  //             return "마감";
+  //           }
+  //         } else if (holiday.contains("첫째주") ||
+  //             holiday.contains("둘째주") ||
+  //             holiday.contains("셋째주") ||
+  //             holiday.contains("넷째주")) {
+  //           final weekOfMonth = (now.day - 1) ~/ 7 + 1;
+  //           final holidayWeek = _getWeekOfMonth(holiday);
+  //           final holidayDay = _getDayOfWeek(holiday.split(' ').last.trim());
+
+  //           if (weekOfMonth == holidayWeek && now.weekday == holidayDay) {
+  //             return "마감";
+  //           }
+  //         }
+  //       }
+  //     }
+
+  //     // 브레이크타임 처리
+  //     if (breakTime != null) {
+  //       final breakTimes = breakTime.split('~');
+  //       if (breakTimes.length == 2) {
+  //         final breakStart = breakTimes[0].trim();
+  //         final breakEnd = breakTimes[1].trim();
+
+  //         // 현재 시간이 브레이크타임 범위에 속하면 "브레이크타임" 반환
+  //         if (currentTime.compareTo(breakStart) >= 0 &&
+  //             currentTime.compareTo(breakEnd) <= 0) {
+  //           return "브레이크타임";
+  //         }
+  //       }
+  //     }
+
+  //     // 현재 시간이 영업 시간 내에 있으면 "영업중" 반환
+  //     if (currentTime.compareTo(startTime) >= 0 &&
+  //         currentTime.compareTo(endTime) <= 0) {
+  //       return "영업중";
+  //     }
+
+  //     // 위 조건에 해당하지 않으면 "마감" 반환
+  //     return "마감";
+  //   } catch (e) {
+  //     print("Error parsing businessTime: $e");
+  //     return "마감";
+  //   }
+  // }
 
   Future<void> fetchPartnerDetails(int partnerId) async {
     try {
@@ -1227,11 +1434,10 @@ class Partner2Controller extends GetxController {
           marker.setOnTapListener((overlay) {
             print("Clicked on marker: ${partner.name}");
           });
-
+          nearbyPartners.value = nowPartners;
           markers.add(marker);
-          markerNum.value = markers.length;
         }
-
+        markerNum.value = markers.length;
         return markers;
       } else {
         return [];

@@ -35,6 +35,7 @@ class ScrapPartnerCard extends StatelessWidget {
       partner.businessTime ?? "",
       partner.breakTime,
       partner.regularHoliday,
+      partner.hasHoliday,
     );
 
     print("현재 상태: $businessStatus");

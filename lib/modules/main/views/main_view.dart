@@ -22,13 +22,14 @@ import 'package:catchmong/widget/content/qr_camera_content.dart';
 import 'package:catchmong/widget/content/scrap_partner_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 class MainScreen extends StatelessWidget {
   final BottomNavController bottomNavController =
       Get.find<BottomNavController>();
-
+  final Partner2Controller partnerController = Get.find<Partner2Controller>();
   DateTime? _lastPressedAt; // 마지막으로 뒤로가기 버튼을 누른 시간 저장
 
   Future<bool> _onWillPop(BuildContext context) async {
@@ -193,7 +194,113 @@ class MainScreen extends StatelessWidget {
                 ))),
           )
         : currentIndex == 3
-            ? FilterBottomSheet()
+            ? FilterBottomSheet(
+                onSelectSort: (String type) {
+                  if (partnerController.isMini.isTrue &&
+                      partnerController.isFilter.isFalse) return;
+                  if (partnerController.sortType.isEmpty) {
+                    partnerController.sortType.value = type;
+                  } else {
+                    partnerController.sortType.value = "";
+                  }
+                },
+                onSelectBusinessTime: (String type) async {
+                  if (partnerController.isMini.isTrue &&
+                      partnerController.isFilter.isFalse) return;
+                  if (partnerController.timeType.isEmpty) {
+                    partnerController.timeType.value = type;
+                  } else {
+                    partnerController.timeType.value = "";
+                  }
+
+                  await partnerController.filterMarkers();
+                },
+                onSelectEatType: (String type) async {
+                  if (partnerController.isMini.isTrue &&
+                      partnerController.isFilter.isFalse) return;
+                  if (partnerController.eatType.isEmpty) {
+                    partnerController.eatType.value = type;
+                  } else {
+                    partnerController.eatType.value = "";
+                  }
+
+                  await partnerController.filterMarkers();
+                },
+                onSelectFoodType: (String type) async {
+                  if (partnerController.isMini.isTrue &&
+                      partnerController.isFilter.isFalse) return;
+                  if (partnerController.foodType.isEmpty) {
+                    partnerController.foodType.value = type;
+                  } else {
+                    partnerController.foodType.value = "";
+                  }
+
+                  await partnerController.filterMarkers();
+                },
+                onSelectServiceType: (String type) async {
+                  if (partnerController.isMini.isTrue &&
+                      partnerController.isFilter.isFalse) return;
+                  if (partnerController.serviceType.isEmpty) {
+                    partnerController.serviceType.value = type;
+                  } else {
+                    partnerController.serviceType.value = "";
+                  }
+
+                  await partnerController.filterMarkers();
+                },
+                onInit: () {
+                  if (partnerController.isMini.isTrue &&
+                      partnerController.isFilter.isFalse) return;
+
+                  partnerController.sortType.value = "";
+                  partnerController.timeType.value = "";
+                  partnerController.eatType.value = "";
+                  partnerController.foodType.value = "";
+                  partnerController.serviceType.value = "";
+                  partnerController.markers.clear();
+                  for (var partner in partnerController.nearbyPartners) {
+                    NMarker marker = NMarker(
+                        id: partner.id.toString(),
+                        position: NLatLng(
+                            partner.latitude ?? 0.0, partner.longitude ?? 0.0),
+                        caption: NOverlayCaption(text: partner.name),
+                        captionAligns: const [NAlign.top]
+
+                        // captionText: partner["name"], // 🔹 마커 위에 이름 표시
+                        // captionColor: Colors.black,
+                        // captionTextSize: 12,
+                        );
+                    // 🔹 마커 클릭 시 동작 추가
+                    marker.setOnTapListener((overlay) {
+                      print("Clicked on marker: ${partner.name}");
+                    });
+                    partnerController.markers.add(marker);
+                  }
+                  partnerController.markerNum.value =
+                      partnerController.markers.length;
+                },
+                onMinimize: (double size) {
+                  if (size <= 0.16) {
+                    // onMinimized();
+                    partnerController.isMini.value = true;
+                  } else {
+                    partnerController.isMini.value = false;
+                  }
+                },
+                onFilter: () async {
+                  partnerController.isFilter.value =
+                      !partnerController.isFilter.value;
+
+                  await partnerController.filterMarkers();
+                },
+                sortType: partnerController.sortType.value,
+                timeType: partnerController.timeType.value,
+                eatType: partnerController.eatType.value,
+                foodType: partnerController.foodType.value,
+                serviceType: partnerController.serviceType.value,
+                isMini: partnerController.isMini.value,
+                isFilter: partnerController.isFilter.value,
+              )
             : null;
   }
 
@@ -441,10 +548,10 @@ class MainView extends StatelessWidget {
                                     final partner = review.partner!;
                                     final businessStatus =
                                         partnerController.getBusinessStatus(
-                                      partner.businessTime ?? "",
-                                      partner.breakTime,
-                                      partner.regularHoliday,
-                                    );
+                                            partner.businessTime ?? "",
+                                            partner.breakTime,
+                                            partner.regularHoliday,
+                                            partner.hasHoliday);
                                     final rating =
                                         partnerController.getRating(partner);
                                     final replyCount =
@@ -613,18 +720,6 @@ void showQrScanner(BuildContext context) {
     barrierColor: Colors.black54, // 배경 색상
     pageBuilder: (context, animation, secondaryAnimation) {
       return QrCameraContent();
-    },
-  );
-}
-
-void showFilterBottomSheet(BuildContext context) {
-  showModalBottomSheet(
-    context: context,
-    isDismissible: true,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    builder: (BuildContext context) {
-      return const FilterBottomSheet();
     },
   );
 }

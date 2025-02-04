@@ -3226,6 +3226,7 @@ void showStoreAdd(BuildContext context) {
                     partner.businessTime ?? "",
                     partner.breakTime,
                     partner.regularHoliday,
+                    partner.hasHoliday,
                   );
                   if (partner.storePhotos == null ||
                       partner.storePhotos!.length < 3) {
@@ -3314,6 +3315,7 @@ void showStoreAdd(BuildContext context) {
                   partner.businessTime ?? "",
                   partner.breakTime,
                   partner.regularHoliday,
+                  partner.hasHoliday,
                 );
                 if (partner.storePhotos == null ||
                     partner.storePhotos!.length < 3) {
@@ -5699,6 +5701,7 @@ void showMenuAdd(BuildContext context, Partner partner) {
                 previewPratner.businessTime ?? "",
                 previewPratner.breakTime,
                 previewPratner.regularHoliday,
+                partner.hasHoliday,
               );
               final rating = controller.getRating(previewPratner);
               final replyCount =
@@ -6226,6 +6229,7 @@ void showStoreEdit(BuildContext context, int partnerId) {
                     partner.businessTime ?? "",
                     partner.breakTime,
                     partner.regularHoliday,
+                    partner.hasHoliday,
                   );
                   if (partner.storePhotos == null ||
                       partner.storePhotos!.length < 3) {
@@ -6312,6 +6316,7 @@ void showStoreEdit(BuildContext context, int partnerId) {
                   partner.businessTime ?? "",
                   partner.breakTime,
                   partner.regularHoliday,
+                  partner.hasHoliday,
                 );
                 if (partner.storePhotos == null ||
                     partner.storePhotos!.length < 3) {
